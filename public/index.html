@@ -144,11 +144,14 @@
 
           <!-- CHAT DEL LOBBY -->
           <div class="chat-panel" id="chat-panel-lobby">
-            <div class="chat-titulo">💬 Chat</div>
+            <div class="chat-titulo">
+              <span>💬 PokéChat</span>
+              <span class="chat-status-led">● EN VIVO</span>
+            </div>
             <div class="chat-mensajes" id="chat-mensajes-lobby"></div>
             <div class="chat-input-row">
-              <input type="text" id="chat-input-lobby" maxlength="200" placeholder="Mensaje..." class="chat-input"/>
-              <button onclick="enviarChat()" class="btn-chat-send">↵</button>
+              <input type="text" id="chat-input-lobby" maxlength="200" placeholder="Escribe un mensaje..." class="chat-input"/>
+              <button onclick="enviarChat()" class="btn-chat-send" title="Enviar">↵</button>
               <button onclick="enviarBuzz()" id="btn-buzz-lobby" class="btn-buzz" title="Avisar al otro jugador">🔔 Avisar</button>
             </div>
           </div>
@@ -314,7 +317,8 @@
               </label>
               <label class="tog tog-destacada">
                 <input type="checkbox" id="chk-oculto" checked>
-                🙈 Modo Oculto (Estilo Clash Royale) — Las elecciones propias del rival son secretas; solo ves los Pokémon que tú le regalaste
+                🙈 Modo Oculto (Draft a ciegas)
+                <button class="btn-info-inline" onclick="mostrarInfo('modoOculto')">?</button>
               </label>
             </div>
           </div>
@@ -422,12 +426,15 @@
 
         <!-- Chat en draft -->
         <div class="chat-panel chat-panel-draft">
-          <div class="chat-titulo">💬 Chat</div>
+          <div class="chat-titulo">
+            <span>💬 PokéChat</span>
+            <span class="chat-status-led">● EN VIVO</span>
+          </div>
           <div class="chat-mensajes" id="chat-mensajes"></div>
           <div class="chat-input-row">
-            <input type="text" id="chat-input" maxlength="200" placeholder="Mensaje..." class="chat-input"/>
-            <button onclick="enviarChat()" class="btn-chat-send">↵</button>
-            <button onclick="enviarBuzz()" id="btn-buzz" class="btn-buzz">🔔 Avisar</button>
+            <input type="text" id="chat-input" maxlength="200" placeholder="Escribe un mensaje..." class="chat-input"/>
+            <button onclick="enviarChat()" class="btn-chat-send" title="Enviar">↵</button>
+            <button onclick="enviarBuzz()" id="btn-buzz" class="btn-buzz" title="Avisar al otro jugador">🔔 Avisar</button>
           </div>
         </div>
       </div>

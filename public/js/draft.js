@@ -276,9 +276,9 @@ export async function renderChat(est) {
   const html = chat.length ? chat.map(m => {
     const cls = m.rol === 'sistema' ? 'chat-sistema' : m.rol === 'jugador1' ? 'chat-j1' : m.rol === 'jugador2' ? 'chat-j2' : 'chat-esp'
     const ts  = new Date(m.ts).toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit'})
-    const autor = m.rol === 'sistema' ? '' : `<span class="chat-autor">[${escHTML(m.autor || 'Usuario')}]</span>`
-    return `<div class="chat-msg ${cls}">${autor}<span class="chat-texto">${escHTML(m.texto)}</span><span class="chat-ts">${ts}</span></div>`
-  }).join('') : ''
+    const autor = m.rol === 'sistema' ? '<span class="chat-autor chat-autor-sys">⚙️ Sistema</span>' : `<span class="chat-autor">${escHTML(m.autor || 'Usuario')}</span>`
+    return `<div class="chat-msg ${cls}"><div class="chat-msg-header">${autor}<span class="chat-ts">${ts}</span></div><span class="chat-texto">${escHTML(m.texto)}</span></div>`
+  }).join('') : '<div class="chat-vacio">💬 ¡Canal conectado!<br>Envía un mensaje para coordinar las reglas con tu rival.</div>'
 
   boxes.forEach(box => { box.innerHTML = html; box.scrollTop = box.scrollHeight })
 

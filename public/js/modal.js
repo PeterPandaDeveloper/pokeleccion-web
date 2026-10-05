@@ -44,6 +44,15 @@ const INFO = {
       <li><b>No son Legendarios</b> ni Ultra Bestias ni Paradojas</li></ul>
       <p>Ejemplo: Bulbasaur ✅, Pikachu ✅ (por Raichu), Tauros ❌ (sin evolución), Moltres ❌ (legendario).</p>
       <p>Perfecto para partidas con Pokémon de bajo nivel y mucho potencial estratégico.</p>`
+  },
+  modoOculto: {
+    titulo: '🙈 Modo Oculto (Draft a Ciegas)',
+    cuerpo: `<p>Inspirado en el modo elección de <b>Clash Royale</b>:</p>
+      <ul>
+        <li>Los Pokémon que el rival elija para su propio equipo se mantienen <b>secretos</b> durante toda la partida (aparecen como <code>???</code> con el sprite de Sustituto).</li>
+        <li>Tú solo puedes ver los Pokémon que <b>tú le regalaste</b> durante las rondas.</li>
+        <li>Al finalizar el duelo, se revelan los equipos completos de ambos jugadores.</li>
+      </ul>`
   }
 }
 
