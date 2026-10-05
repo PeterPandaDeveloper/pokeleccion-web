@@ -10,7 +10,13 @@ import { getStorage } from './storage'
 
 // ─── HELPERS HTTP ─────────────────────────────────────────────────────────────
 export function json(res: http.ServerResponse, code: number, data: unknown): void {
-  res.writeHead(code, {'Content-Type':'application/json'})
+  res.writeHead(code, {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    'Surrogate-Control': 'no-store'
+  })
   res.end(JSON.stringify(data))
 }
 
@@ -101,7 +107,11 @@ async function responderConSala(res: http.ServerResponse, code: number, sala: Sa
     }
   }
   await storage.guardarSala(sala)
-  return json(res, code, data !== undefined ? data : sala.estado)
+  const resData = (data !== undefined ? data : sala.estado) as Record<string, unknown>
+  if (typeof resData === 'object' && resData !== null) {
+    resData.serverTime = Date.now()
+  }
+  return json(res, code, resData)
 }
 
 // ─── HANDLER PRINCIPAL ───────────────────────────────────────────────────────
@@ -143,7 +153,14 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
 
   if (endpoint!=='/estado') console.log(`${m} [${salaId}] ${endpoint} — ${ip}`)
 
+  const esMutacion = m !== 'GET' || endpoint.startsWith('/elegir/') || endpoint === '/reset'
+  let lockToken: string | null = null
+
   try {
+    if (esMutacion && storage.adquirirLock) {
+      lockToken = await storage.adquirirLock(salaId)
+    }
+
     const sala = await storage.obtenerSala(salaId)
     if (!sala || sala.eliminada) {
       return json(res,410,{error:'Sala eliminada', eliminado:true})
@@ -164,7 +181,12 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       if (huboTimeout || huboHeartbeat) {
         await storage.guardarSala(sala)
       }
-      return json(res,200,{...estado,salaId,reglas:estado.config?etiquetaConfig(estado.config):null})
+      return json(res,200,{
+        ...estado,
+        salaId,
+        reglas:estado.config?etiquetaConfig(estado.config):null,
+        serverTime: Date.now(),
+      })
     }
 
     // Espectadores (con nombre opcional)
@@ -428,5 +450,9 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
   } catch(e) {
     console.error('Error interno:',e)
     res.writeHead(500); res.end(JSON.stringify({error:'Error interno del servidor.'}))
+  } finally {
+    if (lockToken && storage.liberarLock) {
+      try { await storage.liberarLock(salaId, lockToken) } catch {}
+    }
   }
 }

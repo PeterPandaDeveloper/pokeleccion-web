@@ -252,6 +252,11 @@ export async function unirseAlLobby() {
     const d = await post('/lobby/unirse',{rol,nombre,token:estado.miToken||''})
     estado.miRol=rol; estado.miToken=d.token; estado.salaId=d.salaId||estado.salaId
     guardarSesion(); Sonido.seleccionar(); mostrarPasoLobby()
+    if (d.estado && window.aplicarEstado) {
+      await window.aplicarEstado(d.estado)
+    } else if (window.forzarActualizar) {
+      window.forzarActualizar()
+    }
   } catch(e) { Sonido.error(); mostrarToast('⚠️ '+e.message,'err') }
 }
 
@@ -259,11 +264,16 @@ export async function votarConfig() {
   if (yaListo) { mostrarToast('Ya confirmaste tu configuración.','err'); return }
   const voto = leerVoto()
   try {
-    await post('/lobby/votar', { voto })
+    const res = await post('/lobby/votar', { voto })
     Sonido.votar(); yaVote = true
     document.querySelector('.btn-votar').textContent = '✏️ Cambiar mi voto'
     document.getElementById('btn-listo').style.display = 'inline-block'
     mostrarToast('✅ Voto registrado','ok')
+    if (res && res.lobby && window.aplicarEstado) {
+      await window.aplicarEstado(res)
+    } else if (window.forzarActualizar) {
+      window.forzarActualizar()
+    }
   } catch(e) { Sonido.error(); mostrarToast('⚠️ '+e.message,'err') }
 }
 
@@ -280,11 +290,16 @@ export async function votarConfigDelOtro() {
     }
     aplicarVotoEnUI(votoOtro)
     const voto = leerVoto()
-    await post('/lobby/votar', { voto })
+    const res = await post('/lobby/votar', { voto })
     Sonido.votar(); yaVote = true
     document.querySelector('.btn-votar').textContent = '✏️ Cambiar mi voto'
     document.getElementById('btn-listo').style.display = 'inline-block'
     mostrarToast('✅ Configuración del rival copiada y votada','ok')
+    if (res && res.lobby && window.aplicarEstado) {
+      await window.aplicarEstado(res)
+    } else if (window.forzarActualizar) {
+      window.forzarActualizar()
+    }
   } catch(e) { Sonido.error(); mostrarToast('⚠️ '+e.message,'err') }
 }
 
@@ -301,12 +316,17 @@ export async function marcarListo() {
       Sonido.error(); mostrarToast(`Solo ${ids.length} Pokémon disponibles. Necesitas al menos ${numRondasLocal * 2}. Ajusta los filtros.`,'err')
       document.getElementById('btn-listo').disabled=false; return
     }
-    await post('/lobby/listo',{idsValidos:ids})
+    const res = await post('/lobby/listo',{idsValidos:ids})
     Sonido.listo(); yaListo=true
     document.getElementById('btn-listo').textContent='⌛ Esperando al otro jugador...'
     // Bloquear controles de config
     bloquearConfig()
     mostrarToast('✅ ¡Listo! Esperando al otro jugador.','ok')
+    if (res && res.fase && window.aplicarEstado) {
+      await window.aplicarEstado(res)
+    } else if (window.forzarActualizar) {
+      window.forzarActualizar()
+    }
   } catch(e) {
     document.getElementById('msg-pool').style.display='none'
     Sonido.error(); mostrarToast('⚠️ '+e.message,'err')
@@ -318,9 +338,14 @@ export async function limpiarSala() {
   if (cooldownLimpiar) return
   if (!confirm('¿Borrar todas las selecciones y empezar de nuevo?')) return
   try {
-    await post('/lobby/limpiar',{})
+    const res = await post('/lobby/limpiar',{})
     Sonido.limpiar(); cooldownLimpiar=true
     resetLobbyEstado()
+    if (res && res.lobby && window.aplicarEstado) {
+      await window.aplicarEstado(res)
+    } else if (window.forzarActualizar) {
+      window.forzarActualizar()
+    }
     const btn = document.querySelector('.btn-limpiar')
     if (btn) { btn.disabled=true }
     let seg=12
@@ -454,6 +479,8 @@ export function mostrarPasoLobby() {
   }
 }
 
+let ultimoEstadoBloqueado = null
+
 export function actualizarLobbyUI(est) {
   const lj1=est.lobby.jugador1, lj2=est.lobby.jugador2
 
@@ -462,8 +489,11 @@ export function actualizarLobbyUI(est) {
     const mi = est.lobby[estado.miRol]
     yaVote = !!mi.voto
     yaListo = !!mi.listo
-    if (mi.bloqueado) bloquearConfig()
-    else desbloquearConfig()
+    if (mi.bloqueado !== ultimoEstadoBloqueado) {
+      ultimoEstadoBloqueado = mi.bloqueado
+      if (mi.bloqueado) bloquearConfig()
+      else desbloquearConfig()
+    }
     if (yaVote && !mi.bloqueado) {
       const btnVotar = document.querySelector('.btn-votar')
       if (btnVotar) btnVotar.textContent = '✏️ Cambiar mi voto'
@@ -531,6 +561,7 @@ export function resetLobbyEstado() {
   yaVote = false
   yaListo = false
   cooldownLimpiar = false
+  ultimoEstadoBloqueado = null
   desbloquearConfig()
   document.getElementById('tipo-grid')?.classList.remove('has-selected')
   const cp = document.getElementById('config-panel-wrap')

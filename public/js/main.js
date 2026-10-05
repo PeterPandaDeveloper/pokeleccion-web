@@ -177,51 +177,76 @@ window.unirseASala = async (id) => {
   mostrarToast(`Sala ${id} seleccionada. ¡Elige tu rol!`, 'ok')
 }
 
-// ─── MAIN LOOP ────────────────────────────────────────────────────────────────
+// ─── MAIN LOOP & SINCRONIZACIÓN EN TIEMPO REAL ─────────────────────────────
 let isActualizando = false
-async function actualizar() {
-  if (isActualizando) return
+
+export async function aplicarEstado(est) {
+  if (!est) return
+  prevEstadoG = est
+
+  // Detectar notificaciones del otro jugador
+  detectarCambios(est)
+
+  if (est.fase === 'lobby') {
+    if (enDraft) {
+      // Volvimos al lobby (reset)
+      enDraft = false
+      document.getElementById('pantalla-draft').style.display = 'none'
+      document.getElementById('pantalla-lobby').style.display = 'block'
+      resetarEstadoRender()
+      mostrarPasoLobby()
+    }
+    if (document.getElementById('paso-lobby').style.display !== 'none') {
+      actualizarLobbyUI(est)
+    }
+    await renderChat(est)
+  } else {
+    if (!enDraft) {
+      enDraft = true
+      flashBatalla(() => {
+        document.getElementById('pantalla-lobby').style.display = 'none'
+        document.getElementById('pantalla-draft').style.display = 'block'
+      })
+    }
+    await syncDraft(est)
+  }
+
+  // Indicador de conexión
+  setConexion(true)
+}
+window.aplicarEstado = aplicarEstado
+
+export async function actualizar() {
+  if (isActualizando || !estado.salaId) return
   isActualizando = true
   try {
-    if (!estado.salaId) return
     const est = await fetchEstado()
-    prevEstadoG = est
-
-    // Detectar notificaciones del otro jugador
-    detectarCambios(est)
-
-    if (est.fase === 'lobby') {
-      if (enDraft) {
-        // Volvimos al lobby (reset)
-        enDraft = false
-        document.getElementById('pantalla-draft').style.display = 'none'
-        document.getElementById('pantalla-lobby').style.display = 'block'
-        resetarEstadoRender()
-        mostrarPasoLobby()
-      }
-      if (document.getElementById('paso-lobby').style.display !== 'none') {
-        actualizarLobbyUI(est)
-      }
-      await renderChat(est)
-    } else {
-      if (!enDraft) {
-        enDraft = true
-        flashBatalla(() => {
-          document.getElementById('pantalla-lobby').style.display = 'none'
-          document.getElementById('pantalla-draft').style.display = 'block'
-        })
-      }
-      await syncDraft(est)
-    }
-
-    // Indicador de conexión
-    setConexion(true)
+    await aplicarEstado(est)
   } catch {
     setConexion(false)
   } finally {
     isActualizando = false
   }
 }
+
+function obtenerIntervaloPolling() {
+  if (document.hidden) return 1800
+  if (!prevEstadoG) return 450
+  if (prevEstadoG.fase === 'draft') return 320 // ¡Tiempo real en draft sin lag!
+  if (prevEstadoG.fase === 'fin') return 2000
+  return 480 // Lobby ágil
+}
+
+let loopTimer = null
+export function programarSiguientePoll(inmediato = false) {
+  if (loopTimer) clearTimeout(loopTimer)
+  const delay = inmediato ? 0 : obtenerIntervaloPolling()
+  loopTimer = setTimeout(async () => {
+    try { await actualizar() } catch {}
+    programarSiguientePoll()
+  }, delay)
+}
+window.forzarActualizar = () => programarSiguientePoll(true)
 
 let _prevLobby = null
 function detectarCambios(est) {
@@ -308,11 +333,11 @@ async function iniciar() {
   // Iniciar heartbeat si ya tenemos sesión activa
   if (estado.miToken && estado.salaId && estado.miRol !== 'espectador') iniciarHeartbeat()
 
-  // Loop principal: setTimeout recursivo (no setInterval)
-  ;(async function loop() {
-    try { await actualizar() } catch {}
-    finally { setTimeout(loop, 1000) }
-  })()
+  // Iniciar loop adaptativo en tiempo real
+  programarSiguientePoll(true)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) programarSiguientePoll(true)
+  })
 
   // Enter en input de nombre
   document.getElementById('input-nombre')?.addEventListener('keydown', e => {

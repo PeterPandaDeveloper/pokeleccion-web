@@ -1,6 +1,7 @@
 import { Sala, crearSalaDefault } from './sala'
 import { CONFIG } from './config'
 import Redis from 'ioredis'
+import * as crypto from 'crypto'
 
 export interface HistorialPartida {
   id: string
@@ -26,6 +27,8 @@ export interface IStorage {
   listarSalasPublicas(): Promise<Array<{ id: string; fase: string; j1: string|null; j2: string|null; hayEspacio: boolean }>>
   guardarHistorial(partida: HistorialPartida): Promise<void>
   obtenerEstadisticas(): Promise<EstadisticasPartidas>
+  adquirirLock?(id: string, maxWaitMs?: number): Promise<string | null>
+  liberarLock?(id: string, token: string | null): Promise<void>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -102,6 +105,12 @@ class MemoryStorage implements IStorage {
       ultimasPartidas: this.historial.slice(0, 10),
     }
   }
+
+  async adquirirLock(id: string, maxWaitMs = 1200): Promise<string | null> {
+    return 'mem-lock'
+  }
+
+  async liberarLock(id: string, token: string | null): Promise<void> {}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -134,6 +143,54 @@ class UpstashRedisStorage implements IStorage {
     return data.result
   }
 
+  private async pipeline(comandos: unknown[][]): Promise<any[]> {
+    if (!comandos.length) return []
+    try {
+      const res = await fetch(`${this.url}/pipeline`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(comandos),
+      })
+      if (res.ok) {
+        const data = await res.json() as Array<{ result: any; error?: string }>
+        return data.map(d => d.result)
+      }
+    } catch {}
+    const results = []
+    for (const c of comandos) {
+      results.push(await this.comando(c))
+    }
+    return results
+  }
+
+  async adquirirLock(id: string, maxWaitMs = 1500): Promise<string | null> {
+    const token = crypto.randomBytes(4).toString('hex')
+    const key = `lock:sala:${id}`
+    const start = Date.now()
+    while (Date.now() - start < maxWaitMs) {
+      try {
+        const res = await this.comando(['SET', key, token, 'NX', 'PX', 2500])
+        if (res === 'OK' || res === true) return token
+      } catch {}
+      await new Promise(r => setTimeout(r, 35))
+    }
+    return null
+  }
+
+  async liberarLock(id: string, token: string | null): Promise<void> {
+    if (!token) return
+    try {
+      const key = `lock:sala:${id}`
+      const val = await this.comando(['GET', key])
+      if (val === token) {
+        await this.comando(['DEL', key])
+      }
+    } catch {}
+  }
+
   async obtenerSala(id: string): Promise<Sala> {
     const raw = await this.comando(['GET', `sala:${id}`])
     if (!raw) {
@@ -149,12 +206,11 @@ class UpstashRedisStorage implements IStorage {
   async guardarSala(sala: Sala): Promise<void> {
     const ttlSegundos = Math.ceil(CONFIG.TTL_SIN_JUGADORES / 1000) // 420s (7 min)
     const jsonStr = JSON.stringify({ ...sala, timer: null })
-    await this.comando(['SET', `sala:${sala.id}`, jsonStr, 'EX', ttlSegundos])
-    if (!sala.privada && !sala.eliminada) {
-      await this.comando(['SADD', 'salas:publicas', sala.id])
-    } else {
-      await this.comando(['SREM', 'salas:publicas', sala.id])
-    }
+    const cmds: unknown[][] = [
+      ['SET', `sala:${sala.id}`, jsonStr, 'EX', ttlSegundos],
+      [!sala.privada && !sala.eliminada ? 'SADD' : 'SREM', 'salas:publicas', sala.id],
+    ]
+    await this.pipeline(cmds)
   }
 
   async eliminarSala(id: string): Promise<void> {
@@ -164,9 +220,13 @@ class UpstashRedisStorage implements IStorage {
 
   async listarSalasPublicas(): Promise<Array<{ id: string; fase: string; j1: string|null; j2: string|null; hayEspacio: boolean }>> {
     const ids: string[] = (await this.comando(['SMEMBERS', 'salas:publicas'])) || []
+    if (!ids.length) return []
+    const cmds = ids.map(sid => ['GET', `sala:${sid}`])
+    const raws = await this.pipeline(cmds)
     const resultado = []
-    for (const sid of ids) {
-      const raw = await this.comando(['GET', `sala:${sid}`])
+    for (let i = 0; i < ids.length; i++) {
+      const sid = ids[i]
+      const raw = raws[i]
       if (!raw) {
         await this.comando(['SREM', 'salas:publicas', sid])
         continue
@@ -229,6 +289,31 @@ class IoRedisStorage implements IStorage {
     this.client.connect().catch(err => {
       console.warn('⚠️ No se pudo conectar a Redis vía ioredis:', err.message)
     })
+  }
+
+  async adquirirLock(id: string, maxWaitMs = 1500): Promise<string | null> {
+    const token = crypto.randomBytes(4).toString('hex')
+    const key = `lock:sala:${id}`
+    const start = Date.now()
+    while (Date.now() - start < maxWaitMs) {
+      try {
+        const res = await this.client.set(key, token, 'PX', 2500, 'NX')
+        if (res === 'OK') return token
+      } catch {}
+      await new Promise(r => setTimeout(r, 35))
+    }
+    return null
+  }
+
+  async liberarLock(id: string, token: string | null): Promise<void> {
+    if (!token) return
+    try {
+      const key = `lock:sala:${id}`
+      const val = await this.client.get(key)
+      if (val === token) {
+        await this.client.del(key)
+      }
+    } catch {}
   }
 
   async obtenerSala(id: string): Promise<Sala> {

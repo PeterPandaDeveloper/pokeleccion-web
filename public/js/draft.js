@@ -85,10 +85,10 @@ export async function syncDraft(est) {
     }
 
     // Timer
-    if (est.timerExpira) sincronizarTimer(est.timerExpira)
+    if (est.timerExpira) sincronizarTimer(est.timerExpira, est.serverTime)
 
     // Cartas
-    if (!arrEq(est.opcionesActuales, prevOps)) {
+    if (!arrEq(est.opcionesActuales, prevOps) || document.querySelectorAll('#opciones-render .poke-card').length === 0) {
       await renderCartas(est)
       prevOps = [...est.opcionesActuales]
     }
@@ -99,12 +99,17 @@ export async function syncDraft(est) {
 }
 
 // ─── TIMER ───────────────────────────────────────────────────────────────────
-function sincronizarTimer(exp) {
+let serverTimeOffset = 0
+
+function sincronizarTimer(exp, serverTime) {
   if (timerExpira !== exp) ultimoSeg = -1
   timerExpira = exp
+  if (serverTime) {
+    serverTimeOffset = Date.now() - serverTime
+  }
   document.getElementById('timer-wrap').style.display = 'flex'
   actualizarTimer()
-  if (!timerHandle) timerHandle = setInterval(actualizarTimer, 100)
+  if (!timerHandle) timerHandle = setInterval(actualizarTimer, 80)
 }
 
 function detenerTimer() {
@@ -114,11 +119,11 @@ function detenerTimer() {
 
 function actualizarTimer() {
   if (!timerExpira) return
-  const ms  = timerExpira - Date.now()
-  const seg = Math.max(0, ms / TIMER_SEG / 100)  // fracción 0-1
+  const nowServer = Date.now() - serverTimeOffset
+  const ms  = Math.max(0, timerExpira - nowServer)
   const ring = document.getElementById('ring-fg')
   if (ring) ring.style.strokeDashoffset = 213.6 * (1 - Math.max(0, ms / (TIMER_SEG * 1000)))
-  const s   = Math.ceil(Math.max(0, ms / 1000))
+  const s   = Math.ceil(ms / 1000)
   const num = document.getElementById('timer-num')
   if (num) {
     if (s !== ultimoSeg && s <= 5 && s >= 1) { Sonido.timerTick(s <= 3); ultimoSeg = s }
@@ -134,14 +139,29 @@ function actualizarTimer() {
 async function renderCartas(est) {
   const esYo = est.turnoDe === estado.miRol
   const c    = document.getElementById('opciones-render')
-  c.innerHTML = ''
-  for (const id of est.opcionesActuales) {
-    const nom = await fetchNombre(id)
+  if (!c) return
+
+  // Si ya tenemos exactamente estas cartas renderizadas, solo actualizar estado visual
+  const existingCards = c.querySelectorAll('.poke-card')
+  if (existingCards.length === est.opcionesActuales.length && arrEq(est.opcionesActuales, prevOps)) {
+    existingCards.forEach(card => {
+      card.classList.toggle('card-disabled', !esYo)
+    })
+    return
+  }
+
+  // Pre-obtener todos los nombres en paralelo para evitar parpadeos secuenciales
+  const nombres = await Promise.all(est.opcionesActuales.map(fetchNombre))
+
+  // Construir fragmento fuera del DOM
+  const frag = document.createDocumentFragment()
+  est.opcionesActuales.forEach((id, idx) => {
+    const nom = nombres[idx] || `#${id}`
     const div = document.createElement('div')
     div.className = 'poke-card' + (!esYo ? ' card-disabled' : '')
-    div.onclick   = () => intentarElegir(id)
+    div.dataset.pokeId = String(id)
+    div.onclick   = () => intentarElegir(id, div)
     if (esYo) div.addEventListener('mouseenter', () => Sonido.hover())
-    // Imagen oficial con fallback a sprite
     const artwork = imgUrl(id)
     const sprite  = imgSprite(id)
     div.innerHTML = `
@@ -149,10 +169,11 @@ async function renderCartas(est) {
            onerror="this.src='${sprite}'"
            style="width:118px;height:118px;object-fit:contain;display:block;margin:0 auto;transition:transform .22s">
       <div class="poke-name">${nom}</div>`
-    c.appendChild(div)
-    // Precargar
-    const img = new Image(); img.src = artwork
-  }
+    frag.appendChild(div)
+  })
+
+  // Reemplazo atómico en un solo repaint (cero tearing / cero pantalla en blanco)
+  c.replaceChildren(frag)
 }
 
 // ─── EQUIPOS ─────────────────────────────────────────────────────────────────
@@ -326,8 +347,7 @@ export async function enviarChat() {
     }
     await post('/chat', body)
     ultimoChatSig = ''
-    const est = await fetchEstado()
-    await renderChat(est)
+    if (window.forzarActualizar) await window.forzarActualizar()
   } catch(e) { mostrarToast('⚠️ '+e.message,'err') }
 }
 
@@ -336,6 +356,7 @@ export async function enviarBuzz() {
     await post('/buzz', {})
     mostrarToast('🔔 Aviso enviado','ok')
     Sonido.click()
+    if (window.forzarActualizar) window.forzarActualizar()
     // Deshabilitar todos los botones de buzz 8s
     const btn = document.getElementById('btn-buzz')
     const btnL = document.getElementById('btn-buzz-lobby')
@@ -359,13 +380,39 @@ export async function enviarBuzz() {
 }
 
 // ─── ELECCIÓN ────────────────────────────────────────────────────────────────
-export async function intentarElegir(id) {
-  if (!estado.miRol || estado.miRol === 'espectador') return
+let elegiendoEnProgreso = false
+
+export async function intentarElegir(id, cardEl) {
+  if (!estado.miRol || estado.miRol === 'espectador' || elegiendoEnProgreso) return
+  elegiendoEnProgreso = true
   Sonido.seleccionar()
+
+  // Feedback visual táctil e inmediato
+  if (cardEl) {
+    cardEl.classList.add('card-seleccionada')
+  }
+  const cards = document.querySelectorAll('#opciones-render .poke-card')
+  cards.forEach(c => c.classList.add('card-disabled'))
+
   try {
-    await get(`/elegir/${estado.miRol}/${id}`)
-    prevOps = []
-  } catch(e) { Sonido.error(); mostrarToast('⚠️ '+e.message,'err') }
+    const nuevoEst = await get(`/elegir/${estado.miRol}/${id}`)
+    if (nuevoEst && nuevoEst.opcionesActuales) {
+      if (window.aplicarEstado) {
+        await window.aplicarEstado(nuevoEst)
+      } else {
+        await syncDraft(nuevoEst)
+      }
+    } else {
+      if (window.forzarActualizar) await window.forzarActualizar()
+    }
+  } catch(e) {
+    Sonido.error()
+    mostrarToast('⚠️ '+e.message,'err')
+    if (cardEl) cardEl.classList.remove('card-seleccionada')
+    cards.forEach(c => c.classList.remove('card-disabled'))
+  } finally {
+    elegiendoEnProgreso = false
+  }
 }
 
 // ─── EXPORTAR ────────────────────────────────────────────────────────────────
@@ -472,6 +519,7 @@ export async function resetear() {
 export function resetarEstadoRender() {
   prevOps=[]; prevTurno=''; prevRonda=-1; exportGen=false; yaRevelo=false
   rendJ1.clear(); rendJ2.clear(); ultimoChatSig=''; ultimoBuzzId=''; chatInicializado=false
+  elegiendoEnProgreso=false; serverTimeOffset=0
   detenerTimer()
   resetLobbyEstado()
   document.getElementById('equipo-j1').innerHTML=''
