@@ -47,11 +47,11 @@ const INFO = {
   },
   modoOculto: {
     titulo: '🙈 Modo Oculto (Draft a Ciegas)',
-    cuerpo: `<p>Inspirado en el modo elección de <b>Clash Royale</b>:</p>
+    cuerpo: `<p>Añade misterio y tensión táctica a la partida:</p>
       <ul>
-        <li>Los Pokémon que el rival elija para su propio equipo se mantienen <b>secretos</b> durante toda la partida (aparecen como <code>???</code> con el sprite de Sustituto).</li>
-        <li>Tú solo puedes ver los Pokémon que <b>tú le regalaste</b> durante las rondas.</li>
-        <li>Al finalizar el duelo, se revelan los equipos completos de ambos jugadores.</li>
+        <li>Las elecciones que tu rival toma para su propio equipo se mantienen <b>secretas</b> durante el draft (se muestran como <code>???</code> con el muñeco de Sustituto).</li>
+        <li>Tú solo puedes ver los Pokémon que <b>tú le envías</b> en tus turnos de elección.</li>
+        <li>Los equipos completos se revelan automáticamente al finalizar el draft para el combate.</li>
       </ul>`
   }
 }
