@@ -313,12 +313,12 @@ let storageInstance: IStorage | null = null
 export function getStorage(): IStorage {
   if (storageInstance) return storageInstance
 
-  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-    console.log('⚡ Conectado a Upstash Redis (Serverless HTTP)')
-    storageInstance = new UpstashRedisStorage(
-      process.env.UPSTASH_REDIS_REST_URL,
-      process.env.UPSTASH_REDIS_REST_TOKEN
-    )
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN
+
+  if (upstashUrl && upstashToken) {
+    console.log('⚡ Conectado a Upstash Redis / Vercel KV (Serverless HTTP)')
+    storageInstance = new UpstashRedisStorage(upstashUrl, upstashToken)
   } else if (process.env.REDIS_URL || process.env.REDIS_HOST) {
     console.log('🔌 Conectado a Redis TCP (ioredis / Oracle Server)')
     storageInstance = new IoRedisStorage(process.env.REDIS_URL)
