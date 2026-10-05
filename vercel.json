@@ -1,8 +1,9 @@
 {
-  "cleanUrls": true,
+  "outputDirectory": "public",
   "rewrites": [
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/api/(.*)", "destination": "/api/[...routes]" },
-    { "source": "/api", "destination": "/api/index" }
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    }
   ]
 }
