@@ -15,6 +15,11 @@ export function json(res: http.ServerResponse, code: number, data: unknown): voi
 }
 
 export function readBody(req: http.IncomingMessage): Promise<string> {
+  const anyReq = req as any
+  if (anyReq.body !== undefined && anyReq.body !== null && anyReq.body !== '') {
+    if (typeof anyReq.body === 'string') return Promise.resolve(anyReq.body)
+    if (typeof anyReq.body === 'object') return Promise.resolve(JSON.stringify(anyReq.body))
+  }
   return new Promise((ok,fail) => {
     let buf='', size=0
     req.on('data',(chunk:Buffer)=>{
@@ -25,6 +30,23 @@ export function readBody(req: http.IncomingMessage): Promise<string> {
     req.on('end',()=>ok(buf))
     req.on('error',fail)
   })
+}
+
+export async function parseJsonBody(req: http.IncomingMessage): Promise<Record<string, unknown>> {
+  const anyReq = req as any
+  if (anyReq.body !== undefined && anyReq.body !== null) {
+    if (typeof anyReq.body === 'object') return anyReq.body
+    if (typeof anyReq.body === 'string' && anyReq.body.trim()) {
+      try { return JSON.parse(anyReq.body) } catch { return {} }
+    }
+  }
+  try {
+    const raw = await readBody(req)
+    if (!raw || !raw.trim()) return {}
+    return JSON.parse(raw)
+  } catch {
+    return {}
+  }
 }
 
 export function getIP(req: http.IncomingMessage): string {
@@ -147,7 +169,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
 
     // Espectadores (con nombre opcional)
     if (endpoint==='/espectador/unirse'&&m==='POST') {
-      const bodyEsp = JSON.parse(await readBody(req)) as Record<string,unknown>
+      const bodyEsp = await parseJsonBody(req)
       estado.lobby.espectadores = Math.max(0, estado.lobby.espectadores + 1)
       const nombre = String(bodyEsp.nombre??'espectador').trim().slice(0,20)
       agregarMensajeSistema(sala,`👁 ${nombre} se unió como espectador`)
@@ -155,7 +177,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
     }
 
     if (endpoint==='/espectador/salir'&&m==='POST') {
-      const bodyEsp = JSON.parse(await readBody(req)) as Record<string,unknown>
+      const bodyEsp = await parseJsonBody(req)
       estado.lobby.espectadores = Math.max(0, estado.lobby.espectadores - 1)
       const nombre = String(bodyEsp.nombre??'espectador').trim().slice(0,20)
       agregarMensajeSistema(sala,`👁 ${nombre} dejó de mirar`)
@@ -164,7 +186,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
 
     // Verificar reconexión
     if (endpoint==='/lobby/verificar'&&m==='POST') {
-      const b = JSON.parse(await readBody(req))
+      const b = await parseJsonBody(req)
       const tk = String((b as Record<string,unknown>).token??'')
       if (!validarToken(tk)) return json(res,200,{rol:null,estado})
       if (estado.jugador1.token===tk) return json(res,200,{rol:'jugador1',estado,salaId})
@@ -176,7 +198,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
     if (endpoint==='/lobby/unirse'&&m==='POST') {
       if (!checkRL(ip,'unirse',CONFIG.RATE_UNIRSE))
         return json(res,429,{error:'Demasiados intentos. Espera un momento.'})
-      const b = JSON.parse(await readBody(req)) as Record<string,unknown>
+      const b = await parseJsonBody(req)
       const rol    = String(b.rol??'')
       const nombre = String(b.nombre??'').trim().slice(0,20)
       const tkCliente = String(b.token??'')
@@ -205,7 +227,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
 
     // Chat (jugadores y espectadores) — ANTES de la validación de token
     if (endpoint==='/chat'&&m==='POST') {
-      const bodyChat = JSON.parse(await readBody(req)) as Record<string,unknown>
+      const bodyChat = await parseJsonBody(req)
       const texto = String(bodyChat.texto??'').trim().slice(0,CONFIG.MAX_CHAT_MSG)
       if (!texto) return json(res,400,{error:'Mensaje vacío.'})
       const tkBodyChat = String(bodyChat.token??'')
@@ -229,7 +251,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
 
     // ── /intercambiar — jugador deja slot libre, espectador toma slot vacío ──
     if (endpoint==='/intercambiar'&&m==='POST') {
-      const bodyInt = JSON.parse(await readBody(req)) as Record<string,unknown>
+      const bodyInt = await parseJsonBody(req)
       const accion  = String(bodyInt.accion??'')
       if (accion === 'liberar') {
         const tkLibera = String(bodyInt.token??'')
@@ -273,7 +295,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
     }
 
     if (endpoint==='/eliminar'&&m==='POST') {
-      const b = JSON.parse(await readBody(req)) as Record<string,unknown>
+      const b = await parseJsonBody(req)
       const tk = String(b.token??'')
       if (!validarToken(tk)) return json(res,403,{error:'Token no válido.'})
       const rolPropio = estado.jugador1.token===tk ? 'jugador1' : estado.jugador2.token===tk ? 'jugador2' : null
@@ -295,7 +317,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
     }
 
     // ── A partir de aquí se requiere token válido ────────────────────────────
-    const b      = m!=='GET' ? JSON.parse(await readBody(req)) as Record<string,unknown> : {}
+    const b      = m!=='GET' ? await parseJsonBody(req) : {}
     const tkBody = String(b.token??token)
     if (!validarToken(tkBody)) return json(res,403,{error:'Token no válido o manipulado.'})
     const rolPropio = estado.jugador1.token===tkBody ? 'jugador1'
