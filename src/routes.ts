@@ -389,7 +389,8 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
         return json(res,429,{error:'Espera antes de volver a avisar.'})
       estado.lobby[campoBuzz] = ahora
       const nombre = estado[rolPropio].nombre||rolPropio
-      agregarMensajeSistema(sala,`🔔 ${nombre} te avisa: ¡ey, sigue!`)
+      const rolRival = rolPropio==='jugador1' ? 'jugador2' : 'jugador1'
+      agregarMensajeSistema(sala,`🔔 ${nombre} te avisa: ¡ey, sigue!`, rolPropio, rolRival)
       return responderConSala(res, 200, sala, {ok:true})
     }
 

@@ -235,6 +235,7 @@ async function revelarTodo(est) {
 // ─── CHAT & BUZZ VISUAL ──────────────────────────────────────────────────────
 let ultimoChatSig = ''
 let ultimoBuzzId  = ''
+let chatInicializado = false
 
 export function dispararAlertaVisualBuzz(texto) {
   Sonido.buzz()
@@ -283,10 +284,23 @@ export async function renderChat(est) {
   boxes.forEach(box => { box.innerHTML = html; box.scrollTop = box.scrollHeight })
 
   const ultimo = chat[chat.length - 1]
-  if (ultimo && ultimo.rol !== estado.miRol && ultimo.rol !== 'sistema') Sonido.chat()
-  if (ultimo?.rol === 'sistema' && ultimo.texto.includes('🔔') && ultimo.id !== ultimoBuzzId) {
-    ultimoBuzzId = ultimo.id
-    dispararAlertaVisualBuzz(ultimo.texto)
+  if (!chatInicializado) {
+    chatInicializado = true
+    if (ultimo?.id) ultimoBuzzId = ultimo.id
+  } else {
+    if (ultimo && ultimo.rol !== estado.miRol && ultimo.rol !== 'sistema') Sonido.chat()
+    if (ultimo?.rol === 'sistema' && ultimo.texto.includes('🔔') && ultimo.id !== ultimoBuzzId) {
+      ultimoBuzzId = ultimo.id
+      const esReciente = Math.abs(Date.now() - (ultimo.ts || 0)) < 8000
+      // Solo alertar y vibrar si el aviso es para mí (el rival) y NO para quien lo envió ni para espectadores
+      const soyElDestinatario = ultimo.paraRol
+        ? (estado.miRol === ultimo.paraRol)
+        : (estado.miRol && estado.miRol !== ultimo.deRol && estado.miRol !== 'espectador')
+
+      if (esReciente && soyElDestinatario) {
+        dispararAlertaVisualBuzz(ultimo.texto)
+      }
+    }
   }
 }
 
@@ -321,7 +335,7 @@ export async function enviarBuzz() {
   try {
     await post('/buzz', {})
     mostrarToast('🔔 Aviso enviado','ok')
-    Sonido.buzz()
+    Sonido.click()
     // Deshabilitar todos los botones de buzz 8s
     const btn = document.getElementById('btn-buzz')
     const btnL = document.getElementById('btn-buzz-lobby')
@@ -457,7 +471,7 @@ export async function resetear() {
 
 export function resetarEstadoRender() {
   prevOps=[]; prevTurno=''; prevRonda=-1; exportGen=false; yaRevelo=false
-  rendJ1.clear(); rendJ2.clear(); ultimoChatSig=''
+  rendJ1.clear(); rendJ2.clear(); ultimoChatSig=''; ultimoBuzzId=''; chatInicializado=false
   detenerTimer()
   resetLobbyEstado()
   document.getElementById('equipo-j1').innerHTML=''

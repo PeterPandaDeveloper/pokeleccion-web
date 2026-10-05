@@ -17,6 +17,7 @@ export interface Jugador       { equipo: number[]; picksPropios: number[]; conec
 export interface MensajeChat {
   id: string; autor: string; rol: 'jugador1'|'jugador2'|'sistema'|'espectador'
   texto: string; ts: number
+  deRol?: string; paraRol?: string
 }
 
 export interface EstadoSala {
@@ -170,10 +171,11 @@ export function actualizarPresenciaJugadores(sala: Sala): void {
   }
 }
 
-export function agregarMensajeSistema(sala: Sala, texto: string): void {
+export function agregarMensajeSistema(sala: Sala, texto: string, deRol?: string, paraRol?: string): void {
   const msg: MensajeChat = {
     id: crypto.randomBytes(4).toString('hex'),
     autor: 'Sistema', rol: 'sistema', texto, ts: Date.now(),
+    deRol, paraRol,
   }
   sala.estado.chat.push(msg)
   if (sala.estado.chat.length > CONFIG.MAX_CHAT_HISTORIAL)
