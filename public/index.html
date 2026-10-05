@@ -165,17 +165,94 @@
               <button class="btn-info-small" onclick="mostrarInfo('region')">?</button>
             </div>
             <div class="region-grid">
-              <button class="rbtn active" data-r="todas"  onclick="toggleRegion(this)">Todas</button>
-              <button class="rbtn" data-r="kanto"  onclick="toggleRegion(this)">Kanto</button>
-              <button class="rbtn" data-r="johto"  onclick="toggleRegion(this)">Johto</button>
-              <button class="rbtn" data-r="hoenn"  onclick="toggleRegion(this)">Hoenn</button>
-              <button class="rbtn" data-r="sinnoh" onclick="toggleRegion(this)">Sinnoh</button>
-              <button class="rbtn" data-r="unova"  onclick="toggleRegion(this)">Unova</button>
-              <button class="rbtn" data-r="kalos"  onclick="toggleRegion(this)">Kalos</button>
-              <button class="rbtn" data-r="alola"  onclick="toggleRegion(this)">Alola</button>
-              <button class="rbtn" data-r="galar"  onclick="toggleRegion(this)">Galar</button>
-              <button class="rbtn" data-r="paldea" onclick="toggleRegion(this)">Paldea</button>
-              <button class="rbtn" data-r="hisui"  onclick="toggleRegion(this)">Hisui</button>
+              <button class="rbtn rbtn-todas active" data-r="todas" onclick="toggleRegion(this)">
+                <span class="rbtn-nombre">🌐 Todas</span>
+                <span class="rbtn-starters">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" alt="Pikachu" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png" alt="Eevee" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/151.png" alt="Mew" class="rbtn-sprite" loading="lazy">
+                </span>
+              </button>
+              <button class="rbtn" data-r="kanto" onclick="toggleRegion(this)">
+                <span class="rbtn-nombre">Kanto</span>
+                <span class="rbtn-starters">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png" alt="Bulbasaur" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" alt="Charmander" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png" alt="Squirtle" class="rbtn-sprite" loading="lazy">
+                </span>
+              </button>
+              <button class="rbtn" data-r="johto" onclick="toggleRegion(this)">
+                <span class="rbtn-nombre">Johto</span>
+                <span class="rbtn-starters">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/152.png" alt="Chikorita" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/155.png" alt="Cyndaquil" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/158.png" alt="Totodile" class="rbtn-sprite" loading="lazy">
+                </span>
+              </button>
+              <button class="rbtn" data-r="hoenn" onclick="toggleRegion(this)">
+                <span class="rbtn-nombre">Hoenn</span>
+                <span class="rbtn-starters">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/252.png" alt="Treecko" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/255.png" alt="Torchic" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/258.png" alt="Mudkip" class="rbtn-sprite" loading="lazy">
+                </span>
+              </button>
+              <button class="rbtn" data-r="sinnoh" onclick="toggleRegion(this)">
+                <span class="rbtn-nombre">Sinnoh</span>
+                <span class="rbtn-starters">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/387.png" alt="Turtwig" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/390.png" alt="Chimchar" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/393.png" alt="Piplup" class="rbtn-sprite" loading="lazy">
+                </span>
+              </button>
+              <button class="rbtn" data-r="unova" onclick="toggleRegion(this)">
+                <span class="rbtn-nombre">Unova</span>
+                <span class="rbtn-starters">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/495.png" alt="Snivy" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/498.png" alt="Tepig" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/501.png" alt="Oshawott" class="rbtn-sprite" loading="lazy">
+                </span>
+              </button>
+              <button class="rbtn" data-r="kalos" onclick="toggleRegion(this)">
+                <span class="rbtn-nombre">Kalos</span>
+                <span class="rbtn-starters">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/650.png" alt="Chespin" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/653.png" alt="Fennekin" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/656.png" alt="Froakie" class="rbtn-sprite" loading="lazy">
+                </span>
+              </button>
+              <button class="rbtn" data-r="alola" onclick="toggleRegion(this)">
+                <span class="rbtn-nombre">Alola</span>
+                <span class="rbtn-starters">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/722.png" alt="Rowlet" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/725.png" alt="Litten" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/728.png" alt="Popplio" class="rbtn-sprite" loading="lazy">
+                </span>
+              </button>
+              <button class="rbtn" data-r="galar" onclick="toggleRegion(this)">
+                <span class="rbtn-nombre">Galar</span>
+                <span class="rbtn-starters">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/810.png" alt="Grookey" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/813.png" alt="Scorbunny" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/816.png" alt="Sobble" class="rbtn-sprite" loading="lazy">
+                </span>
+              </button>
+              <button class="rbtn" data-r="paldea" onclick="toggleRegion(this)">
+                <span class="rbtn-nombre">Paldea</span>
+                <span class="rbtn-starters">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/906.png" alt="Sprigatito" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/909.png" alt="Fuecoco" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/912.png" alt="Quaxly" class="rbtn-sprite" loading="lazy">
+                </span>
+              </button>
+              <button class="rbtn" data-r="hisui" onclick="toggleRegion(this)">
+                <span class="rbtn-nombre">Hisui</span>
+                <span class="rbtn-starters">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/722.png" alt="Rowlet" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/155.png" alt="Cyndaquil" class="rbtn-sprite" loading="lazy">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/501.png" alt="Oshawott" class="rbtn-sprite" loading="lazy">
+                </span>
+              </button>
             </div>
             <p class="cfg-hint" id="hint-regiones">Selección: todas</p>
           </div>
