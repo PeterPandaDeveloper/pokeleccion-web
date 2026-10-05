@@ -34,8 +34,16 @@ export function getIP(req: http.IncomingMessage): string {
 }
 
 export function parseReq(req: http.IncomingMessage) {
-  const url      = new URL(req.url??'/', `http://${req.headers.host??'localhost'}`)
-  const base     = url.pathname
+  const forwardedUri = req.headers['x-forwarded-uri'] as string
+  const url      = new URL(forwardedUri || req.url || '/', `http://${req.headers.host??'localhost'}`)
+  let base       = url.pathname
+
+  // Si viene de rewrite en Vercel con ?path=...
+  const pathParam = url.searchParams.get('path')
+  if ((base === '/api' || base === '/api/') && pathParam) {
+    base = '/api/' + pathParam
+  }
+
   const token    = url.searchParams.get('token')??''
   const partes   = base.split('/').filter(Boolean)
   // rutas: /api/sala/:salaId/:endpoint...  o  /api/:global
