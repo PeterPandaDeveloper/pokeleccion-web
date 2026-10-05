@@ -3,6 +3,14 @@ export const typeCache = new Map()
 export const bstCache  = new Map()
 export const evoCache  = new Map()
 export const colorCache = new Map()
+export const statsCache = new Map()
+export const abilityCache = new Map()
+export const genCache = new Map()
+export const pokemonFullCache = new Map()
+
+export function getPokemonData(id) {
+  return pokemonFullCache.get(Number(id)) || null
+}
 
 const pendingRequests = new Map()
 
@@ -23,10 +31,14 @@ export async function cargarPokedex() {
         const data = await r.json()
         for (const [idStr, p] of Object.entries(data)) {
           const id = Number(idStr)
+          pokemonFullCache.set(id, p)
           nameCache.set(id, p.name)
           typeCache.set(id, p.types)
           bstCache.set(id, p.bst)
           colorCache.set(id, p.color)
+          statsCache.set(id, p.stats)
+          abilityCache.set(id, p.abilities)
+          genCache.set(id, p.gen)
           evoCache.set(id, {
             esFinal: p.esFinal,
             sinEvo: p.sinEvo,
