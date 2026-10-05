@@ -1,4 +1,4 @@
-import { TIPOS, TIPO_COLOR, TIPO_EN, RANGOS, FORMAS_REGIONALES, LEGENDARIOS, COLORES, COLOR_HEX, FORMAS_REGIONALES_ESPECIALES, GIMMICKS, NUM_RONDAS_DEFAULT } from './constantes.js'
+import { TIPOS, TIPO_COLOR, TIPO_EN, TIPO_ABBR, RANGOS, FORMAS_REGIONALES, LEGENDARIOS, COLORES, COLOR_HEX, FORMAS_REGIONALES_ESPECIALES, GIMMICKS, NUM_RONDAS_DEFAULT } from './constantes.js'
 import { Sonido }  from './sonido.js'
 import { estado, API, post, guardarSesion, fetchEstado } from './api.js'
 import { mostrarInfo, mostrarToast } from './modal.js'
@@ -15,9 +15,15 @@ export let cooldownLimpiar = false
 
 // ─── BUILD UI ─────────────────────────────────────────────────────────────────
 export function construirTipos() {
-  document.getElementById('tipo-grid').innerHTML = TIPOS.map(t =>
-    `<button class="tbtn" data-t="${t}" style="--tc:${TIPO_COLOR[t]}" onclick="window.toggleTipo(this)">${t}</button>`
-  ).join('')
+  const tGrid = document.getElementById('tipo-grid')
+  if (tGrid) {
+    tGrid.innerHTML = TIPOS.map(t => {
+      const abbr  = TIPO_ABBR[t] || t.slice(0, 3).toUpperCase()
+      const color = TIPO_COLOR[t]
+      const cap   = t.charAt(0).toUpperCase() + t.slice(1)
+      return `<button class="tbtn type-badge type-${TIPO_EN[t]}" data-t="${t}" style="background-color:${color};" title="${cap} (${abbr})" onclick="window.toggleTipo(this)">${abbr}</button>`
+    }).join('')
+  }
   const colorGrid = document.getElementById('color-grid')
   if (colorGrid) {
     colorGrid.innerHTML = COLORES.map(c => `<button class="cbtn" data-c="${c}" style="--cc:${COLOR_HEX[c]}" onclick="window.toggleColor(this)">${c}</button>`).join('')
@@ -53,6 +59,7 @@ export function toggleRegion(btn) {
 export function toggleTipo(btn) {
   const t=btn.dataset.t
   tiposSel.has(t)?(tiposSel.delete(t),btn.classList.remove('active')):(tiposSel.add(t),btn.classList.add('active'))
+  document.getElementById('tipo-grid')?.classList.toggle('has-selected', tiposSel.size > 0)
   document.getElementById('modo-tipos-row').style.display = tiposSel.size>1?'flex':'none'
   if (tiposSel.size) coloresSel.clear(); document.querySelectorAll('.cbtn').forEach(b=>b.classList.remove('active'))
   Sonido.click()
@@ -61,7 +68,11 @@ export function toggleTipo(btn) {
 export function toggleColor(btn) {
   const c=btn.dataset.c
   coloresSel.has(c)?(coloresSel.delete(c),btn.classList.remove('active')):(coloresSel.add(c),btn.classList.add('active'))
-  if (coloresSel.size) tiposSel.clear(); document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'))
+  if (coloresSel.size) {
+    tiposSel.clear()
+    document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'))
+    document.getElementById('tipo-grid')?.classList.remove('has-selected')
+  }
   document.getElementById('modo-tipos-row').style.display = 'none'
   Sonido.click()
 }
@@ -142,6 +153,7 @@ export function aplicarVotoEnUI(v) {
   document.querySelectorAll('.tbtn').forEach(b => {
     b.classList.toggle('active', tiposSel.has(b.dataset.t))
   })
+  document.getElementById('tipo-grid')?.classList.toggle('has-selected', tiposSel.size > 0)
   document.querySelectorAll('.cbtn').forEach(b => {
     b.classList.toggle('active', coloresSel.has(b.dataset.c))
   })
@@ -520,6 +532,7 @@ export function resetLobbyEstado() {
   yaListo = false
   cooldownLimpiar = false
   desbloquearConfig()
+  document.getElementById('tipo-grid')?.classList.remove('has-selected')
   const cp = document.getElementById('config-panel-wrap')
   if (cp) { cp.style.opacity = ''; cp.style.pointerEvents = '' }
   document.getElementById('cfg-acciones').style.display = ''

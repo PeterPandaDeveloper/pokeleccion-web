@@ -1,6 +1,13 @@
-export const TIPOS = ['normal','fuego','agua','planta','eléctrico','hielo',
-  'lucha','veneno','tierra','volador','psíquico','bicho',
-  'roca','fantasma','dragón','siniestro','acero','hada']
+export const TIPOS = [
+  'normal','fuego','agua','eléctrico','planta','hielo','lucha','veneno','tierra',
+  'volador','psíquico','bicho','roca','fantasma','dragón','siniestro','acero','hada'
+]
+
+export const TIPO_ABBR = {
+  normal:'NOR', fuego:'FIR', agua:'WAT', 'eléctrico':'ELE', planta:'GRA', hielo:'ICE',
+  lucha:'FIG', veneno:'POI', tierra:'GRO', volador:'FLY', 'psíquico':'PSY', bicho:'BUG',
+  roca:'ROC', fantasma:'GHO', 'dragón':'DRA', siniestro:'DAR', acero:'STE', hada:'FAI'
+}
 
 export const COLORES = ['negro','azul','marron','gris','verde','rosa','morado','rojo','blanco','amarillo']
 export const COLOR_HEX = {
@@ -16,11 +23,9 @@ export const TIPO_EN = {
 }
 
 export const TIPO_COLOR = {
-  normal:'#A8A878',fuego:'#F08030',agua:'#6890F0',planta:'#78C850',
-  'eléctrico':'#F8D030',hielo:'#98D8D8',lucha:'#C03028',veneno:'#A040A0',
-  tierra:'#E0C068',volador:'#A890F0','psíquico':'#F85888',bicho:'#A8B820',
-  roca:'#B8A038',fantasma:'#705898','dragón':'#7038F8',siniestro:'#705848',
-  acero:'#B8B8D0',hada:'#EE99AC'
+  normal:'#aa9', fuego:'#f42', agua:'#39f', 'eléctrico':'#fc3', planta:'#7c5', hielo:'#6cf',
+  lucha:'#b54', veneno:'#a59', tierra:'#db5', volador:'#89f', 'psíquico':'#f59', bicho:'#ab2',
+  roca:'#ba6', fantasma:'#66b', 'dragón':'#76e', siniestro:'#754', acero:'#aab', hada:'#e9e'
 }
 
 export const RANGOS = {
