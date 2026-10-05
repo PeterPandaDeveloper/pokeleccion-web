@@ -1289,3 +1289,42 @@ textarea:focus {
   cursor: not-allowed;
 }
 
+/* ════ ALERTA VISUAL DE BUZZ (AVISAR) ════ */
+@keyframes buzz-shake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10%, 30%, 50%, 70%, 90% { transform: translate(-6px, -2px) rotate(-1deg); }
+  20%, 40%, 60%, 80% { transform: translate(6px, 2px) rotate(1deg); }
+}
+
+body.buzz-shake {
+  animation: buzz-shake 0.7s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.alerta-buzz-visual {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #e84040, #ff8c00);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 40px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  box-shadow: 0 10px 30px rgba(232, 64, 64, 0.6), 0 0 25px rgba(255, 140, 0, 0.5);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 3px solid #fff;
+  animation: pop-buzz 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  pointer-events: none;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+}
+
+@keyframes pop-buzz {
+  0% { transform: translateX(-50%) scale(0.6); opacity: 0; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+

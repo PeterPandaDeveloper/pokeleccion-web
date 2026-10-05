@@ -12,7 +12,7 @@ export interface VotoConfig {
 }
 
 export interface LobbyJugador { nombre: string; listo: boolean; voto: VotoConfig|null; bloqueado: boolean }
-export interface Jugador       { equipo: number[]; conectado: boolean; token: string|null; nombre: string; lastSeen: number }
+export interface Jugador       { equipo: number[]; picksPropios: number[]; conectado: boolean; token: string|null; nombre: string; lastSeen: number }
 
 export interface MensajeChat {
   id: string; autor: string; rol: 'jugador1'|'jugador2'|'sistema'|'espectador'
@@ -61,8 +61,8 @@ export function crearEstado(): EstadoSala {
       ultimoBuzzJ1: 0, ultimoBuzzJ2: 0,
     },
     config: null,
-    jugador1: { equipo:[], conectado:false, token:null, nombre:'', lastSeen:0 },
-    jugador2: { equipo:[], conectado:false, token:null, nombre:'', lastSeen:0 },
+    jugador1: { equipo:[], picksPropios:[], conectado:false, token:null, nombre:'', lastSeen:0 },
+    jugador2: { equipo:[], picksPropios:[], conectado:false, token:null, nombre:'', lastSeen:0 },
     rondaActual:0, opcionesActuales:[], turnoDe:'jugador1',
     historial:[], poolSize:0, timerExpira:null, ultimaEleccionRandom:false,
     chat:[],
@@ -133,8 +133,8 @@ export function limpiarSelecciones(sala: Sala): void {
     ultimaLimpieza: Math.max(ts, Date.now()),
     ultimoBuzzJ1: 0, ultimoBuzzJ2: 0,
   }
-  estado.jugador1 = { equipo: [], conectado: j1.conectado, token: j1.token, nombre: j1.nombre, lastSeen: j1.lastSeen }
-  estado.jugador2 = { equipo: [], conectado: j2.conectado, token: j2.token, nombre: j2.nombre, lastSeen: j2.lastSeen }
+  estado.jugador1 = { equipo: [], picksPropios: [], conectado: j1.conectado, token: j1.token, nombre: j1.nombre, lastSeen: j1.lastSeen }
+  estado.jugador2 = { equipo: [], picksPropios: [], conectado: j2.conectado, token: j2.token, nombre: j2.nombre, lastSeen: j2.lastSeen }
   estado.rondaActual = 0
   estado.opcionesActuales = []
   estado.turnoDe = 'jugador1'

@@ -165,18 +165,33 @@ async function renderEquipos(est) {
   const esEspectador = !estado.miRol || estado.miRol === 'espectador'
   const esFin = est.turnoDe === 'FIN'
 
-  for (const id of est.jugador1.equipo) {
-    if (!rendJ1.has(id)) {
-      const ocultar = modoOculto && estado.miRol === 'jugador2' && !esEspectador && !esFin
+  for (let i = 0; i < est.jugador1.equipo.length; i++) {
+    const id = est.jugador1.equipo[i]
+    const key = `j1_${i}_${id}`
+    if (!rendJ1.has(key)) {
+      // Estilo Clash Royale:
+      // J1 elige en rondas impares (índices 0, 2, 4...) -> pick secreto propio de J1.
+      // J2 elige en rondas pares (índices 1, 3, 5...) y le da ese poke a J1 -> J2 sabe qué le regaló.
+      // El rival (J2) solo ve '???' para los Pokémon que J1 eligió para sí mismo.
+      const esPickPropioDeJ1 = (i % 2 === 0)
+      const ocultar = modoOculto && estado.miRol === 'jugador2' && !esEspectador && !esFin && esPickPropioDeJ1
       g1.appendChild(await crearMini(id, 'slide-in-right', ocultar))
-      rendJ1.add(id)
+      rendJ1.add(key)
     }
   }
-  for (const id of est.jugador2.equipo) {
-    if (!rendJ2.has(id)) {
-      const ocultar = modoOculto && estado.miRol === 'jugador1' && !esEspectador && !esFin
+
+  for (let i = 0; i < est.jugador2.equipo.length; i++) {
+    const id = est.jugador2.equipo[i]
+    const key = `j2_${i}_${id}`
+    if (!rendJ2.has(key)) {
+      // Estilo Clash Royale:
+      // J1 elige en rondas impares (índices 0, 2, 4...) y le da ese poke a J2 -> J1 sabe qué le regaló.
+      // J2 elige en rondas pares (índices 1, 3, 5...) -> pick secreto propio de J2.
+      // El rival (J1) solo ve '???' para los Pokémon que J2 eligió para sí mismo.
+      const esPickPropioDeJ2 = (i % 2 === 1)
+      const ocultar = modoOculto && estado.miRol === 'jugador1' && !esEspectador && !esFin && esPickPropioDeJ2
       g2.appendChild(await crearMini(id, 'slide-in-left', ocultar))
-      rendJ2.add(id)
+      rendJ2.add(key)
     }
   }
 }
@@ -219,8 +234,34 @@ async function revelarTodo(est) {
   }
 }
 
-// ─── CHAT ────────────────────────────────────────────────────────────────────
+// ─── CHAT & BUZZ VISUAL ──────────────────────────────────────────────────────
 let ultimoChatSig = ''
+let ultimoBuzzId  = ''
+
+export function dispararAlertaVisualBuzz(texto) {
+  Sonido.buzz()
+  document.body.classList.remove('buzz-shake')
+  void document.body.offsetWidth
+  document.body.classList.add('buzz-shake')
+  setTimeout(() => document.body.classList.remove('buzz-shake'), 750)
+
+  // Banner visual flotante
+  const idBanner = 'banner-buzz-notif'
+  let banner = document.getElementById(idBanner)
+  if (!banner) {
+    banner = document.createElement('div')
+    banner.id = idBanner
+    banner.className = 'alerta-buzz-visual'
+    document.body.appendChild(banner)
+  }
+  banner.innerHTML = `<span style="font-size:1.6rem">🔔</span> <span>${escHTML(texto || '¡AVISO DEL RIVAL!')}</span>`
+  banner.style.display = 'flex'
+
+  clearTimeout(banner._timer)
+  banner._timer = setTimeout(() => {
+    banner.style.display = 'none'
+  }, 3500)
+}
 
 export async function renderChat(est) {
   const chat = est.chat || []
@@ -245,7 +286,10 @@ export async function renderChat(est) {
 
   const ultimo = chat[chat.length - 1]
   if (ultimo && ultimo.rol !== estado.miRol && ultimo.rol !== 'sistema') Sonido.chat()
-  if (ultimo?.rol === 'sistema' && ultimo.texto.includes('🔔')) Sonido.buzz()
+  if (ultimo?.rol === 'sistema' && ultimo.texto.includes('🔔') && ultimo.id !== ultimoBuzzId) {
+    ultimoBuzzId = ultimo.id
+    dispararAlertaVisualBuzz(ultimo.texto)
+  }
 }
 
 function escHTML(s) {

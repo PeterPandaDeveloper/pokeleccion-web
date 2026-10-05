@@ -68,7 +68,7 @@ export function etiquetaConfig(c: VotoConfig): string {
   if (c.minBST) p.push(`📊 BST ≥ ${c.minBST}`)
   if (c.maxBST) p.push(`📊 BST ≤ ${c.maxBST}`)
   p.push(`🎯 ${c.numRondas} ronda${c.numRondas > 1 ? 's' : ''}`)
-  if (c.modoOculto) p.push('🙈 Modo Oculto')
+  if (c.modoOculto) p.push('🙈 Modo Oculto (Clash Royale)')
   return p.length ? p.join(' · ') : '🎯 Sin restricciones'
 }
 
@@ -137,7 +137,10 @@ export function verificarTimeoutPasivo(salaId: string, sala: Sala): boolean {
 export function aplicarEleccion(salaId: string, sala: Sala, jugador: 'jugador1'|'jugador2', elegido: number): void {
   const rival    = jugador==='jugador1'?'jugador2':'jugador1'
   const noElegido = sala.estado.opcionesActuales.find(id=>id!==elegido)!
+  if (!sala.estado[jugador].picksPropios) sala.estado[jugador].picksPropios = []
+  if (!sala.estado[rival].picksPropios) sala.estado[rival].picksPropios = []
   sala.estado[jugador].equipo.push(elegido)
+  sala.estado[jugador].picksPropios.push(elegido)
   sala.estado[rival].equipo.push(noElegido)
   generarRonda(salaId, sala)
 }

@@ -1,6 +1,6 @@
 import * as crypto from 'crypto'
 
-const SECRETO = process.env.TOKEN_SECRET ?? crypto.randomBytes(32).toString('hex')
+const SECRETO = process.env.TOKEN_SECRET || 'poke-draft-fixed-serverless-secret-key-2026-prod'
 
 export function generarToken(): string {
   const rand  = crypto.randomBytes(16).toString('hex')

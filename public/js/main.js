@@ -152,16 +152,36 @@ async function cargarSalasPublicas() {
   } catch {}
 }
 
-window.unirseASala = (id) => {
+window.unirseASala = async (id) => {
   estado.salaId = id
   guardarSesion()
   actualizarDisplaySala()
   Sonido.click()
+  try {
+    const est = await fetchEstado()
+    const sel = document.getElementById('rol-selector')
+    if (sel) {
+      if (est.jugador1?.conectado && !est.jugador2?.conectado) {
+        sel.value = 'jugador2'
+        onRolChange()
+        mostrarToast(`Sala ${id}: J1 ocupado (${est.jugador1.nombre||'J1'}). ¡Seleccionado Jugador 2!`, 'ok')
+        return
+      } else if (est.jugador1?.conectado && est.jugador2?.conectado) {
+        sel.value = 'espectador'
+        onRolChange()
+        mostrarToast(`Sala ${id}: Sala llena. ¡Entrarás como Espectador!`, 'info')
+        return
+      }
+    }
+  } catch {}
   mostrarToast(`Sala ${id} seleccionada. ¡Elige tu rol!`, 'ok')
 }
 
 // ─── MAIN LOOP ────────────────────────────────────────────────────────────────
+let isActualizando = false
 async function actualizar() {
+  if (isActualizando) return
+  isActualizando = true
   try {
     if (!estado.salaId) return
     const est = await fetchEstado()
@@ -198,6 +218,8 @@ async function actualizar() {
     setConexion(true)
   } catch {
     setConexion(false)
+  } finally {
+    isActualizando = false
   }
 }
 
@@ -261,6 +283,23 @@ async function iniciar() {
           enDraft = true
           document.getElementById('pantalla-lobby').style.display = 'none'
           document.getElementById('pantalla-draft').style.display = 'block'
+        }
+      }
+    } catch {}
+  }
+
+  // Si no tenemos rol/token pero sí una sala asignada, auto-detectar rol disponible
+  if (estado.salaId && (!estado.miRol || !estado.miToken)) {
+    try {
+      const est = await fetchEstado()
+      const sel = document.getElementById('rol-selector')
+      if (sel) {
+        if (est.jugador1?.conectado && !est.jugador2?.conectado) {
+          sel.value = 'jugador2'
+          onRolChange()
+        } else if (est.jugador1?.conectado && est.jugador2?.conectado) {
+          sel.value = 'espectador'
+          onRolChange()
         }
       }
     } catch {}

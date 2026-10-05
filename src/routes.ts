@@ -41,14 +41,20 @@ export function parseReq(req: http.IncomingMessage) {
   // Si viene de rewrite en Vercel con ?path=...
   const pathParam = url.searchParams.get('path')
   if ((base === '/api' || base === '/api/') && pathParam) {
-    base = '/api/' + pathParam
+    base = '/api/' + pathParam.replace(/^\//, '').replace(/\/$/, '')
   }
 
   const token    = url.searchParams.get('token')??''
   const partes   = base.split('/').filter(Boolean)
   // rutas: /api/sala/:salaId/:endpoint...  o  /api/:global
-  const salaId   = partes[1]==='sala' ? (partes[2]??'default') : null
-  const endpoint = salaId ? ('/'+partes.slice(3).join('/')) : base
+  let salaId: string | null = partes[1]==='sala' ? (partes[2]??'default') : (url.searchParams.get('sala') || null)
+  let endpoint = base
+  if (partes[1] === 'sala') {
+    endpoint = '/' + partes.slice(3).join('/')
+  } else if (partes[1] === 'lobby' || partes[1] === 'espectador' || partes[1] === 'chat' || partes[1] === 'estado') {
+    endpoint = '/' + partes.slice(1).join('/')
+    if (!salaId) salaId = 'default'
+  }
   return { base, endpoint, token, salaId }
 }
 

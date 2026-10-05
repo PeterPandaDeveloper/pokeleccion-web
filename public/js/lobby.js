@@ -197,6 +197,11 @@ export async function unirseAlLobby() {
   const rol    = document.getElementById('rol-selector').value
   const nombre = document.getElementById('input-nombre')?.value.trim()
   if (rol==='espectador') {
+    if (!estado.salaId) {
+      Sonido.error()
+      mostrarToast('⚠️ Para ser espectador selecciona una sala pública abajo o usa el enlace de tu amigo.', 'err')
+      return
+    }
     const nomEsp = document.getElementById('input-nombre-esp')?.value.trim() || 'Espectador'
     estado.miRol='espectador'; estado.miToken=''; estado.miNombre=nomEsp
     try {
@@ -207,6 +212,30 @@ export async function unirseAlLobby() {
   }
   if (!nombre) { Sonido.error(); mostrarToast('⚠️ Escribe tu nombre.','err'); return }
   estado.miNombre = nombre
+
+  // Auto-crear sala si el usuario entra como Jugador 1 sin haber elegido o creado una sala
+  if (!estado.salaId && rol === 'jugador1') {
+    try {
+      const r = await fetch('/api/sala/crear', { method: 'POST' })
+      const d = await r.json()
+      if (d.salaId) {
+        estado.salaId = d.salaId
+        guardarSesion()
+        actualizarDisplaySala()
+        await copiarEnlace()
+        mostrarToast(`🎮 Sala ${d.salaId} creada. ¡Enlace copiado!`, 'ok')
+      }
+    } catch (e) {
+      Sonido.error()
+      mostrarToast('⚠️ Error creando sala automática', 'err')
+      return
+    }
+  } else if (!estado.salaId && rol === 'jugador2') {
+    Sonido.error()
+    mostrarToast('⚠️ Para unirte como Jugador 2 entra con el enlace de la sala o selecciona una sala activa.', 'err')
+    return
+  }
+
   try {
     const d = await post('/lobby/unirse',{rol,nombre,token:estado.miToken||''})
     estado.miRol=rol; estado.miToken=d.token; estado.salaId=d.salaId||estado.salaId
