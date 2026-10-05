@@ -235,6 +235,10 @@
                 <input type="checkbox" id="chk-nodup"> Sin tipos repetidos en el equipo
                 <button class="btn-info-inline" onclick="mostrarInfo('nodup')">?</button>
               </label>
+              <label class="tog tog-destacada">
+                <input type="checkbox" id="chk-oculto">
+                🙈 Modo Oculto — El rival no ve tus Pokémon hasta el final
+              </label>
             </div>
           </div>
 
@@ -249,6 +253,25 @@
               <input type="number" id="bst-min" min="0" max="1200" step="10" placeholder="300" class="bst-input"/>
               <label class="cfg-hint">Máx.</label>
               <input type="number" id="bst-max" min="0" max="1200" step="10" placeholder="600" class="bst-input"/>
+            </div>
+          </div>
+
+          <!-- Número de rondas -->
+          <div class="cfg-grupo">
+            <div class="cfg-label-row">
+              <label class="cfg-label">Rondas</label>
+              <span class="cfg-hint">Pokémon por equipo (1–6)</span>
+            </div>
+            <div class="bst-row">
+              <label class="cfg-hint">Pokémon cada uno:</label>
+              <select id="num-rondas" class="num-rondas-sel">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6" selected>6</option>
+              </select>
             </div>
           </div>
 
@@ -298,7 +321,10 @@
 
     <div class="arena">
       <div class="team-panel">
-        <h2 class="player-name j1-color" id="nom-j1-draft">Jugador 1</h2>
+        <div class="player-header">
+          <h2 class="player-name j1-color" id="nom-j1-draft">Jugador 1</h2>
+          <span class="team-badge" id="badge-j1">0/6</span>
+        </div>
         <div class="poke-grid" id="equipo-j1"></div>
       </div>
 
@@ -330,7 +356,10 @@
       </div>
 
       <div class="team-panel">
-        <h2 class="player-name j2-color" id="nom-j2-draft">Jugador 2</h2>
+        <div class="player-header">
+          <h2 class="player-name j2-color" id="nom-j2-draft">Jugador 2</h2>
+          <span class="team-badge" id="badge-j2">0/6</span>
+        </div>
         <div class="poke-grid" id="equipo-j2"></div>
       </div>
     </div>
@@ -340,24 +369,23 @@
       <h2 class="export-title">Exportar a Showdown</h2>
       <p class="nota-regla">⚠️ <strong>Regla:</strong> Puedes cambiar ataques, habilidades y objetos. Los Pokémon son obligatorios.</p>
       <div class="export-grid">
-        <div class="export-col">
+        <div class="export-col" id="export-col-j1">
           <h3 class="j1-color" id="sd-title-j1">Jugador 1</h3>
           <textarea id="sd-j1" readonly></textarea>
           <div class="export-btns">
-            <button class="btn-accion" onclick="copiarCodigo('sd-j1',this)">📋 Copiar</button>
+            <button class="btn-accion" onclick="copiarCodigo('sd-j1',this)">📋 Copiar mi equipo</button>
             <button class="btn-showdown j1-showdown" onclick="abrirShowdown('sd-j1')">⚡ Abrir en Showdown</button>
           </div>
         </div>
-        <div class="export-col">
+        <div class="export-col" id="export-col-j2">
           <h3 class="j2-color" id="sd-title-j2">Jugador 2</h3>
           <textarea id="sd-j2" readonly></textarea>
           <div class="export-btns">
-            <button class="btn-accion" onclick="copiarCodigo('sd-j2',this)">📋 Copiar</button>
+            <button class="btn-accion" onclick="copiarCodigo('sd-j2',this)">📋 Copiar mi equipo</button>
             <button class="btn-showdown j2-showdown" onclick="abrirShowdown('sd-j2')">⚡ Abrir en Showdown</button>
           </div>
         </div>
       </div>
-      <button class="btn-accion" style="margin-top:14px;display:block;margin-left:auto;margin-right:auto" onclick="copiarAmbos(this)">📋 Copiar ambos equipos</button>
     </div>
 
   </div>

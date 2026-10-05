@@ -1214,3 +1214,78 @@ textarea:focus {
 }
 .btn-sala-nueva:hover { color:var(--yellow-lt); border-color:var(--yellow); }
 .copy-ok { background:linear-gradient(180deg,var(--green),var(--green-dk)) !important; color:var(--text) !important; }
+
+/* ════ MODO OCULTO — POKÉMON SUSTITUTO ════ */
+.mini-poke-oculto {
+  background: #1a1230 !important;
+  border-color: #6a3da8 !important;
+  box-shadow: 0 0 0 2px rgba(138,43,226,0.35), 2px 2px 0 rgba(0,0,0,0.4) !important;
+  animation: pulso-misterio 2.2s ease-in-out infinite;
+}
+.mini-poke-oculto img {
+  filter: drop-shadow(0 0 5px rgba(180,80,255,0.8));
+}
+.mini-poke-oculto p {
+  color: #b87fff !important;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+@keyframes pulso-misterio {
+  0%,100% { box-shadow: 0 0 0 2px rgba(138,43,226,0.30), 2px 2px 0 rgba(0,0,0,0.4); }
+  50%      { box-shadow: 0 0 0 4px rgba(200,100,255,0.65), 2px 2px 0 rgba(0,0,0,0.4); }
+}
+
+/* ════ REVEAL ANIMATION ════ */
+.mini-poke-revelado {
+  animation: poke-reveal 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  border-color: var(--green-lt) !important;
+  box-shadow: 0 0 0 2px rgba(60,184,120,0.55), 2px 2px 0 rgba(0,0,0,0.4) !important;
+}
+@keyframes poke-reveal {
+  0%   { transform: scale(0.7) rotateY(90deg); opacity: 0; }
+  60%  { transform: scale(1.15) rotateY(0deg); opacity: 1; }
+  100% { transform: scale(1)    rotateY(0deg); opacity: 1; }
+}
+
+/* ════ PLAYER HEADER + BADGE DE PROGRESO ════ */
+.player-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.team-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.52rem;
+  color: var(--text-dim);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid var(--ui-border);
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 1px;
+  transition: color .3s, border-color .3s;
+}
+
+/* ════ SELECTOR DE RONDAS ════ */
+.num-rondas-sel {
+  font-family: 'VT323', monospace;
+  font-size: 1.15rem;
+  padding: 4px 10px;
+  border: 2px solid var(--ui-border-strong);
+  background: var(--bg-base);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: border-color .15s;
+  min-width: 56px;
+}
+.num-rondas-sel:focus {
+  outline: none;
+  border-color: var(--yellow);
+}
+.num-rondas-sel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

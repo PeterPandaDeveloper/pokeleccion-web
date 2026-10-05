@@ -3,12 +3,12 @@ import { Sonido }   from './sonido.js'
 import { estado, API, get, post, fetchEstado } from './api.js'
 import { mostrarToast } from './modal.js'
 import { fetchNombre, imgUrl, imgSprite } from './pokeapi.js'
-import { TIMER_SEG } from './constantes.js'
+import { TIMER_SEG, SUBSTITUTE_IMG } from './constantes.js'
 
 // ─── ESTADO DE RENDER ────────────────────────────────────────────────────────
 export let prevOps = [], prevTurno = '', prevRonda = -1, exportGen = false
 export const rendJ1 = new Set(), rendJ2 = new Set()
-let timerHandle = null, timerExpira = null, ultimoSeg = -1
+let timerHandle = null, timerExpira = null, ultimoSeg = -1, yaRevelo = false
 
 // ─── TRANSICIÓN DE BATALLA ───────────────────────────────────────────────────
 export function flashBatalla(cb) {
@@ -33,11 +33,15 @@ export async function syncDraft(est) {
   const ep   = document.getElementById('esp-pill')
   if (ep) { ep.style.display = espN > 0 ? 'inline-block' : 'none'; document.getElementById('esp-count-draft').textContent = espN }
 
-  // Ronda
+  // Ronda y badges de progreso
+  const totalRondas = est.config?.numRondas ?? 6
   if (est.rondaActual !== prevRonda) {
-    document.getElementById('ronda-txt').textContent = `Ronda ${est.rondaActual} / 6`
+    document.getElementById('ronda-txt').textContent = `Ronda ${est.rondaActual} / ${totalRondas}`
     prevRonda = est.rondaActual
   }
+  const b1 = document.getElementById('badge-j1'), b2 = document.getElementById('badge-j2')
+  if (b1) b1.textContent = `${est.jugador1.equipo.length}/${totalRondas}`
+  if (b2) b2.textContent = `${est.jugador2.equipo.length}/${totalRondas}`
 
   // Tag de asignación aleatoria
   const rtag = document.getElementById('random-tag')
@@ -52,6 +56,8 @@ export async function syncDraft(est) {
     document.getElementById('turno-alert').style.color = 'var(--text)'
     document.getElementById('timer-wrap').style.display = 'none'
     document.getElementById('opciones-render').innerHTML = ''
+    if (est.config?.modoOculto) await revelarTodo(est)
+    await renderEquipos(est)
     if (!exportGen) {
       Sonido.finDraft()
       await generarExport(est)
@@ -60,7 +66,6 @@ export async function syncDraft(est) {
       document.getElementById('showdown-box').style.display = 'block'
       exportGen = true
     }
-    await renderEquipos(est)
     return
   }
 
@@ -156,24 +161,62 @@ async function renderCartas(est) {
 async function renderEquipos(est) {
   const g1 = document.getElementById('equipo-j1')
   const g2 = document.getElementById('equipo-j2')
+  const modoOculto = est.config?.modoOculto
+  const esEspectador = !estado.miRol || estado.miRol === 'espectador'
+  const esFin = est.turnoDe === 'FIN'
+
   for (const id of est.jugador1.equipo) {
-    if (!rendJ1.has(id)) { g1.appendChild(await crearMini(id,'slide-in-right')); rendJ1.add(id) }
+    if (!rendJ1.has(id)) {
+      const ocultar = modoOculto && estado.miRol === 'jugador2' && !esEspectador && !esFin
+      g1.appendChild(await crearMini(id, 'slide-in-right', ocultar))
+      rendJ1.add(id)
+    }
   }
   for (const id of est.jugador2.equipo) {
-    if (!rendJ2.has(id)) { g2.appendChild(await crearMini(id,'slide-in-left'));  rendJ2.add(id) }
+    if (!rendJ2.has(id)) {
+      const ocultar = modoOculto && estado.miRol === 'jugador1' && !esEspectador && !esFin
+      g2.appendChild(await crearMini(id, 'slide-in-left', ocultar))
+      rendJ2.add(id)
+    }
   }
 }
 
-async function crearMini(id, anim) {
-  const nom  = await fetchNombre(id)
+async function crearMini(id, anim, oculto = false) {
+  const nom  = oculto ? '???' : await fetchNombre(id)
   const div  = document.createElement('div')
-  div.className = 'mini-poke ' + anim
-  const artwork = imgUrl(id)
-  const sprite  = imgSprite(id)
+  div.className = 'mini-poke ' + anim + (oculto ? ' mini-poke-oculto' : '')
+  div.dataset.pokeId = String(id)
+  const artwork = oculto ? SUBSTITUTE_IMG : imgUrl(id)
+  const sprite  = oculto ? SUBSTITUTE_IMG : imgSprite(id)
   div.innerHTML = `<img src="${artwork}" alt="${nom}" loading="lazy"
-    onerror="this.src='${sprite}'" style="width:52px;height:52px;object-fit:contain">
+    ${oculto ? '' : `onerror="this.src='${sprite}'"`} style="width:52px;height:52px;object-fit:contain">
     <p>${nom}</p>`
   return div
+}
+
+// ─── REVEAL DE POKÉMON OCULTOS ──────────────────────────────────────────────
+async function revelarTodo(est) {
+  if (yaRevelo) return
+  yaRevelo = true
+  const paneles = [
+    { g: document.getElementById('equipo-j1') },
+    { g: document.getElementById('equipo-j2') },
+  ]
+  for (const { g } of paneles) {
+    if (!g) continue
+    const ocultos = Array.from(g.querySelectorAll('.mini-poke-oculto'))
+    for (const el of ocultos) {
+      const id = parseInt(el.dataset.pokeId || '0')
+      if (!id) continue
+      const nom = await fetchNombre(id)
+      el.classList.remove('mini-poke-oculto')
+      el.classList.add('mini-poke-revelado')
+      el.innerHTML = `<img src="${imgUrl(id)}" alt="${nom}" loading="lazy"
+        onerror="this.src='${imgSprite(id)}'" style="width:52px;height:52px;object-fit:contain">
+        <p>${nom}</p>`
+      await new Promise(r => setTimeout(r, 110))
+    }
+  }
 }
 
 // ─── CHAT ────────────────────────────────────────────────────────────────────
@@ -271,6 +314,11 @@ export async function intentarElegir(id) {
 
 // ─── EXPORTAR ────────────────────────────────────────────────────────────────
 async function generarExport(est) {
+  const esEspectador = !estado.miRol || estado.miRol === 'espectador'
+  const colJ1 = document.getElementById('export-col-j1')
+  const colJ2 = document.getElementById('export-col-j2')
+  if (colJ1) colJ1.style.display = (esEspectador || estado.miRol === 'jugador1') ? 'flex' : 'none'
+  if (colJ2) colJ2.style.display = (esEspectador || estado.miRol === 'jugador2') ? 'flex' : 'none'
   document.getElementById('sd-j1').value = await fmtEquipo(est.jugador1.equipo)
   document.getElementById('sd-j2').value = await fmtEquipo(est.jugador2.equipo)
 }
@@ -345,7 +393,7 @@ export async function resetear() {
 }
 
 export function resetarEstadoRender() {
-  prevOps=[]; prevTurno=''; prevRonda=-1; exportGen=false
+  prevOps=[]; prevTurno=''; prevRonda=-1; exportGen=false; yaRevelo=false
   rendJ1.clear(); rendJ2.clear(); ultimoChatSig=''
   detenerTimer()
   resetLobbyEstado()

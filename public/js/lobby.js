@@ -1,4 +1,4 @@
-import { TIPOS, TIPO_COLOR, TIPO_EN, RANGOS, FORMAS_REGIONALES, LEGENDARIOS, COLORES, COLOR_HEX, FORMAS_REGIONALES_ESPECIALES, GIMMICKS } from './constantes.js'
+import { TIPOS, TIPO_COLOR, TIPO_EN, RANGOS, FORMAS_REGIONALES, LEGENDARIOS, COLORES, COLOR_HEX, FORMAS_REGIONALES_ESPECIALES, GIMMICKS, NUM_RONDAS_DEFAULT } from './constantes.js'
 import { Sonido }  from './sonido.js'
 import { estado, API, post, guardarSesion, fetchEstado } from './api.js'
 import { mostrarInfo, mostrarToast } from './modal.js'
@@ -94,6 +94,8 @@ export function leerVoto() {
     sinFormasRegionales: !!document.getElementById('chk-formas-reg')?.checked,
     maxBST: document.getElementById('bst-max')?.value ? parseInt(document.getElementById('bst-max').value) : null,
     minBST: document.getElementById('bst-min')?.value ? parseInt(document.getElementById('bst-min').value) : null,
+    numRondas: parseInt(document.getElementById('num-rondas')?.value || String(NUM_RONDAS_DEFAULT)),
+    modoOculto: !!document.getElementById('chk-oculto')?.checked,
   }
 }
 
@@ -116,6 +118,9 @@ export function etiquetaVoto(v) {
   if (v.sinFormasRegionales) p.push('🗺️ Sin formas regionales')
   if (v.minBST) p.push('📊 BST mínimo: '+v.minBST)
   if (v.maxBST) p.push('📊 BST máximo: '+v.maxBST)
+  const nr = v.numRondas ?? NUM_RONDAS_DEFAULT
+  p.push(`🎯 ${nr} ronda${nr > 1 ? 's' : ''}`)
+  if (v.modoOculto) p.push('🙈 Modo Oculto')
   return p.length ? p.join(' · ') : '🎯 Sin restricciones'
 }
 
@@ -159,6 +164,9 @@ export function aplicarVotoEnUI(v) {
   const bstMax = document.getElementById('bst-max')
   if (bstMin) bstMin.value = v.minBST ?? ''
   if (bstMax) bstMax.value = v.maxBST ?? ''
+  const numREl = document.getElementById('num-rondas')
+  if (numREl) numREl.value = String(v.numRondas ?? NUM_RONDAS_DEFAULT)
+  setChk('chk-oculto', v.modoOculto)
 }
 
 function bloquearConfig() {
@@ -247,8 +255,9 @@ export async function marcarListo() {
   try {
     const ids = await construirPool(leerVoto())
     document.getElementById('msg-pool').style.display='none'
-    if (ids.length<12) {
-      Sonido.error(); mostrarToast(`Solo ${ids.length} Pokémon disponibles. Ajusta los filtros.`,'err')
+    const numRondasLocal = parseInt(document.getElementById('num-rondas')?.value || String(NUM_RONDAS_DEFAULT))
+    if (ids.length < numRondasLocal * 2) {
+      Sonido.error(); mostrarToast(`Solo ${ids.length} Pokémon disponibles. Necesitas al menos ${numRondasLocal * 2}. Ajusta los filtros.`,'err')
       document.getElementById('btn-listo').disabled=false; return
     }
     await post('/lobby/listo',{idsValidos:ids})

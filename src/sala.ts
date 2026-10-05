@@ -8,6 +8,7 @@ export interface VotoConfig {
   soloBase: boolean; copaBebe: boolean; noDuplicadosTipo: boolean
   sinGimmicks: boolean; sinFormasRegionales: boolean
   maxBST: number|null; minBST: number|null
+  numRondas: number; modoOculto: boolean
 }
 
 export interface LobbyJugador { nombre: string; listo: boolean; voto: VotoConfig|null; bloqueado: boolean }
@@ -68,6 +69,20 @@ export function crearEstado(): EstadoSala {
   }
 }
 
+export function crearSalaDefault(id: string): Sala {
+  const ahora = Date.now()
+  return {
+    id,
+    estado: crearEstado(),
+    pool: [],
+    timer: null,
+    creadaEn: ahora,
+    sinJugadoresDesde: ahora,
+    privada: false,
+    eliminacionPendiente: null,
+  }
+}
+
 export function obtenerSala(id: string): Sala {
   if (!salas.has(id)) {
     if (salas.size >= CONFIG.MAX_SALAS) {
@@ -89,12 +104,8 @@ export function obtenerSala(id: string): Sala {
       salas.delete(target)
       console.log(`♻️  Sala eliminada: ${target}`)
     }
-    const ahora = Date.now()
-    salas.set(id, {
-      id, estado: crearEstado(), pool:[], timer:null,
-      creadaEn: ahora, sinJugadoresDesde: ahora, privada: false,
-      eliminacionPendiente: null,
-    })
+    const nueva = crearSalaDefault(id)
+    salas.set(id, nueva)
     console.log(`🏠  Sala creada: ${id} (total: ${salas.size})`)
   }
   return salas.get(id)!
@@ -178,24 +189,33 @@ export function actualizarHeartbeat(sala: Sala, rol: 'jugador1'|'jugador2'): voi
     actualizarPresenciaJugadores(sala)
 }
 
-// ─── TTL: purgar salas sin jugadores ─────────────────────────────────────────
-setInterval(() => {
+export function verificarHeartbeatPasivo(sala: Sala): boolean {
   const ahora = Date.now()
-  for (const [id, sala] of salas) {
-    // Marcar jugadores como desconectados si no han dado heartbeat en 20s
-    for (const rol of ['jugador1','jugador2'] as const) {
-      const j = sala.estado[rol]
-      if (j.conectado && j.lastSeen > 0 && ahora - j.lastSeen > HEARTBEAT_TIMEOUT_MS) {
-        j.conectado = false
-        console.log(`💔  [${id}] ${rol} desconectado (sin heartbeat)`)
-      }
-    }
-    actualizarPresenciaJugadores(sala)
-    if (sala.sinJugadoresDesde !== null &&
-        ahora - sala.sinJugadoresDesde > CONFIG.TTL_SIN_JUGADORES) {
-      if (sala.timer) clearTimeout(sala.timer)
-      salas.delete(id)
-      console.log(`🗑️  Sala expirada (sin jugadores 7 min): ${id}`)
+  let huboCambio = false
+  for (const rol of ['jugador1','jugador2'] as const) {
+    const j = sala.estado[rol]
+    if (j.conectado && j.lastSeen > 0 && ahora - j.lastSeen > HEARTBEAT_TIMEOUT_MS) {
+      j.conectado = false
+      huboCambio = true
+      console.log(`💔  [${sala.id}] ${rol} desconectado (sin heartbeat pasivo)`)
     }
   }
-}, CONFIG.TTL_CHECK_MS)
+  if (huboCambio) actualizarPresenciaJugadores(sala)
+  return huboCambio
+}
+
+// ─── TTL: purgar salas sin jugadores (Solo en modo standalone / persistente) ─
+if (process.env.VERCEL !== '1' && process.env.SERVERLESS !== '1') {
+  setInterval(() => {
+    const ahora = Date.now()
+    for (const [id, sala] of salas) {
+      verificarHeartbeatPasivo(sala)
+      if (sala.sinJugadoresDesde !== null &&
+          ahora - sala.sinJugadoresDesde > CONFIG.TTL_SIN_JUGADORES) {
+        if (sala.timer) clearTimeout(sala.timer)
+        salas.delete(id)
+        console.log(`🗑️  Sala expirada (sin jugadores 7 min): ${id}`)
+      }
+    }
+  }, CONFIG.TTL_CHECK_MS)
+}

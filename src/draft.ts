@@ -44,7 +44,9 @@ export function resolverConfig(v1: VotoConfig, v2: VotoConfig): VotoConfig {
   const sinFormasRegionales = v1.sinFormasRegionales || v2.sinFormasRegionales
   const maxBST = v1.maxBST!==null&&v2.maxBST!==null ? Math.min(v1.maxBST,v2.maxBST) : v1.maxBST??v2.maxBST??null
   const minBST = v1.minBST!==null&&v2.minBST!==null ? Math.max(v1.minBST,v2.minBST) : v1.minBST??v2.minBST??null
-  return { regiones, tipos, colores, modoTipos, sinLegendarios, soloFinales, soloSinEvolucion, soloBase, copaBebe, noDuplicadosTipo, sinGimmicks, sinFormasRegionales, maxBST, minBST }
+  const numRondas = Math.max(v1.numRondas, v2.numRondas)
+  const modoOculto = v1.modoOculto || v2.modoOculto
+  return { regiones, tipos, colores, modoTipos, sinLegendarios, soloFinales, soloSinEvolucion, soloBase, copaBebe, noDuplicadosTipo, sinGimmicks, sinFormasRegionales, maxBST, minBST, numRondas, modoOculto }
 }
 
 export function etiquetaConfig(c: VotoConfig): string {
@@ -65,6 +67,8 @@ export function etiquetaConfig(c: VotoConfig): string {
   if (c.sinFormasRegionales) p.push('🗺️ Sin formas regionales')
   if (c.minBST) p.push(`📊 BST ≥ ${c.minBST}`)
   if (c.maxBST) p.push(`📊 BST ≤ ${c.maxBST}`)
+  p.push(`🎯 ${c.numRondas} ronda${c.numRondas > 1 ? 's' : ''}`)
+  if (c.modoOculto) p.push('🙈 Modo Oculto')
   return p.length ? p.join(' · ') : '🎯 Sin restricciones'
 }
 
@@ -84,7 +88,7 @@ export function generarRonda(salaId: string, sala: Sala): void {
   limpiarTimer(sala)
   const { estado } = sala
   estado.ultimaEleccionRandom = false
-  if (estado.rondaActual >= CONFIG.MAX_RONDAS) {
+  if (estado.rondaActual >= estado.config!.numRondas) {
     estado.turnoDe='FIN'; estado.fase='fin'
     const j1 = estado.jugador1.nombre||'J1'
     const j2 = estado.jugador2.nombre||'J2'
@@ -97,15 +101,37 @@ export function generarRonda(salaId: string, sala: Sala): void {
   estado.opcionesActuales=[id1,id2]; estado.historial.push(id1,id2)
   estado.rondaActual++
   estado.turnoDe = estado.rondaActual%2===1 ? 'jugador1' : 'jugador2'
-  // Timer
+  // Timer pasivo
   estado.timerExpira = Date.now() + CONFIG.TIMER_SEG*1000
-  sala.timer = setTimeout(()=>{
-    if (estado.fase!=='draft'||estado.turnoDe==='FIN') return
-    const elegido = estado.opcionesActuales[Math.floor(Math.random()*estado.opcionesActuales.length)]
-    console.log(`⏰  [${salaId}] Timeout → #${elegido}`)
+
+  // Solo en standalone se usa un setTimeout de refuerzo
+  if (process.env.VERCEL !== '1' && process.env.SERVERLESS !== '1') {
+    sala.timer = setTimeout(()=>{
+      if (estado.fase!=='draft'||estado.turnoDe==='FIN') return
+      const elegido = estado.opcionesActuales[Math.floor(Math.random()*estado.opcionesActuales.length)]
+      console.log(`⏰  [${salaId}] Timeout activo → #${elegido}`)
+      estado.ultimaEleccionRandom = true
+      aplicarEleccion(salaId, sala, estado.turnoDe as 'jugador1'|'jugador2', elegido)
+    }, CONFIG.TIMER_SEG*1000)
+  }
+}
+
+/**
+ * Verificación pasiva del temporizador de 10s.
+ * Se ejecuta al recibir peticiones HTTP (ideal para arquitecturas Serverless).
+ */
+export function verificarTimeoutPasivo(salaId: string, sala: Sala): boolean {
+  const { estado } = sala
+  if (estado.fase !== 'draft' || estado.turnoDe === 'FIN') return false
+  if (estado.timerExpira && Date.now() >= estado.timerExpira) {
+    if (!estado.opcionesActuales || !estado.opcionesActuales.length) return false
+    const elegido = estado.opcionesActuales[Math.floor(Math.random() * estado.opcionesActuales.length)]
+    console.log(`⏰  [${salaId}] Timeout pasivo detectado en petición → auto-elección #${elegido}`)
     estado.ultimaEleccionRandom = true
     aplicarEleccion(salaId, sala, estado.turnoDe as 'jugador1'|'jugador2', elegido)
-  }, CONFIG.TIMER_SEG*1000)
+    return true
+  }
+  return false
 }
 
 export function aplicarEleccion(salaId: string, sala: Sala, jugador: 'jugador1'|'jugador2', elegido: number): void {

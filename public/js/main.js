@@ -9,7 +9,7 @@ import {
 } from './lobby.js'
 import {
   syncDraft, flashBatalla, resetarEstadoRender, resetear,
-  enviarChat, enviarBuzz, copiarCodigo, copiarAmbos, abrirShowdown, renderChat,
+  enviarChat, enviarBuzz, copiarCodigo, abrirShowdown, renderChat,
 } from './draft.js'
 
 // ─── ESTADO GLOBAL DE PANTALLA ────────────────────────────────────────────────
@@ -65,7 +65,6 @@ window.resetear        = async () => {
   if (estado.miToken && estado.miRol !== 'espectador') iniciarHeartbeat()
 }
 window.copiarCodigo    = copiarCodigo
-window.copiarAmbos     = copiarAmbos
 window.abrirShowdown   = abrirShowdown
 window.enviarChat      = enviarChat
 window.enviarBuzz      = enviarBuzz

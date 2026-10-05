@@ -49,8 +49,18 @@ function analizarCadena(nodo, nombre) {
 
 export async function precargaBatch(ids) {
   const pendientes = ids.filter(id => !typeCache.has(id))
-  // Limitar a 150 Pokémon máximo para evitar timeouts extremos
-  const limite = pendientes.slice(0, 150)
+  // Limitar a 150 Pokémon máximo para evitar timeouts extremos.
+  // IMPORTANTE: tomar una muestra aleatoria en vez de los primeros N
+  // para evitar sesgos (p.ej. hacia Kanto cuando los ids vienen ordenados).
+  let limite = pendientes
+  if (pendientes.length > 150) {
+    // Fisher-Yates shuffle in-place, then take first 150
+    for (let i = pendientes.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      const tmp = pendientes[i]; pendientes[i] = pendientes[j]; pendientes[j] = tmp
+    }
+    limite = pendientes.slice(0, 150)
+  }
   const BATCH = 50
   for (let i = 0; i < limite.length; i += BATCH) {
     await Promise.all(limite.slice(i, i+BATCH).map(async id => {

@@ -22,13 +22,18 @@ export function validarVoto(v: unknown): string | null {
   if (x.minBST !== null && (typeof x.minBST !== 'number' || x.minBST < 0 || x.minBST > 1200)) return 'minBST fuera de rango.'
   if (x.minBST !== null && x.maxBST !== null && (x.minBST as number) > (x.maxBST as number))
     return 'El BST mínimo no puede ser mayor que el máximo.'
+  // Nuevos campos
+  if (typeof x.numRondas !== 'number' || !Number.isInteger(x.numRondas) || x.numRondas < 1 || x.numRondas > 6)
+    return 'numRondas debe ser un entero entre 1 y 6.'
+  if (typeof x.modoOculto !== 'boolean') return 'modoOculto debe ser booleano.'
   return null
 }
 
-export function validarIds(ids: unknown): string | null {
+export function validarIds(ids: unknown, numRondas: number = 6): string | null {
   if (!Array.isArray(ids)) return 'idsValidos debe ser un arreglo.'
-  if ((ids as number[]).length < 12)    return 'El grupo tiene menos de 12 Pokémon.'
-  if ((ids as number[]).length > 3000)  return 'El grupo excede el máximo permitido.'
+  const minimo = numRondas * 2
+  if ((ids as number[]).length < minimo)   return `El grupo tiene menos de ${minimo} Pokémon.`
+  if ((ids as number[]).length > 3000)     return 'El grupo excede el máximo permitido.'
   if ((ids as unknown[]).some((id) => typeof id !== 'number' || !Number.isInteger(id) || id < 1 || id > 99999))
     return 'El arreglo contiene IDs no válidos.'
   return null

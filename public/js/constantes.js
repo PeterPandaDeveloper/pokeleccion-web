@@ -63,3 +63,6 @@ export const GIMMICKS = new Set([
 ])
 
 export const TIMER_SEG = 10
+
+export const SUBSTITUTE_IMG = 'https://play.pokemonshowdown.com/sprites/gen5/substitute.png'
+export const NUM_RONDAS_DEFAULT = 6

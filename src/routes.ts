@@ -4,8 +4,9 @@ import { CONFIG }      from './config'
 import { checkRL }     from './rateLimiter'
 import { generarToken, validarToken } from './tokens'
 import { validarVoto, validarIds }    from './validators'
-import { salas, obtenerSala, limpiarSelecciones, actualizarPresenciaJugadores, agregarMensajeSistema, actualizarHeartbeat } from './sala'
-import { iniciarDraft, aplicarEleccion, limpiarTimer, etiquetaConfig } from './draft'
+import { Sala, limpiarSelecciones, actualizarPresenciaJugadores, agregarMensajeSistema, actualizarHeartbeat, verificarHeartbeatPasivo } from './sala'
+import { iniciarDraft, aplicarEleccion, etiquetaConfig, verificarTimeoutPasivo } from './draft'
+import { getStorage } from './storage'
 
 // ─── HELPERS HTTP ─────────────────────────────────────────────────────────────
 export function json(res: http.ServerResponse, code: number, data: unknown): void {
@@ -43,32 +44,61 @@ export function parseReq(req: http.IncomingMessage) {
   return { base, endpoint, token, salaId }
 }
 
+// Helper para guardar estado persistente en Storage y responder
+async function responderConSala(res: http.ServerResponse, code: number, sala: Sala, data?: unknown): Promise<void> {
+  const storage = getStorage()
+  if (sala.estado.fase === 'fin' && !(sala as any).historialGuardado) {
+    (sala as any).historialGuardado = true
+    try {
+      await storage.guardarHistorial({
+        id: crypto.randomBytes(4).toString('hex'),
+        salaId: sala.id,
+        fecha: Date.now(),
+        j1: { nombre: sala.estado.jugador1.nombre || 'J1', equipo: sala.estado.jugador1.equipo },
+        j2: { nombre: sala.estado.jugador2.nombre || 'J2', equipo: sala.estado.jugador2.equipo },
+        reglas: sala.estado.config ? etiquetaConfig(sala.estado.config) : 'Sin restricciones',
+        rondas: sala.estado.rondaActual,
+        modoOculto: Boolean(sala.estado.config?.modoOculto),
+      })
+    } catch (e) {
+      console.warn('Error guardando en historial políglota:', e)
+    }
+  }
+  await storage.guardarSala(sala)
+  return json(res, code, data !== undefined ? data : sala.estado)
+}
+
 // ─── HANDLER PRINCIPAL ───────────────────────────────────────────────────────
 export async function handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
   res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200)
+    res.end()
+    return
+  }
+
   const { base, endpoint, token, salaId } = parseReq(req)
   const m  = req.method??'GET'
   const ip = getIP(req)
+  const storage = getStorage()
 
   // Rutas globales (sin sala)
   if (base==='/api/salas' && m==='GET') {
-    return json(res,200,[...salas.entries()]
-      .filter(([,s])=>!s.privada)
-      .map(([id,s])=>({
-        id, fase:s.estado.fase,
-        j1:s.estado.lobby.jugador1.nombre||null,
-        j2:s.estado.lobby.jugador2.nombre||null,
-        hayEspacio: !s.estado.jugador1.conectado || !s.estado.jugador2.conectado,
-      })))
+    const lista = await storage.listarSalasPublicas()
+    return json(res, 200, lista)
+  }
+
+  if (base==='/api/estadisticas' && m==='GET') {
+    const stats = await storage.obtenerEstadisticas()
+    return json(res, 200, stats)
   }
 
   if (base==='/api/sala/crear' && m==='POST') {
     if (!checkRL(ip,'crear',CONFIG.RATE_CREAR_SALA))
       return json(res,429,{error:'Demasiadas salas creadas. Espera un momento.'})
-    if (salas.size>=CONFIG.MAX_SALAS)
-      return json(res,503,{error:'Servidor lleno (máx. 20 salas activas).'})
-    // NO crear sala aquí — solo reservar ID y devolver al cliente.
-    // La sala se crea realmente cuando alguien se une.
     const nuevoId = crypto.randomBytes(3).toString('hex').toUpperCase()
     return json(res,200,{salaId:nuevoId})
   }
@@ -78,17 +108,26 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
   if (endpoint!=='/estado') console.log(`${m} [${salaId}] ${endpoint} — ${ip}`)
 
   try {
-    const sala = salas.get(salaId) ?? obtenerSala(salaId)
+    const sala = await storage.obtenerSala(salaId)
     if (!sala || sala.eliminada) {
       return json(res,410,{error:'Sala eliminada', eliminado:true})
     }
+
     if (sala.eliminacionPendiente && (Date.now() - sala.eliminacionPendiente.creadoEn) > 60000) {
       sala.eliminacionPendiente = null
     }
+
+    // ─── VERIFICACIÓN PASIVA DE TIMEOUT & HEARTBEAT ──────────────────────────
+    const huboTimeout = verificarTimeoutPasivo(salaId, sala)
+    const huboHeartbeat = verificarHeartbeatPasivo(sala)
+
     const { estado } = sala
 
     if (endpoint==='/estado') {
       actualizarPresenciaJugadores(sala)
+      if (huboTimeout || huboHeartbeat) {
+        await storage.guardarSala(sala)
+      }
       return json(res,200,{...estado,salaId,reglas:estado.config?etiquetaConfig(estado.config):null})
     }
 
@@ -98,14 +137,15 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       estado.lobby.espectadores = Math.max(0, estado.lobby.espectadores + 1)
       const nombre = String(bodyEsp.nombre??'espectador').trim().slice(0,20)
       agregarMensajeSistema(sala,`👁 ${nombre} se unió como espectador`)
-      return json(res,200,{ok:true,nombre})
+      return responderConSala(res, 200, sala, {ok:true, nombre})
     }
-    if (endpoint=='/espectador/salir' &&m==='POST') {
+
+    if (endpoint==='/espectador/salir'&&m==='POST') {
       const bodyEsp = JSON.parse(await readBody(req)) as Record<string,unknown>
       estado.lobby.espectadores = Math.max(0, estado.lobby.espectadores - 1)
       const nombre = String(bodyEsp.nombre??'espectador').trim().slice(0,20)
       agregarMensajeSistema(sala,`👁 ${nombre} dejó de mirar`)
-      return json(res,200,{ok:true})
+      return responderConSala(res, 200, sala, {ok:true})
     }
 
     // Verificar reconexión
@@ -133,10 +173,10 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       // Reconexión: token válido y coincide
       if (j.conectado&&j.token) {
         if (!validarToken(tkCliente)||j.token!==tkCliente) return json(res,409,{error:'Ese lugar ya está ocupado.'})
-        return json(res,200,{estado,token:tkCliente,salaId})
+        return responderConSala(res, 200, sala, {estado,token:tkCliente,salaId})
       }
       const nuevoToken = generarToken()
-      j.conectado=true; j.token=nuevoToken; j.nombre=nombre
+      j.conectado=true; j.token=nuevoToken; j.nombre=nombre; j.lastSeen=Date.now()
       estado.lobby[rol as 'jugador1'|'jugador2'].nombre=nombre
       actualizarPresenciaJugadores(sala)
       const otro = rol==='jugador1'?'jugador2':'jugador1'
@@ -146,7 +186,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
         agregarMensajeSistema(sala,`🎮 ${nombre} se unió como ${rol==='jugador1'?'Jugador 1':'Jugador 2'}. Esperando al otro jugador...`)
       }
       console.log(`✅  [${salaId}] ${rol} se unió como "${nombre}"`)
-      return json(res,200,{estado,token:nuevoToken,salaId})
+      return responderConSala(res, 200, sala, {estado,token:nuevoToken,salaId})
     }
 
     // Chat (jugadores y espectadores) — ANTES de la validación de token
@@ -161,7 +201,6 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
         nombre = estado[rolChat].nombre || rolChat
         rol = rolChat
       } else {
-        // Espectador sin token
         nombre = String(bodyChat.nombreEspectador??'Espectador').trim().slice(0,20)
         rol = 'espectador'
       }
@@ -171,11 +210,10 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       }
       estado.chat.push(msg)
       if (estado.chat.length>CONFIG.MAX_CHAT_HISTORIAL) estado.chat.shift()
-      return json(res,200,{ok:true})
+      return responderConSala(res, 200, sala, {ok:true})
     }
 
     // ── /intercambiar — jugador deja slot libre, espectador toma slot vacío ──
-    // COLOCADO ANTES de la validación de token para que espectadores puedan tomar slots
     if (endpoint==='/intercambiar'&&m==='POST') {
       const bodyInt = JSON.parse(await readBody(req)) as Record<string,unknown>
       const accion  = String(bodyInt.accion??'')
@@ -189,7 +227,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
           estado.lobby.espectadores = Math.max(0, estado.lobby.espectadores + 1)
           actualizarPresenciaJugadores(sala)
           agregarMensajeSistema(sala,`🔴 ${nom} dejó de ser Jugador 1 (ahora es espectador)`)
-          return json(res,200,{ok:true,rolLiberado:'jugador1'})
+          return responderConSala(res, 200, sala, {ok:true,rolLiberado:'jugador1'})
         }
         if (validarToken(tkLibera) && estado.jugador2.token===tkLibera) {
           const nom = estado.jugador2.nombre || estado.lobby.jugador2.nombre || 'J2'
@@ -199,7 +237,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
           estado.lobby.espectadores = Math.max(0, estado.lobby.espectadores + 1)
           actualizarPresenciaJugadores(sala)
           agregarMensajeSistema(sala,`🟢 ${nom} dejó de ser Jugador 2 (ahora es espectador)`)
-          return json(res,200,{ok:true,rolLiberado:'jugador2'})
+          return responderConSala(res, 200, sala, {ok:true,rolLiberado:'jugador2'})
         }
         return json(res,403,{error:'Token no válido para liberar slot.'})
       }
@@ -210,12 +248,12 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
         if (j.conectado) return json(res,409,{error:'Ese slot ya está ocupado.'})
         const nombreEsp = String(bodyInt.nombreEspectador??'Espectador').trim().slice(0,20)
         const nuevoToken = generarToken()
-        j.conectado = true; j.token = nuevoToken; j.nombre = nombreEsp || j.nombre
+        j.conectado = true; j.token = nuevoToken; j.nombre = nombreEsp || j.nombre; j.lastSeen = Date.now()
         estado.lobby[rolTomar].nombre = nombreEsp
         estado.lobby.espectadores = Math.max(0, estado.lobby.espectadores - 1)
         actualizarPresenciaJugadores(sala)
         agregarMensajeSistema(sala,`👁 ${nombreEsp} pasó de espectador a ${rolTomar==='jugador1'?'Jugador 1':'Jugador 2'}`)
-        return json(res,200,{ok:true,token:nuevoToken,rol:rolTomar})
+        return responderConSala(res, 200, sala, {ok:true,token:nuevoToken,rol:rolTomar})
       }
       return json(res,400,{error:'Acción no válida. Usar "liberar" o "tomar".'})
     }
@@ -230,7 +268,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
         sala.eliminacionPendiente = { solicitante: rolPropio, creadoEn: Date.now() }
         const nombre = estado[rolPropio].nombre || (rolPropio==='jugador1'?'Jugador 1':'Jugador 2')
         agregarMensajeSistema(sala, `🗑️ ${nombre} quiere eliminar la sala. Espera a que el otro jugador confirme.`)
-        return json(res,200,{ok:true, pending:true, solicitante:rolPropio})
+        return responderConSala(res, 200, sala, {ok:true, pending:true, solicitante:rolPropio})
       }
       if (sala.eliminacionPendiente.solicitante === rolPropio) {
         return json(res,200,{ok:true, pending:true, solicitante:rolPropio})
@@ -238,7 +276,7 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       const nombre = estado[rolPropio].nombre || (rolPropio==='jugador1'?'Jugador 1':'Jugador 2')
       agregarMensajeSistema(sala, `🗑️ ${nombre} confirmó la eliminación de la sala.`)
       if (sala.timer) clearTimeout(sala.timer)
-      salas.delete(salaId)
+      await storage.eliminarSala(salaId)
       return json(res,200,{ok:true, eliminado:true})
     }
 
@@ -258,10 +296,9 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       const ro = String(b.rolObjetivo??'')
       const rolFinal = (ro==='jugador1'||ro==='jugador2') ? ro : rolPropio
       const lj = estado.lobby[rolFinal as 'jugador1'|'jugador2']
-      // BLOQUEAR edición si ya está marcado como listo
       if (lj.bloqueado) return json(res,409,{error:'Ya confirmaste tu configuración. No puedes cambiarla.'})
       lj.voto = b.voto as any
-      return json(res,200,estado)
+      return responderConSala(res, 200, sala, estado)
     }
 
     // Listo (bloquea el voto)
@@ -269,25 +306,28 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       if (estado.fase!=='lobby') return json(res,409,{error:'No estamos en el lobby.'})
       if (!rolPropio) return json(res,403,{error:'Token no válido.'})
       if (!estado.lobby[rolPropio].voto) return json(res,400,{error:'Primero hay que elegir configuración.'})
-      const errIds = validarIds(b.idsValidos)
+      const errIds = validarIds(b.idsValidos, Math.max(
+        estado.lobby.jugador1.voto?.numRondas ?? CONFIG.MAX_RONDAS_DEFAULT,
+        estado.lobby.jugador2.voto?.numRondas ?? CONFIG.MAX_RONDAS_DEFAULT
+      ))
       if (errIds) return json(res,400,{error:errIds})
       estado.lobby[rolPropio].listo    = true
-      estado.lobby[rolPropio].bloqueado = true   // BLOQUEAR voto al confirmar
+      estado.lobby[rolPropio].bloqueado = true
       const nombre = estado[rolPropio].nombre||rolPropio
       agregarMensajeSistema(sala,`✅ ${nombre} está listo.`)
       if (estado.lobby.jugador1.listo&&estado.lobby.jugador2.listo)
         iniciarDraft(salaId,sala,b.idsValidos as number[])
-      return json(res,200,estado)
+      return responderConSala(res, 200, sala, estado)
     }
 
-    // Limpiar sala (= "Borrar todas las selecciones")
+    // Limpiar sala
     if (endpoint==='/lobby/limpiar'&&m==='POST') {
       if (!rolPropio) return json(res,403,{error:'Solo jugadores pueden limpiar.'})
       const ahora = Date.now()
       if (ahora-estado.lobby.ultimaLimpieza<CONFIG.COOLDOWN_LIMPIAR)
         return json(res,429,{error:`Espera ${Math.ceil((CONFIG.COOLDOWN_LIMPIAR-(ahora-estado.lobby.ultimaLimpieza))/1000)}s.`})
       limpiarSelecciones(sala)
-      return json(res,200,estado)
+      return responderConSala(res, 200, sala, estado)
     }
 
     // Elegir Pokémon
@@ -301,10 +341,10 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       if (!Number.isInteger(elegido)||!estado.opcionesActuales.includes(elegido))
         return json(res,400,{error:'Opción no válida.'})
       aplicarEleccion(salaId,sala,jugador,elegido)
-      return json(res,200,estado)
+      return responderConSala(res, 200, sala, estado)
     }
 
-    // Buzz (notificar al otro jugador — anti-spam)
+    // Buzz (anti-spam)
     if (endpoint==='/buzz'&&m==='POST') {
       if (!rolPropio) return json(res,403,{error:'Token no válido.'})
       const ahora = Date.now()
@@ -314,22 +354,22 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       estado.lobby[campoBuzz] = ahora
       const nombre = estado[rolPropio].nombre||rolPropio
       agregarMensajeSistema(sala,`🔔 ${nombre} te avisa: ¡ey, sigue!`)
-      return json(res,200,{ok:true})
+      return responderConSala(res, 200, sala, {ok:true})
     }
 
-    // ── /heartbeat — mantener jugador marcado como conectado ─────────────────
-        if (endpoint==='/heartbeat'&&m==='POST') {
-            if (!rolPropio) return json(res,200,{ok:true})
-            actualizarHeartbeat(sala, rolPropio as 'jugador1'|'jugador2')
-            return json(res,200,{ok:true})
-        }
+    // Heartbeat
+    if (endpoint==='/heartbeat'&&m==='POST') {
+      if (!rolPropio) return json(res,200,{ok:true})
+      actualizarHeartbeat(sala, rolPropio as 'jugador1'|'jugador2')
+      return responderConSala(res, 200, sala, {ok:true})
+    }
 
-    // ── /keepalive — extender vida de la sala por 5 minutos ────────────────
+    // Keepalive
     if (endpoint==='/keepalive'&&m==='POST') {
       sala.sinJugadoresDesde = null
       agregarMensajeSistema(sala, `⏱ Sala mantenida viva por 5 minutos más`)
       console.log(`⏱  [${salaId}] Keepalive recibido`)
-      return json(res,200,{ok:true})
+      return responderConSala(res, 200, sala, {ok:true})
     }
 
     // Sala privada
@@ -337,13 +377,14 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       if (!rolPropio) return json(res,403,{error:'Solo jugadores pueden cambiar privacidad.'})
       sala.privada = Boolean(b.privada)
       console.log(`🔒  [${salaId}] Sala ${sala.privada?'privada':'pública'}`)
-      return json(res,200,{ok:true,privada:sala.privada})
+      return responderConSala(res, 200, sala, {ok:true,privada:sala.privada})
     }
 
     // Reset
     if (endpoint==='/reset'&&m==='GET') {
       if (!rolPropio) return json(res,403,{error:'Solo jugadores pueden reiniciar.'})
-      limpiarSelecciones(sala); return json(res,200,estado)
+      limpiarSelecciones(sala)
+      return responderConSala(res, 200, sala, estado)
     }
 
     res.writeHead(404); res.end('404')
