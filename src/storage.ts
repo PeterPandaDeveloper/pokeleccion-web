@@ -313,15 +313,28 @@ let storageInstance: IStorage | null = null
 export function getStorage(): IStorage {
   if (storageInstance) return storageInstance
 
-  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL
-  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN
+  const upstashUrl =
+    process.env.STORAGE_REST_API_URL ||
+    process.env.UPSTASH_REDIS_REST_URL ||
+    process.env.KV_REST_API_URL ||
+    process.env.REDIS_REST_API_URL
+
+  const upstashToken =
+    process.env.STORAGE_REST_API_TOKEN ||
+    process.env.UPSTASH_REDIS_REST_TOKEN ||
+    process.env.KV_REST_API_TOKEN ||
+    process.env.REDIS_REST_API_TOKEN
+
+  const directRedisUrl =
+    process.env.STORAGE_URL ||
+    process.env.REDIS_URL
 
   if (upstashUrl && upstashToken) {
     console.log('⚡ Conectado a Upstash Redis / Vercel KV (Serverless HTTP)')
     storageInstance = new UpstashRedisStorage(upstashUrl, upstashToken)
-  } else if (process.env.REDIS_URL || process.env.REDIS_HOST) {
+  } else if (directRedisUrl || process.env.REDIS_HOST) {
     console.log('🔌 Conectado a Redis TCP (ioredis / Oracle Server)')
-    storageInstance = new IoRedisStorage(process.env.REDIS_URL)
+    storageInstance = new IoRedisStorage(directRedisUrl)
   } else {
     console.log('💾 Usando almacenamiento en memoria local (MemoryStorage)')
     storageInstance = new MemoryStorage()
