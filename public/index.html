@@ -11,6 +11,9 @@
 </head>
 <body>
 
+<!-- Banner de estado de conexion -->
+<div id="banner-desconexion" class="banner-desconexion" style="display:none"></div>
+
 <!-- Flash de transición -->
 <div id="battle-flash" class="battle-flash"></div>
 
@@ -205,6 +208,38 @@
         <div class="box-gba config-panel" id="config-panel-wrap">
           <h3 class="panel-title">Configuración del duelo</h3>
 
+          <!-- Presets Rápidos -->
+          <div class="presets-section">
+            <div class="cfg-label-row">
+              <label class="cfg-label">⚡ Presets Rápidos</label>
+              <span class="cfg-hint">Configura el duelo en 1 clic</span>
+            </div>
+            <div class="presets-grid">
+              <button type="button" class="btn-preset" id="preset-casual" onclick="aplicarPreset('casual')">
+                <span class="preset-ico">☕</span>
+                <span class="preset-tit">Casual</span>
+                <small class="preset-desc">Sin legendarios, 6 rondas</small>
+              </button>
+              <button type="button" class="btn-preset" id="preset-competitivo" onclick="aplicarPreset('competitivo')">
+                <span class="preset-ico">🏆</span>
+                <span class="preset-tit">Competitivo</span>
+                <small class="preset-desc">Finales, BST 500+, tipos únicos</small>
+              </button>
+              <button type="button" class="btn-preset" id="preset-copabebe" onclick="aplicarPreset('copabebe')">
+                <span class="preset-ico">🍼</span>
+                <span class="preset-tit">Copa Bebé</span>
+                <small class="preset-desc">Primera etapa, BST ≤ 360</small>
+              </button>
+              <button type="button" class="btn-preset" id="preset-caos" onclick="aplicarPreset('caos')">
+                <span class="preset-ico">🎲</span>
+                <span class="preset-tit">Caos Total</span>
+                <small class="preset-desc">Todo permitido, legendarios ON</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="cfg-divider"></div>
+
           <!-- Región (multi) -->
           <div class="cfg-grupo">
             <div class="cfg-label-row">
@@ -369,17 +404,50 @@
 
           <div class="cfg-divider"></div>
 
-          <!-- BST -->
-          <div class="cfg-grupo">
+          <!-- BST con Sliders y Previews Dinámicas -->
+          <div class="cfg-grupo bst-grupo-rework">
             <div class="cfg-label-row">
-              <label class="cfg-label">BST</label>
+              <label class="cfg-label">📊 BST (Estadísticas Base Totales)</label>
               <button class="btn-info-small" onclick="mostrarInfo('bst')">?</button>
             </div>
             <div class="bst-row">
-              <label class="cfg-hint">Mín.</label>
-              <input type="number" id="bst-min" min="0" max="1200" step="10" placeholder="300" class="bst-input"/>
-              <label class="cfg-hint">Máx.</label>
-              <input type="number" id="bst-max" min="0" max="1200" step="10" placeholder="600" class="bst-input"/>
+              <div class="bst-input-col">
+                <label class="cfg-hint">Mínimo</label>
+                <input type="number" id="bst-min" min="0" max="780" step="10" placeholder="0" class="bst-input" oninput="actualizarBSTPreview()"/>
+                <input type="range" id="slider-bst-min" min="180" max="780" step="10" value="180" class="bst-slider" oninput="onSliderBSTMin(this.value)"/>
+              </div>
+              <div class="bst-input-col">
+                <label class="cfg-hint">Máximo</label>
+                <input type="number" id="bst-max" min="0" max="780" step="10" placeholder="780" class="bst-input" oninput="actualizarBSTPreview()"/>
+                <input type="range" id="slider-bst-max" min="180" max="780" step="10" value="780" class="bst-slider" oninput="onSliderBSTMax(this.value)"/>
+              </div>
+            </div>
+
+            <!-- Preview táctil con sprites e indicador de piscina -->
+            <div class="bst-preview-box">
+              <div class="bst-poke-card min-card">
+                <span class="bst-card-tag">Límite Inferior</span>
+                <div class="bst-card-sprite-wrap">
+                  <img id="bst-sprite-min" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/172.png" alt="Min Poke" class="bst-sprite-img" />
+                </div>
+                <strong id="bst-nom-min" class="bst-poke-name">Sin mínimo</strong>
+                <span id="bst-val-min" class="bst-poke-stat">Cualquiera</span>
+              </div>
+
+              <div class="bst-middle-indicator">
+                <span class="bst-indicator-icon">⚖️</span>
+                <span class="bst-indicator-lbl">Piscina elegible</span>
+                <strong id="bst-pool-count" class="bst-indicator-val">1136 Pokémon</strong>
+              </div>
+
+              <div class="bst-poke-card max-card">
+                <span class="bst-card-tag">Límite Superior</span>
+                <div class="bst-card-sprite-wrap">
+                  <img id="bst-sprite-max" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png" alt="Max Poke" class="bst-sprite-img" />
+                </div>
+                <strong id="bst-nom-max" class="bst-poke-name">Sin límite</strong>
+                <span id="bst-val-max" class="bst-poke-stat">Hasta 780+</span>
+              </div>
             </div>
           </div>
 
@@ -518,7 +586,8 @@
           </div>
         </div>
       </div>
-      <div class="resumen-duelo-row" style="text-align:center; margin-top:16px;">
+      <div class="fin-acciones-row" style="text-align:center; margin-top:20px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn-revancha" id="btn-revancha" onclick="solicitarRevancha(this)">⚡ Revancha Inmediata (Mismas Reglas)</button>
         <button class="btn-accion btn-resumen-duelo" onclick="copiarResumenDuelo(this)">📜 Copiar Resumen del Duelo (Discord / WhatsApp)</button>
       </div>
     </div>

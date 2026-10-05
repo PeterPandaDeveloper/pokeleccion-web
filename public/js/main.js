@@ -6,11 +6,14 @@ import {
   leerVoto, etiquetaVoto, unirseAlLobby, crearSalaParty, unirsePorCodigo, votarConfig, votarConfigDelOtro, marcarListo,
   limpiarSala, copiarEnlace, crearNuevaSala, actualizarDisplaySala,
   actualizarLobbyUI, mostrarPasoLobby,
+  aplicarPreset, onSliderBSTMin, onSliderBSTMax, actualizarBSTPreview,
 } from './lobby.js'
 import {
   syncDraft, flashBatalla, resetarEstadoRender, resetear,
   enviarChat, enviarBuzz, copiarCodigo, copiarResumenDuelo, abrirShowdown, renderChat,
+  solicitarRevancha,
 } from './draft.js'
+import { cargarPokedex } from './pokeapi.js'
 
 // ─── ESTADO GLOBAL DE PANTALLA ────────────────────────────────────────────────
 let enDraft = false
@@ -25,6 +28,11 @@ window.syncRestr          = syncRestr
 window.crearSalaParty     = crearSalaParty
 window.unirsePorCodigo    = unirsePorCodigo
 window.copiarResumenDuelo = copiarResumenDuelo
+window.solicitarRevancha  = solicitarRevancha
+window.aplicarPreset      = aplicarPreset
+window.onSliderBSTMin     = onSliderBSTMin
+window.onSliderBSTMax     = onSliderBSTMax
+window.actualizarBSTPreview = actualizarBSTPreview
 window.unirseAlLobby   = async (...args) => {
   await unirseAlLobby(...args)
   // Iniciar heartbeat tras unirse exitosamente
@@ -381,6 +389,30 @@ async function iniciar() {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() }
     })
   })
+
+  // Escuchar estado de red (offline / online)
+  window.addEventListener('offline', () => {
+    const b = document.getElementById('banner-desconexion')
+    if (b) {
+      b.textContent = '⚠️ Sin conexión a internet. Intentando reconectar...'
+      b.className = 'banner-desconexion desconectado'
+      b.style.display = 'block'
+    }
+  })
+  window.addEventListener('online', () => {
+    const b = document.getElementById('banner-desconexion')
+    if (b) {
+      b.textContent = '✅ Conexión restablecida con éxito'
+      b.className = 'banner-desconexion reconectado'
+      setTimeout(() => { b.style.display = 'none' }, 2500)
+    }
+    programarSiguientePoll(true)
+  })
+
+  // Cargar Pokédex en memoria y previsualizar BST
+  cargarPokedex().then(() => {
+    actualizarBSTPreview()
+  }).catch(() => {})
 }
 
 window.onload = iniciar

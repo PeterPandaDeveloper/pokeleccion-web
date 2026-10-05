@@ -2025,3 +2025,388 @@ body.buzz-shake {
 .btn-resumen-duelo:hover {
   background: #6a1b9a !important;
 }
+
+/* ── BANNER DE ESTADO DE CONEXIÓN ── */
+.banner-desconexion {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10001;
+  padding: 10px 16px;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: all 0.25s ease;
+}
+.banner-desconexion.desconectado {
+  background: #d32f2f;
+  color: #fff;
+  border-bottom: 3px solid #b71c1c;
+  animation: pulsoAlerta 1.2s infinite ease-in-out;
+}
+.banner-desconexion.reconectado {
+  background: #2e7d32;
+  color: #fff;
+  border-bottom: 3px solid #1b5e20;
+}
+@keyframes pulsoAlerta {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+/* ── PRESETS RÁPIDOS ── */
+.presets-section {
+  margin-bottom: 18px;
+}
+.presets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+.btn-preset {
+  background: #f1f8e9;
+  border: 2px solid #aed581;
+  border-radius: 4px;
+  padding: 8px 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+}
+.btn-preset:hover {
+  background: #dcedc8;
+  border-color: #7cb342;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+}
+.btn-preset:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+}
+.btn-preset.preset-active {
+  background: #fff9c4;
+  border-color: #fbc02d;
+  box-shadow: 0 0 0 2px #f57f17, 0 3px 0 rgba(0,0,0,0.2);
+}
+.preset-ico {
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+.preset-tit {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.58rem;
+  color: #2e7d32;
+  margin-top: 4px;
+}
+.btn-preset.preset-active .preset-tit {
+  color: #e65100;
+}
+.preset-desc {
+  font-family: 'VT323', monospace;
+  font-size: 0.88rem;
+  color: #555;
+  margin-top: 2px;
+  line-height: 1.1;
+}
+
+/* ── BST REWORK & PREVIEW TÁCTIL ── */
+.bst-grupo-rework {
+  margin-bottom: 16px;
+}
+.bst-input-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bst-slider {
+  width: 100%;
+  accent-color: #2e7d32;
+  cursor: pointer;
+  height: 8px;
+  border-radius: 4px;
+  background: #c8e6c9;
+  outline: none;
+  margin-top: 2px;
+}
+.bst-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2e7d32;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+.bst-preview-box {
+  margin-top: 14px;
+  background: #f4fbf4;
+  border: 2px dashed #a5d6a7;
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+}
+.bst-poke-card {
+  flex: 1;
+  max-width: 150px;
+  background: #ffffff;
+  border: 2px solid #81c784;
+  border-radius: 6px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  transition: transform 0.15s ease;
+}
+.bst-poke-card:hover {
+  transform: translateY(-2px);
+}
+.bst-card-tag {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: #558b2f;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+.bst-card-sprite-wrap {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, #e8f5e9 0%, transparent 70%);
+  border-radius: 50%;
+  margin-bottom: 4px;
+}
+.bst-sprite-img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.bst-poke-name {
+  font-family: 'VT323', monospace;
+  font-size: 1.15rem;
+  color: #1b5e20;
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.bst-poke-stat {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.52rem;
+  color: #e65100;
+  margin-top: 2px;
+}
+.bst-middle-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  padding: 0 6px;
+}
+.bst-indicator-icon {
+  font-size: 1.5rem;
+}
+.bst-indicator-lbl {
+  font-family: 'VT323', monospace;
+  font-size: 1rem;
+  color: #555;
+}
+.bst-indicator-val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  color: #2e7d32;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-top: 2px;
+}
+
+/* ── DEXCARD TACTICAL TOOLTIP ── */
+.dex-tooltip {
+  position: absolute;
+  z-index: 10000;
+  width: 260px;
+  background: #1e2621;
+  color: #e8f5e9;
+  border: 3px solid #43a047;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 0 2px #1b5e20;
+  pointer-events: none;
+  font-family: 'VT323', monospace;
+  animation: dexTooltipFade 0.12s ease-out;
+}
+@keyframes dexTooltipFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.dex-tt-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #388e3c;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+.dex-tt-sprite {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.dex-tt-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+.dex-tt-num {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: #a5d6a7;
+}
+.dex-tt-nom {
+  font-size: 1.3rem;
+  color: #ffffff;
+  text-transform: capitalize;
+  line-height: 1;
+}
+.dex-tt-types {
+  display: flex;
+  gap: 4px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+.dex-tt-type {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.42rem;
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+}
+.dex-tt-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+.dex-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+.dex-stat-row span {
+  width: 28px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: #b0bec5;
+}
+.dex-bar-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.dex-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.2s ease;
+}
+.dex-stat-row b {
+  width: 26px;
+  text-align: right;
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+.bar-hp  { background: #ef5350; }
+.bar-atk { background: #ffa726; }
+.bar-def { background: #ffee58; }
+.bar-spa { background: #42a5f5; }
+.bar-spd { background: #66bb6a; }
+.bar-spe { background: #ab47bc; }
+
+.dex-tt-footer {
+  border-top: 1px solid #388e3c;
+  padding-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.95rem;
+}
+.dex-tt-bst {
+  color: #ffca28;
+}
+.dex-tt-bst strong {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  color: #fff;
+}
+.dex-tt-abil {
+  color: #cfd8dc;
+}
+.dex-tt-abil span {
+  color: #ffffff;
+}
+.dex-tt-phys {
+  color: #90a4ae;
+  font-size: 0.85rem;
+}
+
+/* ── BOTÓN DE REVANCHA INMEDIATA ── */
+.btn-revancha {
+  background: #e65100;
+  color: #ffffff;
+  border: 2px solid #ffb74d;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  padding: 12px 20px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 0 #bf360c, 0 0 12px rgba(255, 152, 0, 0.4);
+  letter-spacing: 0.5px;
+}
+.btn-revancha:hover {
+  background: #f57c00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #bf360c, 0 0 16px rgba(255, 152, 0, 0.6);
+}
+.btn-revancha:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #bf360c;
+}
+.btn-revancha:disabled {
+  background: #78909c;
+  border-color: #b0bec5;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.85;
+}

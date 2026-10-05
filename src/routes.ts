@@ -409,6 +409,39 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       return responderConSala(res, 200, sala, estado)
     }
 
+    // Revancha inmediata (mismas reglas)
+    if (endpoint==='/revancha'&&m==='POST') {
+      if (!rolPropio) return json(res,403,{error:'Token no válido.'})
+      if (estado.fase!=='fin') return json(res,400,{error:'El duelo aún no ha terminado.'})
+      const nombre = estado[rolPropio].nombre || rolPropio
+
+      if (!(sala as any).revanchaPedidaPor) {
+        (sala as any).revanchaPedidaPor = rolPropio
+        agregarMensajeSistema(sala, `⚔️ ${nombre} propuso una revancha inmediata con las mismas reglas. ¡Presiona "Revancha" para aceptar!`)
+        return responderConSala(res, 200, sala, { ok: true, solicitada: true })
+      }
+
+      if ((sala as any).revanchaPedidaPor === rolPropio) {
+        return responderConSala(res, 200, sala, { ok: true, solicitada: true })
+      }
+
+      // Ambos jugadores aceptaron revancha -> Reiniciar draft con mismas reglas
+      (sala as any).revanchaPedidaPor = null
+      estado.jugador1.equipo = []
+      estado.jugador1.picksPropios = []
+      estado.jugador2.equipo = []
+      estado.jugador2.picksPropios = []
+      estado.historial = []
+      estado.rondaActual = 0
+      estado.turnoDe = 'jugador1'
+      estado.fase = 'draft'
+      delete (sala as any).historialGuardado
+
+      iniciarDraft(salaId, sala)
+      agregarMensajeSistema(sala, `⚔️ ¡Revancha aceptada! Comenzando nuevo duelo con las mismas reglas.`)
+      return responderConSala(res, 200, sala, { ok: true, iniciada: true })
+    }
+
     // Buzz (anti-spam)
     if (endpoint==='/buzz'&&m==='POST') {
       if (!rolPropio) return json(res,403,{error:'Token no válido.'})

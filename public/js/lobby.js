@@ -2,7 +2,7 @@ import { TIPOS, TIPO_COLOR, TIPO_EN, TIPO_ABBR, RANGOS, FORMAS_REGIONALES, LEGEN
 import { Sonido }  from './sonido.js'
 import { estado, API, post, guardarSesion, fetchEstado } from './api.js'
 import { mostrarInfo, mostrarToast } from './modal.js'
-import { precargaBatch, evoCache, typeCache, bstCache, colorCache } from './pokeapi.js'
+import { precargaBatch, evoCache, typeCache, bstCache, colorCache, pokemonFullCache } from './pokeapi.js'
 import { renderChat } from './draft.js'
 
 // ─── ESTADO LOCAL DE CONFIG ───────────────────────────────────────────────────
@@ -135,7 +135,179 @@ export function etiquetaVoto(v) {
   return p.length ? p.join(' · ') : '🎯 Sin restricciones'
 }
 
-const CONFIG_CTRLS = '.config-panel input, .config-panel select, .rbtn, .tbtn, .tog input, .bst-input, .btn-votar, .btn-votar-j2'
+const CONFIG_CTRLS = '.config-panel input, .config-panel select, .rbtn, .tbtn, .tog input, .bst-input, .btn-votar, .btn-votar-j2, .btn-preset, .bst-slider'
+
+export function actualizarBSTPreview() {
+  const minVal = parseInt(document.getElementById('bst-min')?.value, 10) || 0
+  const maxVal = parseInt(document.getElementById('bst-max')?.value, 10) || 0
+
+  const sliderMin = document.getElementById('slider-bst-min')
+  const sliderMax = document.getElementById('slider-bst-max')
+  if (sliderMin && document.activeElement !== sliderMin) {
+    sliderMin.value = minVal > 0 ? String(minVal) : '180'
+  }
+  if (sliderMax && document.activeElement !== sliderMax) {
+    sliderMax.value = maxVal > 0 ? String(maxVal) : '780'
+  }
+
+  if (!pokemonFullCache || pokemonFullCache.size === 0) return
+
+  const todos = Array.from(pokemonFullCache.values())
+
+  // Min preview
+  const nomMinEl = document.getElementById('bst-nom-min')
+  const valMinEl = document.getElementById('bst-val-min')
+  const imgMinEl = document.getElementById('bst-sprite-min')
+
+  if (minVal > 0) {
+    let closestMin = todos[0]
+    let diffMin = Infinity
+    for (const p of todos) {
+      const d = Math.abs(p.bst - minVal)
+      if (d < diffMin) { diffMin = d; closestMin = p; if (d === 0) break }
+    }
+    if (nomMinEl) nomMinEl.textContent = closestMin.name
+    if (valMinEl) valMinEl.textContent = `BST ${closestMin.bst}`
+    if (imgMinEl) imgMinEl.src = closestMin.sprite
+  } else {
+    if (nomMinEl) nomMinEl.textContent = 'Sin mínimo'
+    if (valMinEl) valMinEl.textContent = 'Cualquiera'
+    if (imgMinEl) imgMinEl.src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/172.png'
+  }
+
+  // Max preview
+  const nomMaxEl = document.getElementById('bst-nom-max')
+  const valMaxEl = document.getElementById('bst-val-max')
+  const imgMaxEl = document.getElementById('bst-sprite-max')
+
+  if (maxVal > 0 && maxVal < 780) {
+    let closestMax = todos[0]
+    let diffMax = Infinity
+    for (const p of todos) {
+      const d = Math.abs(p.bst - maxVal)
+      if (d < diffMax) { diffMax = d; closestMax = p; if (d === 0) break }
+    }
+    if (nomMaxEl) nomMaxEl.textContent = closestMax.name
+    if (valMaxEl) valMaxEl.textContent = `BST ${closestMax.bst}`
+    if (imgMaxEl) imgMaxEl.src = closestMax.sprite
+  } else {
+    if (nomMaxEl) nomMaxEl.textContent = 'Sin límite'
+    if (valMaxEl) valMaxEl.textContent = 'Hasta 780+'
+    if (imgMaxEl) imgMaxEl.src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png'
+  }
+
+  // Count
+  const effectiveMin = minVal || 0
+  const effectiveMax = maxVal || 9999
+  const count = todos.filter(p => p.bst >= effectiveMin && p.bst <= effectiveMax).length
+  const countEl = document.getElementById('bst-pool-count')
+  if (countEl) countEl.textContent = `${count} Pokémon`
+}
+
+export function onSliderBSTMin(val) {
+  const num = parseInt(val, 10)
+  const minInput = document.getElementById('bst-min')
+  if (minInput) minInput.value = num <= 180 ? '' : String(num)
+  actualizarBSTPreview()
+}
+
+export function onSliderBSTMax(val) {
+  const num = parseInt(val, 10)
+  const maxInput = document.getElementById('bst-max')
+  if (maxInput) maxInput.value = num >= 780 ? '' : String(num)
+  actualizarBSTPreview()
+}
+
+export function aplicarPreset(tipo) {
+  const setChk = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val }
+
+  // Limpiar tipos y colores
+  tiposSel.clear()
+  coloresSel.clear()
+  document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('active'))
+  document.querySelectorAll('.cbtn').forEach(b => b.classList.remove('active'))
+  document.getElementById('tipo-grid')?.classList.remove('has-selected')
+  const mRow = document.getElementById('modo-tipos-row')
+  if (mRow) mRow.style.display = 'none'
+
+  const bstMin = document.getElementById('bst-min')
+  const bstMax = document.getElementById('bst-max')
+  const numR = document.getElementById('num-rondas')
+
+  if (tipo === 'casual') {
+    regionesSel = new Set(['todas'])
+    setChk('chk-sin-leg', true)
+    setChk('chk-finales', false)
+    setChk('chk-sinevo', false)
+    setChk('chk-base', false)
+    setChk('chk-copabebe', false)
+    setChk('chk-nodup', false)
+    setChk('chk-gimmicks', true)
+    setChk('chk-formas-reg', false)
+    if (bstMin) bstMin.value = ''
+    if (bstMax) bstMax.value = ''
+    if (numR) numR.value = '6'
+    setChk('chk-oculto', true)
+    mostrarToast('⚡ Modo Casual seleccionado', 'ok')
+  } else if (tipo === 'competitivo') {
+    regionesSel = new Set(['todas'])
+    setChk('chk-sin-leg', true)
+    setChk('chk-finales', true)
+    setChk('chk-sinevo', false)
+    setChk('chk-base', false)
+    setChk('chk-copabebe', false)
+    setChk('chk-nodup', true)
+    setChk('chk-gimmicks', true)
+    setChk('chk-formas-reg', false)
+    if (bstMin) bstMin.value = '500'
+    if (bstMax) bstMax.value = ''
+    if (numR) numR.value = '6'
+    setChk('chk-oculto', true)
+    mostrarToast('🏆 Modo Competitivo Élite seleccionado', 'ok')
+  } else if (tipo === 'copabebe') {
+    regionesSel = new Set(['todas'])
+    setChk('chk-sin-leg', true)
+    setChk('chk-finales', false)
+    setChk('chk-sinevo', false)
+    setChk('chk-base', false)
+    setChk('chk-copabebe', true)
+    setChk('chk-nodup', false)
+    setChk('chk-gimmicks', true)
+    setChk('chk-formas-reg', false)
+    if (bstMin) bstMin.value = ''
+    if (bstMax) bstMax.value = '360'
+    if (numR) numR.value = '6'
+    setChk('chk-oculto', true)
+    mostrarToast('🍼 Modo Copa Bebé seleccionado', 'ok')
+  } else if (tipo === 'caos') {
+    regionesSel = new Set(['todas'])
+    setChk('chk-sin-leg', false)
+    setChk('chk-finales', false)
+    setChk('chk-sinevo', false)
+    setChk('chk-base', false)
+    setChk('chk-copabebe', false)
+    setChk('chk-nodup', false)
+    setChk('chk-gimmicks', false)
+    setChk('chk-formas-reg', false)
+    if (bstMin) bstMin.value = ''
+    if (bstMax) bstMax.value = ''
+    if (numR) numR.value = '6'
+    setChk('chk-oculto', true)
+    mostrarToast('🎲 Modo Caos Total seleccionado', 'ok')
+  }
+
+  document.querySelectorAll('.rbtn').forEach(b => {
+    b.classList.toggle('active', regionesSel.has(b.dataset.r))
+  })
+  const hintR = document.getElementById('hint-regiones')
+  if (hintR) hintR.textContent = 'Selección: todas'
+
+  document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('preset-active'))
+  document.getElementById(`preset-${tipo}`)?.classList.add('preset-active')
+
+  Sonido.click()
+  actualizarBSTPreview()
+}
 
 /** Aplica un voto del servidor a los botones/checkboxes de la UI. */
 export function aplicarVotoEnUI(v) {
@@ -179,6 +351,8 @@ export function aplicarVotoEnUI(v) {
   const numREl = document.getElementById('num-rondas')
   if (numREl) numREl.value = String(v.numRondas ?? NUM_RONDAS_DEFAULT)
   setChk('chk-oculto', v.modoOculto)
+
+  actualizarBSTPreview()
 }
 
 function bloquearConfig() {

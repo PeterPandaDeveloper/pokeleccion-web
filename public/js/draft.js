@@ -2,8 +2,61 @@ import { resetLobbyEstado } from './lobby.js'
 import { Sonido }   from './sonido.js'
 import { estado, API, get, post, fetchEstado } from './api.js'
 import { mostrarToast } from './modal.js'
-import { fetchNombre, imgUrl, imgSprite } from './pokeapi.js'
+import { fetchNombre, imgUrl, imgSprite, getPokemonData } from './pokeapi.js'
 import { TIMER_SEG, SUBSTITUTE_IMG } from './constantes.js'
+
+export function mostrarDexTooltip(id, el) {
+  const data = getPokemonData(id)
+  if (!data) return
+  let tt = document.getElementById('dex-tooltip')
+  if (!tt) {
+    tt = document.createElement('div')
+    tt.id = 'dex-tooltip'
+    tt.className = 'dex-tooltip'
+    document.body.appendChild(tt)
+  }
+
+  const rect = el.getBoundingClientRect()
+  const top = rect.bottom + window.scrollY + 8
+  const left = Math.max(10, Math.min(window.innerWidth - 270, rect.left + window.scrollX - 40))
+
+  const s = data.stats || { hp:0, atk:0, def:0, spa:0, spd:0, spe:0 }
+  const bar = (v, max=180) => Math.min(100, Math.round((v / max) * 100))
+
+  tt.innerHTML = `
+    <div class="dex-tt-header">
+      <img src="${data.sprite || imgSprite(id)}" class="dex-tt-sprite" alt="${data.name}"/>
+      <div class="dex-tt-info">
+        <span class="dex-tt-num">#${data.id} · Gen ${data.gen || 1}</span>
+        <strong class="dex-tt-nom">${data.name}</strong>
+        <div class="dex-tt-types">
+          ${(data.types || []).map(t => `<span class="dex-tt-type type-${t}">${t.toUpperCase()}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="dex-tt-stats">
+      <div class="dex-stat-row"><span>HP</span><div class="dex-bar-track"><div class="dex-bar-fill bar-hp" style="width:${bar(s.hp)}%"></div></div><b>${s.hp}</b></div>
+      <div class="dex-stat-row"><span>ATK</span><div class="dex-bar-track"><div class="dex-bar-fill bar-atk" style="width:${bar(s.atk)}%"></div></div><b>${s.atk}</b></div>
+      <div class="dex-stat-row"><span>DEF</span><div class="dex-bar-track"><div class="dex-bar-fill bar-def" style="width:${bar(s.def)}%"></div></div><b>${s.def}</b></div>
+      <div class="dex-stat-row"><span>SPA</span><div class="dex-bar-track"><div class="dex-bar-fill bar-spa" style="width:${bar(s.spa)}%"></div></div><b>${s.spa}</b></div>
+      <div class="dex-stat-row"><span>SPD</span><div class="dex-bar-track"><div class="dex-bar-fill bar-spd" style="width:${bar(s.spd)}%"></div></div><b>${s.spd}</b></div>
+      <div class="dex-stat-row"><span>SPE</span><div class="dex-bar-track"><div class="dex-bar-fill bar-spe" style="width:${bar(s.spe)}%"></div></div><b>${s.spe}</b></div>
+    </div>
+    <div class="dex-tt-footer">
+      <div class="dex-tt-bst">BST: <strong>${data.bst || 0}</strong></div>
+      <div class="dex-tt-abil">Hab: <span>${(data.abilities || []).slice(0, 2).join(' / ') || '—'}</span></div>
+      ${data.height && data.weight ? `<div class="dex-tt-phys">${data.height}m · ${data.weight}kg</div>` : ''}
+    </div>
+  `
+  tt.style.top = `${top}px`
+  tt.style.left = `${left}px`
+  tt.style.display = 'block'
+}
+
+export function ocultarDexTooltip() {
+  const tt = document.getElementById('dex-tooltip')
+  if (tt) tt.style.display = 'none'
+}
 
 // ─── ESTADO DE RENDER ────────────────────────────────────────────────────────
 export let prevOps = [], prevTurno = '', prevRonda = -1, exportGen = false
@@ -69,6 +122,17 @@ export async function syncDraft(est) {
 
   document.getElementById('showdown-box').style.display = 'none'
   exportGen = false
+
+  // Si reiniciamos el draft (revancha o nuevo juego) y los equipos en servidor están vacíos
+  if (yaRevelo || (est.jugador1.equipo.length === 0 && rendJ1.size > 0)) {
+    yaRevelo = false
+    rendJ1.clear()
+    rendJ2.clear()
+    const eq1 = document.getElementById('equipo-j1')
+    const eq2 = document.getElementById('equipo-j2')
+    if (eq1) eq1.innerHTML = ''
+    if (eq2) eq2.innerHTML = ''
+  }
 
   if (est.rondaActual > 0) {
     // ── TURNO ──────────────────────────────────────────────────────────────
@@ -161,7 +225,11 @@ async function renderCartas(est) {
     div.className = 'poke-card' + (!esYo ? ' card-disabled' : '')
     div.dataset.pokeId = String(id)
     div.onclick   = () => intentarElegir(id, div)
-    if (esYo) div.addEventListener('mouseenter', () => Sonido.hover())
+    div.addEventListener('mouseenter', () => {
+      if (esYo) Sonido.hover()
+      mostrarDexTooltip(id, div)
+    })
+    div.addEventListener('mouseleave', ocultarDexTooltip)
     const artwork = imgUrl(id)
     const sprite  = imgSprite(id)
     div.innerHTML = `
@@ -225,6 +293,10 @@ async function crearMini(id, anim, oculto = false) {
   div.innerHTML = `<img src="${artwork}" alt="${nom}" loading="lazy"
     ${oculto ? '' : `onerror="this.src='${sprite}'"`} style="width:52px;height:52px;object-fit:contain">
     <p>${nom}</p>`
+  if (!oculto) {
+    div.addEventListener('mouseenter', () => mostrarDexTooltip(id, div))
+    div.addEventListener('mouseleave', ocultarDexTooltip)
+  }
   return div
 }
 
@@ -248,6 +320,8 @@ async function revelarTodo(est) {
       el.innerHTML = `<img src="${imgUrl(id)}" alt="${nom}" loading="lazy"
         onerror="this.src='${imgSprite(id)}'" style="width:52px;height:52px;object-fit:contain">
         <p>${nom}</p>`
+      el.addEventListener('mouseenter', () => mostrarDexTooltip(id, el))
+      el.addEventListener('mouseleave', ocultarDexTooltip)
       await new Promise(r => setTimeout(r, 110))
     }
   }
@@ -533,6 +607,35 @@ export async function copiarResumenDuelo(btn) {
     setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copy-ok') }, 2500)
   }
   mostrarToast('📋 Resumen completo del duelo copiado al portapapeles', 'ok')
+}
+
+export async function solicitarRevancha(btn) {
+  if (estado.miRol !== 'jugador1' && estado.miRol !== 'jugador2') {
+    mostrarToast('⚠️ Solo los duelistas pueden solicitar o aceptar revancha', 'err')
+    return
+  }
+  try {
+    if (btn) {
+      btn.disabled = true
+      btn.textContent = '⏳ Solicitando revancha...'
+    }
+    const res = await post('/revancha', {})
+    if (res?.iniciada) {
+      mostrarToast('⚔️ ¡Revancha aceptada! Comenzando nuevo duelo...', 'ok')
+      Sonido.miTurno?.()
+    } else {
+      mostrarToast('⚔️ Solicitud de revancha enviada a tu rival. Esperando confirmación...', 'ok')
+      Sonido.click?.()
+      if (btn) btn.textContent = '⏳ Esperando que acepte tu rival...'
+    }
+    if (window.forzarActualizar) await window.forzarActualizar()
+  } catch (err) {
+    mostrarToast('⚠️ ' + (err.message || 'Error al pedir revancha'), 'err')
+    if (btn) {
+      btn.disabled = false
+      btn.textContent = '⚡ Revancha Inmediata'
+    }
+  }
 }
 
 export function abrirShowdown(idEl) {
