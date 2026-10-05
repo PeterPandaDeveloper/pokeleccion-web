@@ -204,7 +204,10 @@ class UpstashRedisStorage implements IStorage {
   }
 
   async guardarSala(sala: Sala): Promise<void> {
-    const ttlSegundos = Math.ceil(CONFIG.TTL_SIN_JUGADORES / 1000) // 420s (7 min)
+    // Si la partida está activa en draft o finalizada, extender TTL a 20 minutos (1200s) para resiliencia
+    const ttlSegundos = (sala.estado.fase === 'draft' || sala.estado.fase === 'fin')
+      ? 1200
+      : Math.ceil(CONFIG.TTL_SIN_JUGADORES / 1000)
     const jsonStr = JSON.stringify({ ...sala, timer: null })
     const cmds: unknown[][] = [
       ['SET', `sala:${sala.id}`, jsonStr, 'EX', ttlSegundos],
@@ -329,7 +332,9 @@ class IoRedisStorage implements IStorage {
   }
 
   async guardarSala(sala: Sala): Promise<void> {
-    const ttlSegundos = Math.ceil(CONFIG.TTL_SIN_JUGADORES / 1000)
+    const ttlSegundos = (sala.estado.fase === 'draft' || sala.estado.fase === 'fin')
+      ? 1200
+      : Math.ceil(CONFIG.TTL_SIN_JUGADORES / 1000)
     const jsonStr = JSON.stringify({ ...sala, timer: null })
     await this.client.set(`sala:${sala.id}`, jsonStr, 'EX', ttlSegundos)
     if (!sala.privada && !sala.eliminada) {

@@ -501,6 +501,40 @@ export async function copiarAmbos(btn) {
   }
 }
 
+export async function copiarResumenDuelo(btn) {
+  const j1Nom = document.getElementById('nom-j1')?.textContent?.trim() || 'Jugador 1'
+  const j2Nom = document.getElementById('nom-j2')?.textContent?.trim() || 'Jugador 2'
+  const j1Text = document.getElementById('sd-j1')?.value?.trim() || ''
+  const j2Text = document.getElementById('sd-j2')?.value?.trim() || ''
+  const salaId = estado.salaId || 'DEFAULT'
+
+  const lineasJ1 = j1Text.split('\n\n').map(b => b.split('\n')[0].trim()).filter(Boolean)
+  const lineasJ2 = j2Text.split('\n\n').map(b => b.split('\n')[0].trim()).filter(Boolean)
+
+  const resumen = [
+    `🏆 DUELO POKÉ-ELECCIÓN [Sala: ${salaId}]`,
+    `⚔️ ${j1Nom} vs ${j2Nom}`,
+    `----------------------------------------`,
+    `🔴 Equipo ${j1Nom}:`,
+    ...lineasJ1.map(p => `  • ${p}`),
+    ``,
+    `🟢 Equipo ${j2Nom}:`,
+    ...lineasJ2.map(p => `  • ${p}`),
+    `----------------------------------------`,
+    `🎮 Juega o revive el draft en: ${window.location.origin}/?sala=${salaId}`
+  ].join('\n')
+
+  await copiarTexto(resumen)
+  Sonido.copiar()
+  if (btn) {
+    const orig = btn.innerHTML
+    btn.innerHTML = '✅ ¡Resumen Copiado!'
+    btn.classList.add('copy-ok')
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copy-ok') }, 2500)
+  }
+  mostrarToast('📋 Resumen completo del duelo copiado al portapapeles', 'ok')
+}
+
 export function abrirShowdown(idEl) {
   const txt = document.getElementById(idEl)?.value?.trim()
   if (!txt) return

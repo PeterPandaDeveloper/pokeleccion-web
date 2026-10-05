@@ -142,6 +142,11 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
     return json(res, 200, stats)
   }
 
+  if ((base==='/api/historial' || base==='/api/partidas') && m==='GET') {
+    const stats = await storage.obtenerEstadisticas()
+    return json(res, 200, stats.ultimasPartidas)
+  }
+
   if (base==='/api/sala/crear' && m==='POST') {
     if (!checkRL(ip,'crear',CONFIG.RATE_CREAR_SALA))
       return json(res,429,{error:'Demasiadas salas creadas. Espera un momento.'})
@@ -364,17 +369,19 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       if (estado.fase!=='lobby') return json(res,409,{error:'No estamos en el lobby.'})
       if (!rolPropio) return json(res,403,{error:'Token no válido.'})
       if (!estado.lobby[rolPropio].voto) return json(res,400,{error:'Primero hay que elegir configuración.'})
-      const errIds = validarIds(b.idsValidos, Math.max(
-        estado.lobby.jugador1.voto?.numRondas ?? CONFIG.MAX_RONDAS_DEFAULT,
-        estado.lobby.jugador2.voto?.numRondas ?? CONFIG.MAX_RONDAS_DEFAULT
-      ))
-      if (errIds) return json(res,400,{error:errIds})
+      if (Array.isArray(b.idsValidos)) {
+        const errIds = validarIds(b.idsValidos, Math.max(
+          estado.lobby.jugador1.voto?.numRondas ?? CONFIG.MAX_RONDAS_DEFAULT,
+          estado.lobby.jugador2.voto?.numRondas ?? CONFIG.MAX_RONDAS_DEFAULT
+        ))
+        if (errIds) return json(res,400,{error:errIds})
+      }
       estado.lobby[rolPropio].listo    = true
       estado.lobby[rolPropio].bloqueado = true
       const nombre = estado[rolPropio].nombre||rolPropio
       agregarMensajeSistema(sala,`✅ ${nombre} está listo.`)
       if (estado.lobby.jugador1.listo&&estado.lobby.jugador2.listo)
-        iniciarDraft(salaId,sala,b.idsValidos as number[])
+        iniciarDraft(salaId,sala,Array.isArray(b.idsValidos)?(b.idsValidos as number[]):undefined)
       return responderConSala(res, 200, sala, estado)
     }
 

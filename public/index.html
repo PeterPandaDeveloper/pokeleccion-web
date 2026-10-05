@@ -51,46 +51,66 @@
       <button class="btn-tutorial-link" onclick="mostrarTutorial()">¿Cómo jugar?</button>
     </div>
 
-    <!-- PASO 1: nombre/rol -->
+    <!-- PASO 1: nombre/rol (Flujo Party Game) -->
     <div id="paso-nombre" class="lobby-step">
-      <div class="box-gba">
-        <h2 class="step-title" id="paso-titulo">¿Quién eres?</h2>
+      <div class="box-gba party-onboarding-box">
+        <h2 class="step-title" id="paso-titulo">Entrenador Pokémon</h2>
 
-        <!-- Selector de salas públicas -->
-        <div class="salas-section">
-          <div class="salas-header">
-            <span class="salas-label">Salas disponibles</span>
-            <button class="btn-sala-nueva" onclick="crearNuevaSala()">+ Nueva sala</button>
+        <div class="party-form">
+          <div class="input-row party-input-row" id="fila-nombre">
+            <label class="ctrl-label">Nombre</label>
+            <input type="text" id="input-nombre" maxlength="20" placeholder="Tu nombre de entrenador..." autocomplete="off"/>
           </div>
-          <div id="salas-publicas" class="salas-lista">
-            <p class="sin-salas">Cargando salas...</p>
-          </div>
-        </div>
 
-        <div class="divider-o">— o entra directamente —</div>
-
-        <div class="nombre-form">
-          <div class="sala-selector-row">
-            <span class="sala-actual">Sala: <strong id="sala-id-display">—</strong></span>
-            <button class="btn-copiar-sala" onclick="copiarEnlace()">🔗 Copiar enlace</button>
+          <!-- Dos botones principales de Party Game -->
+          <div class="party-actions-grid">
+            <button class="btn-party-primary" id="btn-party-crear" onclick="crearSalaParty()">
+              <span class="party-btn-icon">🎮</span>
+              <span class="party-btn-text">
+                <strong>Crear Sala</strong>
+                <small>Ser anfitrión y generar enlace</small>
+              </span>
+            </button>
+            <button class="btn-party-secondary" id="btn-party-unirse" onclick="unirsePorCodigo()">
+              <span class="party-btn-icon">🤝</span>
+              <span class="party-btn-text">
+                <strong>Unirse a Sala</strong>
+                <small>Entrar con código o enlace</small>
+              </span>
+            </button>
           </div>
-          <div class="input-row">
-            <label class="ctrl-label">Rol</label>
+
+          <div class="party-codigo-row">
+            <input type="text" id="input-codigo-sala" maxlength="8" placeholder="Código de sala (ej: A1B2C3)" autocomplete="off" style="text-transform:uppercase"/>
+            <button class="btn-entrar-codigo" onclick="unirsePorCodigo()">Entrar</button>
+          </div>
+
+          <!-- Retrocompatibilidad de hooks -->
+          <div style="display:none">
             <select id="rol-selector" onchange="onRolChange()">
               <option value="jugador1">🔴 Jugador 1</option>
               <option value="jugador2">🟢 Jugador 2</option>
               <option value="espectador">👁 Espectador</option>
             </select>
-          </div>
-          <div class="input-row" id="fila-nombre">
-            <label class="ctrl-label">Nombre</label>
-            <input type="text" id="input-nombre" maxlength="20" placeholder="Nombre de entrenador..." autocomplete="off"/>
-          </div>
-          <div class="input-row" id="fila-nombre-esp" style="display:none">
-            <label class="ctrl-label">Nombre</label>
             <input type="text" id="input-nombre-esp" maxlength="20" placeholder="Tu nombre como espectador..." autocomplete="off"/>
+            <button id="btn-unirse" onclick="unirseAlLobby()">Entrar</button>
           </div>
-          <button id="btn-unirse" onclick="unirseAlLobby()">Entrar</button>
+
+          <div class="sala-selector-row party-sala-row">
+            <span class="sala-actual">Sala actual: <strong id="sala-id-display">—</strong></span>
+            <button class="btn-copiar-sala" onclick="copiarEnlace()">🔗 Copiar enlace</button>
+          </div>
+        </div>
+
+        <!-- Selector de salas públicas -->
+        <div class="salas-section">
+          <div class="salas-header">
+            <span class="salas-label">Salas públicas disponibles</span>
+            <button class="btn-sala-nueva" onclick="crearSalaParty()">+ Nueva sala</button>
+          </div>
+          <div id="salas-publicas" class="salas-lista">
+            <p class="sin-salas">Cargando salas...</p>
+          </div>
         </div>
       </div>
     </div>
@@ -497,6 +517,9 @@
             <button class="btn-showdown j2-showdown" onclick="abrirShowdown('sd-j2')">⚡ Abrir en Showdown</button>
           </div>
         </div>
+      </div>
+      <div class="resumen-duelo-row" style="text-align:center; margin-top:16px;">
+        <button class="btn-accion btn-resumen-duelo" onclick="copiarResumenDuelo(this)">📜 Copiar Resumen del Duelo (Discord / WhatsApp)</button>
       </div>
     </div>
 

@@ -3,13 +3,13 @@ import { Sonido }        from './sonido.js'
 import { mostrarToast, mostrarInfo, cerrarInfo, mostrarTutorial, cerrarTutorial } from './modal.js'
 import {
   construirTipos, onRolChange, toggleRegion, toggleTipo, toggleColor, syncRestr,
-  leerVoto, etiquetaVoto, unirseAlLobby, votarConfig, votarConfigDelOtro, marcarListo,
+  leerVoto, etiquetaVoto, unirseAlLobby, crearSalaParty, unirsePorCodigo, votarConfig, votarConfigDelOtro, marcarListo,
   limpiarSala, copiarEnlace, crearNuevaSala, actualizarDisplaySala,
   actualizarLobbyUI, mostrarPasoLobby,
 } from './lobby.js'
 import {
   syncDraft, flashBatalla, resetarEstadoRender, resetear,
-  enviarChat, enviarBuzz, copiarCodigo, abrirShowdown, renderChat,
+  enviarChat, enviarBuzz, copiarCodigo, copiarResumenDuelo, abrirShowdown, renderChat,
 } from './draft.js'
 
 // ─── ESTADO GLOBAL DE PANTALLA ────────────────────────────────────────────────
@@ -17,11 +17,14 @@ let enDraft = false
 let prevEstadoG = null
 
 // ─── EXPONER AL HTML (onclick=) ───────────────────────────────────────────────
-window.onRolChange     = onRolChange
-window.toggleRegion    = toggleRegion
-window.toggleTipo      = toggleTipo
-window.toggleColor     = toggleColor
-window.syncRestr       = syncRestr
+window.onRolChange        = onRolChange
+window.toggleRegion       = toggleRegion
+window.toggleTipo         = toggleTipo
+window.toggleColor        = toggleColor
+window.syncRestr          = syncRestr
+window.crearSalaParty     = crearSalaParty
+window.unirsePorCodigo    = unirsePorCodigo
+window.copiarResumenDuelo = copiarResumenDuelo
 window.unirseAlLobby   = async (...args) => {
   await unirseAlLobby(...args)
   // Iniciar heartbeat tras unirse exitosamente
@@ -230,11 +233,28 @@ export async function actualizar() {
 }
 
 function obtenerIntervaloPolling() {
-  if (document.hidden) return 1800
-  if (!prevEstadoG) return 450
-  if (prevEstadoG.fase === 'draft') return 320 // ¡Tiempo real en draft sin lag!
-  if (prevEstadoG.fase === 'fin') return 2000
-  return 480 // Lobby ágil
+  if (document.hidden) return 2500
+  if (!prevEstadoG) return 480
+
+  if (prevEstadoG.fase === 'draft') {
+    const miTurno = (prevEstadoG.turnoDe === estado.miRol)
+    if (miTurno) return 320 // ¡Instantáneo cuando es mi turno!
+
+    // Si es turno del rival, verificar si el reloj está bajo para acelerar
+    if (prevEstadoG.timerExpira) {
+      const msRestantes = prevEstadoG.timerExpira - Date.now()
+      if (msRestantes <= 3500) return 350 // Acelerar cuando está por pasar el turno
+    }
+    // Ahorro sustancial de cuota Redis mientras el rival piensa
+    return 950
+  }
+
+  if (prevEstadoG.fase === 'fin') return 2500
+
+  // Lobby: si ambos están listos, sincronizar rápido
+  const ambosListos = prevEstadoG.lobby?.jugador1?.listo && prevEstadoG.lobby?.jugador2?.listo
+  if (ambosListos) return 350
+  return 600
 }
 
 let loopTimer = null
@@ -339,9 +359,20 @@ async function iniciar() {
     if (!document.hidden) programarSiguientePoll(true)
   })
 
-  // Enter en input de nombre
+  // Enter en input de nombre y código
   document.getElementById('input-nombre')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') unirseAlLobby()
+    if (e.key === 'Enter') {
+      const cod = document.getElementById('input-codigo-sala')?.value?.trim()
+      if (cod || estado.salaId) unirsePorCodigo()
+      else crearSalaParty()
+    }
+  })
+  if (estado.salaId) {
+    const inputCod = document.getElementById('input-codigo-sala')
+    if (inputCod && !inputCod.value) inputCod.value = estado.salaId
+  }
+  document.getElementById('input-codigo-sala')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') unirsePorCodigo()
   })
 
   // Enter en chat (ambos inputs)

@@ -1898,3 +1898,130 @@ body.buzz-shake {
   100% { transform: translateX(-50%) scale(1); opacity: 1; }
 }
 
+
+/* ════ PARTY GAME ONBOARDING FLOW ════ */
+.party-onboarding-box {
+  max-width: 480px;
+  margin: 0 auto;
+}
+.party-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.party-input-row {
+  margin-bottom: 4px;
+}
+.party-input-row input {
+  flex: 1;
+  font-size: 1.15rem;
+}
+.party-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 480px) {
+  .party-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.btn-party-primary, .btn-party-secondary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  text-align: left;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'Press Start 2P', monospace;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+}
+.btn-party-primary {
+  background: #1b5e20;
+  border: 2px solid #81c784;
+  color: #fff;
+}
+.btn-party-primary:hover {
+  background: #2e7d32;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+}
+.btn-party-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+}
+.btn-party-secondary {
+  background: #0277bd;
+  border: 2px solid #81d4fa;
+  color: #fff;
+}
+.btn-party-secondary:hover {
+  background: #0288d1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+}
+.btn-party-secondary:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+}
+.party-btn-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.party-btn-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.party-btn-text strong {
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+}
+.party-btn-text small {
+  font-family: 'VT323', monospace;
+  font-size: 0.95rem;
+  opacity: 0.9;
+  font-weight: normal;
+}
+.party-codigo-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.party-codigo-row input {
+  flex: 1;
+  letter-spacing: 2px;
+  font-weight: bold;
+  text-align: center;
+}
+.btn-entrar-codigo {
+  background: #37474f;
+  color: #eceff1;
+  border: 2px solid #78909c;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.58rem;
+  transition: all 0.15s ease;
+}
+.btn-entrar-codigo:hover {
+  background: #455a64;
+}
+.party-sala-row {
+  margin-top: 4px;
+}
+.btn-resumen-duelo {
+  background: #4a148c !important;
+  color: #f3e5f5 !important;
+  border: 2px solid #ba68c8 !important;
+  font-size: 0.65rem !important;
+  padding: 10px 18px !important;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.btn-resumen-duelo:hover {
+  background: #6a1b9a !important;
+}

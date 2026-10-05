@@ -1,5 +1,6 @@
 import { CONFIG }        from './config'
 import { Sala, EstadoSala, VotoConfig, agregarMensajeSistema } from './sala'
+import { POKEMON_DB }     from './pokemonData'
 
 const LEGENDARIOS = new Set<number>([
   144,145,146,150,151,243,244,245,249,250,251,377,378,379,380,381,382,383,384,385,386,
@@ -8,6 +9,18 @@ const LEGENDARIOS = new Set<number>([
   792,800,801,802,888,889,890,891,892,893,894,895,896,897,898,
   905,1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1017,1020,1024,1025,
 ])
+
+export const RANGOS: Record<string, [number, number]> = {
+  todas: [1, 1025], kanto: [1, 151], johto: [152, 251], hoenn: [252, 386], sinnoh: [387, 493],
+  unova: [494, 649], kalos: [650, 721], alola: [722, 809], galar: [810, 905], paldea: [906, 1025]
+}
+
+export const TIPO_EN: Record<string, string> = {
+  normal:'normal', fuego:'fire', agua:'water', planta:'grass', 'eléctrico':'electric',
+  hielo:'ice', lucha:'fighting', veneno:'poison', tierra:'ground', volador:'flying',
+  'psíquico':'psychic', bicho:'bug', roca:'rock', fantasma:'ghost', 'dragón':'dragon',
+  siniestro:'dark', acero:'steel', hada:'fairy'
+}
 
 export const FORMAS_REGIONALES: Record<string, number[]> = {
   kanto:[10033,10034,10035,10036,10037,10038,10039,10040],
@@ -26,6 +39,55 @@ export const FORMAS_REGIONALES: Record<string, number[]> = {
          10196,10197,10198,10199,10200,10201,10202,10203,10204],
   paldea:[10250,10251,10252],
   todas:[],
+}
+
+export const FORMAS_REGIONALES_ESPECIALES = new Set<number>([
+  ...Object.values(FORMAS_REGIONALES).flat()
+])
+
+export const GIMMICKS = new Set<number>([
+  793,794,795,796,797,798,799,803,804,805,806,
+  1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025
+])
+
+export function construirPoolBackend(v: VotoConfig): number[] {
+  const idSet = new Set<number>()
+  for (const reg of v.regiones) {
+    const [mn, mx] = RANGOS[reg] || [1, 1025]
+    for (let i = mn; i <= mx; i++) idSet.add(i)
+    ;(FORMAS_REGIONALES[reg] || []).forEach(id => idSet.add(id))
+  }
+  let ids = [...idSet].sort((a, b) => a - b)
+  if (v.sinLegendarios) ids = ids.filter(id => !LEGENDARIOS.has(id))
+
+  if (v.soloFinales)      ids = ids.filter(id => POKEMON_DB[id]?.esFinal === true)
+  if (v.soloSinEvolucion) ids = ids.filter(id => POKEMON_DB[id]?.sinEvo === true)
+  if (v.soloBase)         ids = ids.filter(id => POKEMON_DB[id]?.esBase === true)
+  if (v.copaBebe)         ids = ids.filter(id => POKEMON_DB[id]?.esBase === true && POKEMON_DB[id]?.copaBebe === true && !LEGENDARIOS.has(id))
+
+  if (v.tipos && v.tipos.length) {
+    const te = v.tipos.map(t => TIPO_EN[t]).filter(Boolean)
+    ids = v.modoTipos === 'AND'
+      ? ids.filter(id => te.every(t => POKEMON_DB[id]?.types.includes(t)))
+      : ids.filter(id => te.some(t => POKEMON_DB[id]?.types.includes(t)))
+  }
+
+  if (v.colores && v.colores.length) {
+    ids = ids.filter(id => v.colores.includes(POKEMON_DB[id]?.color || 'gris'))
+  }
+
+  if (v.sinFormasRegionales) {
+    ids = ids.filter(id => !FORMAS_REGIONALES_ESPECIALES.has(id))
+  }
+
+  if (v.sinGimmicks) {
+    ids = ids.filter(id => !GIMMICKS.has(id))
+  }
+
+  if (v.minBST) ids = ids.filter(id => (POKEMON_DB[id]?.bst || 0) >= v.minBST!)
+  if (v.maxBST) ids = ids.filter(id => (POKEMON_DB[id]?.bst || 9999) <= v.maxBST!)
+
+  return ids
 }
 
 export function resolverConfig(v1: VotoConfig, v2: VotoConfig): VotoConfig {
@@ -145,16 +207,27 @@ export function aplicarEleccion(salaId: string, sala: Sala, jugador: 'jugador1'|
   generarRonda(salaId, sala)
 }
 
-export function iniciarDraft(salaId: string, sala: Sala, idsValidos: number[]): void {
+export function iniciarDraft(salaId: string, sala: Sala, idsValidosCliente?: number[]): void {
   const { estado } = sala
   estado.config  = resolverConfig(estado.lobby.jugador1.voto!, estado.lobby.jugador2.voto!)
-  sala.pool      = idsValidos.slice()
+  
+  // Cálculo autoritativo seguro en el backend:
+  let poolServidor = construirPoolBackend(estado.config)
+  if (!poolServidor || poolServidor.length < (estado.config.numRondas * 2)) {
+    if (idsValidosCliente && idsValidosCliente.length >= (estado.config.numRondas * 2)) {
+      poolServidor = idsValidosCliente.slice()
+    } else {
+      poolServidor = Array.from({length: 1025}, (_, i) => i + 1)
+    }
+  }
+
+  sala.pool      = poolServidor
   estado.poolSize = sala.pool.length
   estado.jugador1.nombre = estado.lobby.jugador1.nombre
   estado.jugador2.nombre = estado.lobby.jugador2.nombre
   estado.fase = 'draft'
   const etiqueta = etiquetaConfig(estado.config)
   agregarMensajeSistema(sala, `🎮 ¡Draft iniciado! Reglas: ${etiqueta}`)
-  console.log(`🎮  [${salaId}] Draft iniciado — pool: ${sala.pool.length}`)
+  console.log(`🎮  [${salaId}] Draft iniciado — pool autoritativo calculado en servidor: ${sala.pool.length}`)
   generarRonda(salaId, sala)
 }

@@ -205,6 +205,102 @@ export function desbloquearConfig() {
 }
 
 // ─── ACCIONES ─────────────────────────────────────────────────────────────────
+export async function crearSalaParty() {
+  const nombre = (document.getElementById('input-nombre')?.value || '').trim() || 'Entrenador'
+  estado.miNombre = nombre
+  guardarSesion()
+  try {
+    const r = await fetch('/api/sala/crear', { method: 'POST' })
+    const d = await r.json()
+    if (!d.salaId) throw new Error(d.error || 'No se pudo crear la sala')
+    estado.salaId = d.salaId
+    guardarSesion()
+    actualizarDisplaySala()
+
+    const resUnirse = await post('/lobby/unirse', { rol: 'jugador1', nombre, token: '' })
+    estado.miRol = 'jugador1'
+    estado.miToken = resUnirse.token
+    guardarSesion()
+    Sonido.seleccionar()
+    mostrarPasoLobby()
+    await copiarEnlace()
+    mostrarToast(`🎮 Sala ${d.salaId} creada. ¡Enlace copiado al portapapeles!`, 'ok')
+    if (resUnirse.estado && window.aplicarEstado) {
+      await window.aplicarEstado(resUnirse.estado)
+    } else if (window.forzarActualizar) {
+      window.forzarActualizar()
+    }
+    import('./api.js').then(m => m.iniciarHeartbeat())
+  } catch (e) {
+    Sonido.error()
+    mostrarToast('⚠️ ' + e.message, 'err')
+  }
+}
+
+export async function unirsePorCodigo(codigoInput) {
+  const nombre = (document.getElementById('input-nombre')?.value || '').trim() || 'Entrenador'
+  estado.miNombre = nombre
+  guardarSesion()
+
+  const codigo = (codigoInput || document.getElementById('input-codigo-sala')?.value || estado.salaId || '').trim().toUpperCase()
+  if (!codigo) {
+    Sonido.error()
+    mostrarToast('⚠️ Ingresa el código de la sala (ej: A1B2C3).', 'err')
+    return
+  }
+
+  estado.salaId = codigo
+  guardarSesion()
+  actualizarDisplaySala()
+
+  try {
+    const r = await fetch(`/api/sala/${codigo}/estado`)
+    if (!r.ok) {
+      if (r.status === 410) throw new Error('Esta sala ya no existe o fue eliminada.')
+      throw new Error('No se encontró la sala ' + codigo)
+    }
+    const est = await r.json()
+
+    let rolElegido = 'espectador'
+    if (!est.jugador1?.conectado) {
+      rolElegido = 'jugador1'
+    } else if (!est.jugador2?.conectado) {
+      rolElegido = 'jugador2'
+    } else {
+      rolElegido = 'espectador'
+    }
+
+    if (rolElegido === 'espectador') {
+      estado.miRol = 'espectador'
+      estado.miToken = ''
+      await fetch(`/api/sala/${codigo}/espectador/unirse`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre })
+      })
+      window.addEventListener('beforeunload', () => navigator.sendBeacon(`/api/sala/${codigo}/espectador/salir`, JSON.stringify({ nombre })))
+      guardarSesion()
+      Sonido.click()
+      mostrarPasoLobby()
+      mostrarToast(`👁 Sala llena. Entraste como Espectador en la sala ${codigo}.`, 'info')
+    } else {
+      const d = await post('/lobby/unirse', { rol: rolElegido, nombre, token: '' })
+      estado.miRol = rolElegido
+      estado.miToken = d.token
+      guardarSesion()
+      Sonido.seleccionar()
+      mostrarPasoLobby()
+      mostrarToast(`✅ ¡Te uniste como ${rolElegido === 'jugador1' ? 'Jugador 1' : 'Jugador 2'} a la sala ${codigo}!`, 'ok')
+      import('./api.js').then(m => m.iniciarHeartbeat())
+    }
+
+    if (window.forzarActualizar) window.forzarActualizar()
+  } catch (e) {
+    Sonido.error()
+    mostrarToast('⚠️ ' + e.message, 'err')
+  }
+}
+
 export async function unirseAlLobby() {
   const rol    = document.getElementById('rol-selector').value
   const nombre = document.getElementById('input-nombre')?.value.trim()
@@ -408,51 +504,39 @@ export function actualizarDisplaySala() {
 
 // ─── POOL DE POKÉMON ─────────────────────────────────────────────────────────
 export async function construirPool(v) {
-  const idSet=new Set()
+  await precargaBatch()
+  const idSet = new Set()
   for (const reg of v.regiones) {
-    const [mn,mx]=RANGOS[reg]||[1,1025]
-    for (let i=mn;i<=mx;i++) idSet.add(i);
-    (FORMAS_REGIONALES[reg]||[]).forEach(id=>idSet.add(id))
+    const [mn, mx] = RANGOS[reg] || [1, 1025]
+    for (let i = mn; i <= mx; i++) idSet.add(i)
+    ;(FORMAS_REGIONALES[reg] || []).forEach(id => idSet.add(id))
   }
-  let ids=[...idSet].sort((a,b)=>a-b)
-  if (v.sinLegendarios) ids=ids.filter(id=>!LEGENDARIOS.has(id))
-  
-  // Si solo hay filtros básicos (sin evolución), no necesitamos API
-  const necesitaAPI=v.soloFinales||v.soloSinEvolucion||v.soloBase||v.copaBebe||v.tipos.length>0||v.colores.length>0||v.maxBST||v.minBST||v.sinFormasRegionales||v.sinGimmicks
-  
-  if (necesitaAPI) {
-    // Para Copa Bebé, limitar a 200 Pokémon aleatorios del pool para evitar timeouts
-    if (v.copaBebe && ids.length > 200) {
-      // Mezclar y tomar 200 aleatorios
-      for (let i = ids.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [ids[i], ids[j]] = [ids[j], ids[i]]
-      }
-      ids = ids.slice(0, 200)
-    }
-    
-    await precargaBatch(ids)
-    if (v.soloFinales)      ids=ids.filter(id=>evoCache.get(id)?.esFinal===true)
-    if (v.soloSinEvolucion) ids=ids.filter(id=>evoCache.get(id)?.sinEvo===true)
-    if (v.soloBase)         ids=ids.filter(id=>evoCache.get(id)?.esBase===true)
-    // Copa Bebé: primera etapa + cadena de 2+ evoluciones + no legendario
-    if (v.copaBebe)         ids=ids.filter(id=>evoCache.get(id)?.esBase===true&&evoCache.get(id)?.copaBebe===true&&!LEGENDARIOS.has(id))
-    if (v.tipos.length) {
-      const te=v.tipos.map(t=>TIPO_EN[t]).filter(Boolean)
-      ids=v.modoTipos==='AND'?ids.filter(id=>te.every(t=>typeCache.get(id)?.includes(t))):ids.filter(id=>te.some(t=>typeCache.get(id)?.includes(t)))
-    }
-    if (v.colores.length) {
-      ids=ids.filter(id => v.colores.includes(colorCache.get(id) || 'gris'))
-    }
-    if (v.sinFormasRegionales) {
-      ids=ids.filter(id=>!FORMAS_REGIONALES_ESPECIALES.has(id))
-    }
-    if (v.sinGimmicks) {
-      ids=ids.filter(id=>!GIMMICKS.has(id))
-    }
-    if (v.minBST) ids=ids.filter(id=>(bstCache.get(id)||0)>=v.minBST)
-    if (v.maxBST) ids=ids.filter(id=>(bstCache.get(id)||9999)<=v.maxBST)
+  let ids = [...idSet].sort((a, b) => a - b)
+  if (v.sinLegendarios) ids = ids.filter(id => !LEGENDARIOS.has(id))
+
+  if (v.soloFinales)      ids = ids.filter(id => evoCache.get(id)?.esFinal === true)
+  if (v.soloSinEvolucion) ids = ids.filter(id => evoCache.get(id)?.sinEvo === true)
+  if (v.soloBase)         ids = ids.filter(id => evoCache.get(id)?.esBase === true)
+  // Copa Bebé: primera etapa + cadena de 2+ evoluciones + no legendario
+  if (v.copaBebe)         ids = ids.filter(id => evoCache.get(id)?.esBase === true && evoCache.get(id)?.copaBebe === true && !LEGENDARIOS.has(id))
+  if (v.tipos.length) {
+    const te = v.tipos.map(t => TIPO_EN[t]).filter(Boolean)
+    ids = v.modoTipos === 'AND'
+      ? ids.filter(id => te.every(t => typeCache.get(id)?.includes(t)))
+      : ids.filter(id => te.some(t => typeCache.get(id)?.includes(t)))
   }
+  if (v.colores.length) {
+    ids = ids.filter(id => v.colores.includes(colorCache.get(id) || 'gris'))
+  }
+  if (v.sinFormasRegionales) {
+    ids = ids.filter(id => !FORMAS_REGIONALES_ESPECIALES.has(id))
+  }
+  if (v.sinGimmicks) {
+    ids = ids.filter(id => !GIMMICKS.has(id))
+  }
+  if (v.minBST) ids = ids.filter(id => (bstCache.get(id) || 0) >= v.minBST)
+  if (v.maxBST) ids = ids.filter(id => (bstCache.get(id) || 9999) <= v.maxBST)
+
   return ids
 }
 
