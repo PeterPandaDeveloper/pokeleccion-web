@@ -128,17 +128,41 @@
           </div>
           <div id="cooldown-msg" class="cooldown-msg" style="display:none"></div>
           <div id="panel-limpiar" class="panel-limpiar" style="display:none">
-            <label class="tog tog-privada">
-              <input type="checkbox" id="chk-privada" onchange="togglePrivada()">
-              🔒 Sala privada
-            </label>
-            <button class="btn-limpiar" onclick="limpiarSala()">🧹 Borrar selecciones</button>
-            <button class="btn-keepalive" onclick="mantenerViva()">⏱ Mantener sala viva</button>
-            <button class="btn-eliminar-sala" onclick="eliminarSala()">🗑 Eliminar sala</button>
-            <div id="intercambio-btns" class="intercambio-btns">
-              <button class="btn-liberar" id="btn-liberar" onclick="liberarSlot()" style="display:none">🚪 Dejar mi slot</button>
-              <button class="btn-tomar-j1" id="btn-tomar-j1" onclick="tomarSlot('jugador1')" style="display:none">🔴 Tomar Jugador 1</button>
-              <button class="btn-tomar-j2" id="btn-tomar-j2" onclick="tomarSlot('jugador2')" style="display:none">🟢 Tomar Jugador 2</button>
+            <div class="panel-limpiar-header">
+              <span class="panel-limpiar-title">Ajustes de sala</span>
+              <label class="tog-privada-compact" title="Ocultar de la lista pública">
+                <input type="checkbox" id="chk-privada" onchange="togglePrivada()">
+                <svg class="btn-flat-ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span>Privada</span>
+              </label>
+            </div>
+            <div class="panel-limpiar-grid">
+              <button class="btn-util btn-limpiar" onclick="limpiarSala()">
+                <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3l3 3-9 9H9v-3l9-9z"/><path d="M3 21h18"/></svg>
+                <span class="btn-txt">Borrar selecciones</span>
+              </button>
+              <button class="btn-util btn-keepalive" onclick="mantenerViva()">
+                <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span class="btn-txt">Mantener sala viva</span>
+              </button>
+              <div id="intercambio-btns" class="intercambio-btns">
+                <button class="btn-util btn-liberar" id="btn-liberar" onclick="liberarSlot()" style="display:none">
+                  <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  <span class="btn-txt">Dejar mi slot</span>
+                </button>
+                <button class="btn-util btn-tomar-j1" id="btn-tomar-j1" onclick="tomarSlot('jugador1')" style="display:none">
+                  <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                  <span class="btn-txt">Tomar Jugador 1</span>
+                </button>
+                <button class="btn-util btn-tomar-j2" id="btn-tomar-j2" onclick="tomarSlot('jugador2')" style="display:none">
+                  <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                  <span class="btn-txt">Tomar Jugador 2</span>
+                </button>
+              </div>
+              <button class="btn-util btn-eliminar-sala" onclick="eliminarSala()">
+                <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                <span class="btn-txt">Eliminar sala</span>
+              </button>
             </div>
           </div>
 

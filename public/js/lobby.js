@@ -354,11 +354,20 @@ export async function limpiarSala() {
       const msg=document.getElementById('cooldown-msg')
       if (seg<=0) {
         clearInterval(iv); cooldownLimpiar=false
-        if (btn) { btn.disabled=false; btn.textContent='🧹 Borrar selecciones' }
+        if (btn) {
+          btn.disabled = false
+          const txt = btn.querySelector('.btn-txt')
+          if (txt) txt.textContent = 'Borrar selecciones'
+          else btn.textContent = 'Borrar selecciones'
+        }
         if (msg) msg.style.display='none'
       } else {
         if (msg) { msg.style.display='block'; msg.textContent=`Puedes limpiar en ${seg}s` }
-        if (btn) btn.textContent=`⌛ ${seg}s...`
+        if (btn) {
+          const txt = btn.querySelector('.btn-txt')
+          if (txt) txt.textContent = `Limpiar (${seg}s)`
+          else btn.textContent = `Limpiar (${seg}s)`
+        }
       }
     },1000)
     mostrarToast('🧹 Sala limpiada','ok')
@@ -453,15 +462,15 @@ export function mostrarPasoLobby() {
   const esJugador=estado.miRol==='jugador1'||estado.miRol==='jugador2'
   const esEspectador=estado.miRol==='espectador' || !estado.miRol
   const panelLimpiar = document.getElementById('panel-limpiar')
-  if (panelLimpiar) panelLimpiar.style.display='block'
+  if (panelLimpiar) panelLimpiar.style.display = 'flex'
   const btnVotarJ2 = document.getElementById('btn-votar-j2')
   if (btnVotarJ2) btnVotarJ2.style.display = esJugador ? 'inline-block' : 'none'
   const btnLimpiar = document.querySelector('.btn-limpiar')
   const btnKeepalive = document.querySelector('.btn-keepalive')
   const chkPrivada = document.getElementById('chk-privada')
-  if (btnLimpiar) btnLimpiar.style.display = esJugador ? 'block' : 'none'
-  if (btnKeepalive) btnKeepalive.style.display = esJugador ? 'block' : 'none'
-  if (chkPrivada) chkPrivada.closest('label')?.style.setProperty('display', esJugador ? 'flex' : 'none')
+  if (btnLimpiar) btnLimpiar.style.display = esJugador ? 'flex' : 'none'
+  if (btnKeepalive) btnKeepalive.style.display = esJugador ? 'flex' : 'none'
+  if (chkPrivada) chkPrivada.closest('label')?.style.setProperty('display', esJugador ? 'inline-flex' : 'none')
   const acciones = document.getElementById('cfg-acciones')
   if (acciones) acciones.style.display = esJugador ? 'block' : 'none'
   const cp=document.getElementById('config-panel-wrap')
@@ -470,12 +479,12 @@ export function mostrarPasoLobby() {
     cp.style.pointerEvents = esJugador ? '' : 'none'
   }
   const btnLiberar = document.getElementById('btn-liberar')
-  if (btnLiberar) btnLiberar.style.display = esJugador ? 'block' : 'none'
+  if (btnLiberar) btnLiberar.style.display = esJugador ? 'flex' : 'none'
   const btnTomarJ1 = document.getElementById('btn-tomar-j1')
   const btnTomarJ2 = document.getElementById('btn-tomar-j2')
   if (btnTomarJ1 && btnTomarJ2) {
-    btnTomarJ1.style.display = esEspectador ? 'block' : 'none'
-    btnTomarJ2.style.display = esEspectador ? 'block' : 'none'
+    btnTomarJ1.style.display = esEspectador ? 'flex' : 'none'
+    btnTomarJ2.style.display = esEspectador ? 'flex' : 'none'
   }
 }
 
@@ -516,14 +525,14 @@ export function actualizarLobbyUI(est) {
   const btnLiberar = document.getElementById('btn-liberar')
   if (btnLiberar) {
     const esJugador = estado.miRol === 'jugador1' || estado.miRol === 'jugador2'
-    btnLiberar.style.display = esJugador ? 'block' : 'none'
+    btnLiberar.style.display = esJugador ? 'flex' : 'none'
   }
   const btnTomarJ1 = document.getElementById('btn-tomar-j1')
   const btnTomarJ2 = document.getElementById('btn-tomar-j2')
   if (btnTomarJ1 && btnTomarJ2) {
     const esEsp = estado.miRol === 'espectador' || !estado.miRol
-    btnTomarJ1.style.display = (esEsp && !est.jugador1.conectado) ? 'block' : 'none'
-    btnTomarJ2.style.display = (esEsp && !est.jugador2.conectado) ? 'block' : 'none'
+    btnTomarJ1.style.display = (esEsp && !est.jugador1.conectado) ? 'flex' : 'none'
+    btnTomarJ2.style.display = (esEsp && !est.jugador2.conectado) ? 'flex' : 'none'
   }
   const espN=est.lobby.espectadores||0
   const eb=document.getElementById('esp-badge')
