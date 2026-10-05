@@ -61,8 +61,6 @@ export async function syncDraft(est) {
     if (!exportGen) {
       Sonido.finDraft()
       await generarExport(est)
-      document.getElementById('sd-title-j1').textContent = est.jugador1.nombre || 'Jugador 1'
-      document.getElementById('sd-title-j2').textContent = est.jugador2.nombre || 'Jugador 2'
       document.getElementById('showdown-box').style.display = 'block'
       exportGen = true
     }
@@ -358,13 +356,34 @@ export async function intentarElegir(id) {
 
 // ─── EXPORTAR ────────────────────────────────────────────────────────────────
 async function generarExport(est) {
-  const esEspectador = !estado.miRol || estado.miRol === 'espectador'
+  const esJ1 = estado.miRol === 'jugador1'
+  const esJ2 = estado.miRol === 'jugador2'
+  const esEspectador = !esJ1 && !esJ2
   const colJ1 = document.getElementById('export-col-j1')
   const colJ2 = document.getElementById('export-col-j2')
-  if (colJ1) colJ1.style.display = (esEspectador || estado.miRol === 'jugador1') ? 'flex' : 'none'
-  if (colJ2) colJ2.style.display = (esEspectador || estado.miRol === 'jugador2') ? 'flex' : 'none'
-  document.getElementById('sd-j1').value = await fmtEquipo(est.jugador1.equipo)
-  document.getElementById('sd-j2').value = await fmtEquipo(est.jugador2.equipo)
+
+  if (colJ1) colJ1.style.display = (esEspectador || esJ1) ? 'flex' : 'none'
+  if (colJ2) colJ2.style.display = (esEspectador || esJ2) ? 'flex' : 'none'
+
+  // Si soy J1 solo se procesa y asigna J1; si soy J2 solo J2; si es espectador ambos
+  if (esEspectador || esJ1) {
+    document.getElementById('sd-j1').value = await fmtEquipo(est.jugador1.equipo)
+  } else {
+    document.getElementById('sd-j1').value = ''
+  }
+
+  if (esEspectador || esJ2) {
+    document.getElementById('sd-j2').value = await fmtEquipo(est.jugador2.equipo)
+  } else {
+    document.getElementById('sd-j2').value = ''
+  }
+
+  const nomJ1 = est.jugador1.nombre || 'Jugador 1'
+  const nomJ2 = est.jugador2.nombre || 'Jugador 2'
+  const t1 = document.getElementById('sd-title-j1')
+  const t2 = document.getElementById('sd-title-j2')
+  if (t1) t1.textContent = esJ1 ? `Tu Equipo (${nomJ1})` : nomJ1
+  if (t2) t2.textContent = esJ2 ? `Tu Equipo (${nomJ2})` : nomJ2
 }
 
 async function fmtEquipo(equipo) {
