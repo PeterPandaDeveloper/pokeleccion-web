@@ -6,12 +6,10 @@
     "build": "tsc",
     "start": "tsc && node dist/server.js"
   },
-  "devDependencies": {
-    "@types/ioredis": "^4.28.10",
-    "@types/node": "^20.19.43",
-    "typescript": "^5.9.3"
-  },
   "dependencies": {
-    "ioredis": "^6.0.0"
+    "ioredis": "^6.0.0",
+    "typescript": "^5.9.3",
+    "@types/node": "^20.19.43",
+    "@types/ioredis": "^4.28.10"
   }
 }
