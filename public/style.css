@@ -646,16 +646,46 @@ button:active {
   border-radius: 3px;
 }
 
+.cfg-grupo {
+  margin-bottom: 10px;
+}
+
+.cfg-divider {
+  width: 100%;
+  border-top: 2px dashed #b8dab8;
+  margin: 14px 0;
+  opacity: 0.85;
+}
+
 .bst-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .bst-input {
-  width: 90px;
+  width: 100px;
+  text-align: center;
+  font-family: 'VT323', monospace;
+  font-size: 1.15rem;
+  padding: 5px 8px;
+  border: 2px solid #a0c0a0;
+  background: #ffffff;
+  color: #303030;
+  border-radius: 4px;
+}
+
+.num-rondas-sel {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.72rem;
+  padding: 6px 14px;
+  border: 2px solid #a0c0a0;
+  background: #ffffff;
+  color: #2e7d32;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
 .votos-live {
