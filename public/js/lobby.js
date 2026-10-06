@@ -408,7 +408,7 @@ function bloquearConfig() {
     el.style.cursor = 'not-allowed'
   })
   const btnVotar = document.getElementById('cfg-acciones')?.querySelector('.btn-votar')
-  if (btnVotar) btnVotar.textContent = '🔒 Config. bloqueada'
+  if (btnVotar) btnVotar.textContent = getLanguage() === 'en' ? 'Config locked' : 'Config. bloqueada'
 }
 
 export function desbloquearConfig() {
@@ -419,9 +419,12 @@ export function desbloquearConfig() {
     el.style.cursor = ''
   })
   const btnVotar = document.querySelector('.btn-votar')
-  if (btnVotar) btnVotar.textContent = '🗳 Votar mi configuración'
+  if (btnVotar) {
+    btnVotar.removeAttribute('data-voted')
+    btnVotar.textContent = t('btn_vote_my')
+  }
   const btnListo = document.getElementById('btn-listo')
-  if (btnListo) { btnListo.style.display = 'none'; btnListo.textContent = '¡Listo para el duelo!'; btnListo.disabled = false }
+  if (btnListo) { btnListo.style.display = 'none'; btnListo.textContent = t('btn_ready'); btnListo.disabled = false }
 }
 
 // ─── ACCIONES ─────────────────────────────────────────────────────────────────
@@ -600,7 +603,8 @@ export async function votarConfig() {
   try {
     const res = await post('/lobby/votar', { voto })
     Sonido.votar(); yaVote = true
-    document.querySelector('.btn-votar').textContent = t('btn_change_vote')
+    const bV = document.querySelector('.btn-votar')
+    if (bV) { bV.setAttribute('data-voted', 'true'); bV.textContent = t('btn_change_vote') }
     document.getElementById('btn-listo').style.display = 'inline-block'
     mostrarToast(t('toast_vote_registered'), 'ok')
     if (res && res.lobby && window.aplicarEstado) {
@@ -626,7 +630,8 @@ export async function votarConfigDelOtro() {
     const voto = leerVoto()
     const res = await post('/lobby/votar', { voto })
     Sonido.votar(); yaVote = true
-    document.querySelector('.btn-votar').textContent = t('btn_change_vote')
+    const bV = document.querySelector('.btn-votar')
+    if (bV) { bV.setAttribute('data-voted', 'true'); bV.textContent = t('btn_change_vote') }
     document.getElementById('btn-listo').style.display = 'inline-block'
     mostrarToast(t('toast_vote_copied'), 'ok')
     if (res && res.lobby && window.aplicarEstado) {

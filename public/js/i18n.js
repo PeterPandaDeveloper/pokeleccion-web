@@ -35,7 +35,7 @@ export const I18N = {
     code_input_ph: "Room code (e.g. A1B2C3)",
     btn_enter_code: "Join",
     current_room: "Current room:",
-    copy_link: "🔗 Copy link",
+    copy_link: "Copy link",
     active_rooms: "Active rooms",
     new_room: "+ New room",
     loading_rooms: "Loading rooms...",
@@ -47,8 +47,8 @@ export const I18N = {
 
     // Step 2: Lobby
     room_lbl: "Room",
-    copy_code: "📋 Copy code",
-    copy_link_btn: "🔗 Link",
+    copy_code: "Copy code",
+    copy_link_btn: "Link",
     copy_code_hint: "Copy 6-character room code",
     copy_link_hint: "Copy direct invite link",
     waiting_player: "Waiting...",
@@ -137,11 +137,11 @@ export const I18N = {
     rounds_each: "Pokémon each:",
 
     // Lobby action buttons
-    btn_vote_my: "🗳 Vote my config",
-    btn_change_vote: "✏️ Change my vote",
-    btn_vote_rival: "🤝 Copy rival's config",
-    btn_ready: "⚔️ Ready for duel!",
-    btn_waiting_rival: "⌛ Waiting for rival...",
+    btn_vote_my: "Vote my config",
+    btn_change_vote: "Change my vote",
+    btn_vote_rival: "Copy rival's config",
+    btn_ready: "Ready for duel!",
+    btn_waiting_rival: "Waiting for rival...",
     preparing_pool: "Preparing Pokémon pool...",
 
     // Draft screen
@@ -161,9 +161,9 @@ export const I18N = {
     export_title: "Export to Showdown",
     rule_note: "⚠️ <strong>Rule:</strong> You may change moves, abilities, and items. The drafted Pokémon are mandatory.",
     your_team: "Your Team ({name})",
-    btn_copy_team: "📋 Copy team",
-    btn_open_showdown: "⚡ Open Showdown",
-    btn_rematch: "⚔️ Rematch",
+    btn_copy_team: "Copy team",
+    btn_open_showdown: "Open Showdown",
+    btn_rematch: "Rematch",
     btn_requesting_rematch: "⏳ Requesting rematch...",
     btn_waiting_rematch_rival: "⏳ Waiting for rival to accept...",
     rematch_accepted: "⚔️ Rematch accepted! Starting new duel...",
@@ -205,7 +205,7 @@ export const I18N = {
     toast_delete_err: "Error deleting room",
 
     // Nuevas traducciones de notificaciones flotantes y footer
-    footer_created_by: "Created with 🎮 by",
+    footer_created_by: 'Created with <span class="footer-heart">💚</span> by',
     toast_no_active_room: "⚠️ No active room to copy",
     toast_code_fallback: "Code: {code}",
     toast_link_fallback: "Link: {url}",
@@ -258,7 +258,7 @@ export const I18N = {
     code_input_ph: "Código de sala (ej: A1B2C3)",
     btn_enter_code: "Entrar",
     current_room: "Sala actual:",
-    copy_link: "🔗 Copiar enlace",
+    copy_link: "Copiar enlace",
     active_rooms: "Salas activas",
     new_room: "+ Nueva sala",
     loading_rooms: "Cargando salas...",
@@ -270,8 +270,8 @@ export const I18N = {
 
     // Paso 2: Lobby
     room_lbl: "Sala",
-    copy_code: "📋 Copiar código",
-    copy_link_btn: "🔗 Enlace",
+    copy_code: "Copiar código",
+    copy_link_btn: "Enlace",
     copy_code_hint: "Copiar código de 6 caracteres",
     copy_link_hint: "Copiar enlace directo",
     waiting_player: "Esperando...",
@@ -360,11 +360,11 @@ export const I18N = {
     rounds_each: "Pokémon cada uno:",
 
     // Botones de acción del lobby
-    btn_vote_my: "🗳 Votar mi config.",
-    btn_change_vote: "✏️ Cambiar mi voto",
-    btn_vote_rival: "🤝 Config. del rival",
-    btn_ready: "⚔️ ¡Listo para el duelo!",
-    btn_waiting_rival: "⌛ Esperando al otro jugador...",
+    btn_vote_my: "Votar mi config.",
+    btn_change_vote: "Cambiar mi voto",
+    btn_vote_rival: "Config. del rival",
+    btn_ready: "¡Listo para el duelo!",
+    btn_waiting_rival: "Esperando al otro jugador...",
     preparing_pool: "Preparando el grupo de Pokémon...",
 
     // Pantalla de draft
@@ -384,9 +384,9 @@ export const I18N = {
     export_title: "Exportar a Showdown",
     rule_note: "⚠️ <strong>Regla:</strong> Puedes cambiar ataques, habilidades y objetos. Los Pokémon son obligatorios.",
     your_team: "Tu Equipo ({name})",
-    btn_copy_team: "📋 Copiar equipo",
-    btn_open_showdown: "⚡ Abrir Showdown",
-    btn_rematch: "⚔️ Revancha",
+    btn_copy_team: "Copiar equipo",
+    btn_open_showdown: "Abrir Showdown",
+    btn_rematch: "Revancha",
     btn_requesting_rematch: "⏳ Solicitando revancha...",
     btn_waiting_rematch_rival: "⏳ Esperando que acepte tu rival...",
     rematch_accepted: "⚔️ ¡Revancha aceptada! Comenzando nuevo duelo...",
@@ -428,7 +428,7 @@ export const I18N = {
     toast_delete_err: "Error al eliminar la sala",
 
     // Nuevas traducciones de notificaciones flotantes y footer
-    footer_created_by: "Creado con 🎮 por",
+    footer_created_by: 'Creado con <span class="footer-heart">💚</span> por',
     toast_no_active_room: "⚠️ No hay sala activa para copiar",
     toast_code_fallback: "Código: {code}",
     toast_link_fallback: "Enlace: {url}",
@@ -541,7 +541,7 @@ export function actualizarTextosDOM() {
   // 8. Elementos dinámicos del lobby
   const btnVotar = document.querySelector('.btn-votar')
   if (btnVotar) {
-    if (btnVotar.textContent.includes('✏️')) {
+    if (btnVotar.getAttribute('data-voted') === 'true') {
       btnVotar.textContent = dict.btn_change_vote
     } else {
       btnVotar.textContent = dict.btn_vote_my

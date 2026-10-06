@@ -387,17 +387,6 @@ button:active {
   gap: 6px;
 }
 
-.btn-copiar-sala-lobby {
-  background: #fff;
-  border: 1px solid #a0c0a0;
-  color: #2e7d32;
-  padding: 4px 8px;
-  font-size: 0.8rem;
-}
-
-.btn-copiar-sala-lobby:hover {
-  background: #f1f8e9;
-}
 
 /* Botón utilitario base homogéneo */
 .btn-util {
@@ -2996,41 +2985,48 @@ body.buzz-shake {
     justify-content: center;
   }
 }
-.btn-copiar-codigo-lobby {
-  background: linear-gradient(180deg, #fbc02d 0%, #f57f17 100%);
-  color: #2e2000;
-  border: 2px solid #ff6f00;
-  border-radius: 4px;
-  padding: 5px 8px;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.52rem;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 0 #b26a00;
-  transition: transform 0.08s, filter 0.12s;
-  user-select: none;
-}
-.btn-copiar-codigo-lobby:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
-}
-.btn-copiar-codigo-lobby:active {
-  transform: translateY(1px);
-  box-shadow: 0 1px 0 #b26a00;
-}
-.btn-copiar-codigo-draft {
-  background: #fbc02d;
-  color: #2e2000;
-  border: 2px solid #f57f17;
+.btn-copiar-codigo-lobby, .btn-copiar-sala-lobby {
+  background: #ffffff;
+  border: 1px solid #a0c0a0;
+  color: #2e7d32;
   border-radius: 4px;
   padding: 4px 8px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.54rem;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(46, 125, 50, 0.08);
+  transition: all 0.15s ease;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-copiar-codigo-lobby:hover, .btn-copiar-sala-lobby:hover {
+  background: #f1f8e9;
+  border-color: #2e7d32;
+  color: #1b5e20;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(46, 125, 50, 0.15);
+}
+.btn-copiar-codigo-lobby:active, .btn-copiar-sala-lobby:active {
+  transform: translateY(1px);
+  background: #e8f5e9;
+  box-shadow: none;
+}
+.btn-copiar-codigo-draft, .btn-copiar-sala-draft {
+  background: transparent;
+  border: 1px solid var(--ui-border-strong);
+  color: var(--yellow-lt);
+  padding: 5px 10px;
+  border-radius: 8px;
   font-size: 0.85rem;
   cursor: pointer;
-  box-shadow: 0 2px 0 #b26a00;
-  transition: transform 0.08s;
+  transition: background 0.15s, border-color 0.15s;
 }
-.btn-copiar-codigo-draft:hover {
-  transform: translateY(-1px);
+.btn-copiar-codigo-draft:hover, .btn-copiar-sala-draft:hover {
+  background: rgba(232, 200, 72, 0.12);
+  border-color: var(--yellow);
 }
 
 /* ── PERSONALIZACIÓN DE ESPECTADORES ── */
@@ -3154,4 +3150,22 @@ body.buzz-shake {
   padding: 2px 6px;
   border-radius: 4px;
   border: 1px solid #a5d6a7;
+}
+
+.footer-heart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  line-height: 1;
+  vertical-align: middle;
+  margin: 0 4px;
+  transform: translateY(-1px);
+  filter: drop-shadow(0 1px 2px rgba(46, 125, 50, 0.4));
+  animation: pulse-heart 2.2s ease-in-out infinite;
+}
+
+@keyframes pulse-heart {
+  0%, 100% { transform: translateY(-1px) scale(1); }
+  50% { transform: translateY(-1px) scale(1.15); }
 }
