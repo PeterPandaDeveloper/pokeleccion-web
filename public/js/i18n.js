@@ -233,8 +233,8 @@ export const I18N = {
     toast_room_private: "🔒 Private room",
     toast_room_public: "🌐 Public room",
     toast_room_selected: "Room {id} selected. Choose your role!",
-    toast_super_assist_on: "🧠 Super Assist enabled",
-    toast_super_assist_off: "🧠 Super Assist disabled",
+    toast_super_assist_on: "Super Assist enabled",
+    toast_super_assist_off: "Super Assist disabled",
     toast_avatar_selected: "Spectator avatar: {avatar}"
   },
 
@@ -456,8 +456,8 @@ export const I18N = {
     toast_room_private: "🔒 Sala privada",
     toast_room_public: "🌐 Sala pública",
     toast_room_selected: "Sala {id} seleccionada. ¡Elige tu rol!",
-    toast_super_assist_on: "🧠 Súper Ayuda activada",
-    toast_super_assist_off: "🧠 Súper Ayuda desactivada",
+    toast_super_assist_on: "Súper Ayuda activada",
+    toast_super_assist_off: "Súper Ayuda desactivada",
     toast_avatar_selected: "Avatar de espectador: {avatar}"
   }
 }

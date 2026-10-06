@@ -2285,8 +2285,15 @@ body.buzz-shake {
   box-shadow: 0 2px 0 rgba(0,0,0,0.2);
 }
 .party-btn-icon {
-  font-size: 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   line-height: 1;
+}
+.party-btn-svg {
+  display: block;
+  flex-shrink: 0;
 }
 .party-btn-text {
   display: flex;
@@ -2508,7 +2515,7 @@ body.buzz-shake {
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 2px 0 rgba(0,0,0,0.08);
-  height: 29px;
+  height: 32px;
   vertical-align: middle;
 }
 
@@ -2518,13 +2525,14 @@ body.buzz-shake {
   color: #444444;
   font-family: 'Press Start 2P', monospace;
   font-size: 0.52rem;
-  padding: 5px 9px;
+  padding: 4px 10px;
   cursor: pointer;
   transition: all 0.15s ease;
   user-select: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   line-height: 1;
   height: 100%;
 }
@@ -2540,13 +2548,35 @@ body.buzz-shake {
   font-weight: bold;
 }
 
+.lang-flag {
+  font-size: 1.35rem;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+  transform: translateY(-1px);
+}
+
+.lang-txt {
+  font-size: 0.55rem;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 @media (max-width: 600px) {
   .lang-switch-wrap {
-    height: 26px;
+    height: 29px;
   }
   .btn-lang {
     font-size: 0.46rem;
-    padding: 4px 6px;
+    padding: 3px 7px;
+    gap: 4px;
+  }
+  .lang-flag {
+    font-size: 1.15rem;
+  }
+  .lang-txt {
+    font-size: 0.48rem;
   }
 }
 

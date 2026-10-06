@@ -28,10 +28,10 @@ export function actualizarBotonSuperAyudaUI() {
 
   btns.forEach(b => {
     if (superAyudaActiva) {
-      b.innerHTML = `🧠 ${lbl}: <b style="color:var(--yellow-lt,#aed581)">${onTxt}</b>`
+      b.innerHTML = `${lbl}: <b style="color:var(--yellow-lt,#aed581)">${onTxt}</b>`
       b.classList.add('super-ayuda-on')
     } else {
-      b.innerHTML = `🧠 ${lbl}: <span style="opacity:0.7">${offTxt}</span>`
+      b.innerHTML = `${lbl}: <span style="opacity:0.7">${offTxt}</span>`
       b.classList.remove('super-ayuda-on')
     }
   })
@@ -47,11 +47,11 @@ export function toggleSuperAyuda() {
   const isEn = getLanguage() === 'en'
   if (superAyudaActiva) {
     mostrarToast(isEn
-      ? '🧠 Super Assist ON: Stats card visible on hover/tap'
-      : '🧠 Súper Ayuda ACTIVADA: Ficha técnica visible al pasar el cursor o pulsar un Pokémon', 'ok')
+      ? 'Super Assist ON: Stats card visible on hover/tap'
+      : 'Súper Ayuda ACTIVADA: Ficha técnica visible al pasar el cursor o pulsar un Pokémon', 'ok')
   } else {
     ocultarDexTooltip()
-    mostrarToast(isEn ? '🧠 Super Assist OFF' : '🧠 Súper Ayuda DESACTIVADA', 'info')
+    mostrarToast(isEn ? 'Super Assist OFF' : 'Súper Ayuda DESACTIVADA', 'info')
   }
 }
 
@@ -82,7 +82,7 @@ export function mostrarDexTooltip(id, el) {
 
   tt.innerHTML = `
     <div class="dex-tt-topbar">
-      <span class="dex-tt-badge">🧠 ${t('super_assist').toUpperCase()}</span>
+      <span class="dex-tt-badge">${t('super_assist').toUpperCase()}</span>
       <span class="dex-tt-gen">GEN ${data.gen || 1}</span>
     </div>
     <div class="dex-tt-header">
