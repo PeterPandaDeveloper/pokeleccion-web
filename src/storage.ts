@@ -74,13 +74,16 @@ class MemoryStorage implements IStorage {
     const res = []
     for (const [id, s] of this.salas) {
       if (!s.privada && !s.eliminada) {
-        res.push({
-          id,
-          fase: s.estado.fase,
-          j1: s.estado.lobby.jugador1.nombre || null,
-          j2: s.estado.lobby.jugador2.nombre || null,
-          hayEspacio: !s.estado.jugador1.conectado || !s.estado.jugador2.conectado,
-        })
+        const sinNadie = !s.estado.jugador1.conectado && !s.estado.jugador2.conectado && (s.estado.lobby.espectadores || 0) === 0
+        if (!sinNadie) {
+          res.push({
+            id,
+            fase: s.estado.fase,
+            j1: s.estado.lobby.jugador1.nombre || null,
+            j2: s.estado.lobby.jugador2.nombre || null,
+            hayEspacio: !s.estado.jugador1.conectado || !s.estado.jugador2.conectado,
+          })
+        }
       }
     }
     return res
@@ -204,14 +207,17 @@ class UpstashRedisStorage implements IStorage {
   }
 
   async guardarSala(sala: Sala): Promise<void> {
-    // Si la partida está activa en draft o finalizada, extender TTL a 20 minutos (1200s) para resiliencia
-    const ttlSegundos = (sala.estado.fase === 'draft' || sala.estado.fase === 'fin')
-      ? 1200
-      : Math.ceil(CONFIG.TTL_SIN_JUGADORES / 1000)
+    // Si la partida no tiene jugadores ni espectadores conectados, reducir TTL a 180s (3 min)
+    const sinNadie = !sala.estado.jugador1.conectado && !sala.estado.jugador2.conectado && (sala.estado.lobby.espectadores || 0) === 0
+    const ttlSegundos = sinNadie
+      ? 180
+      : (sala.estado.fase === 'draft' || sala.estado.fase === 'fin')
+        ? 1200
+        : Math.ceil(CONFIG.TTL_SIN_JUGADORES / 1000)
     const jsonStr = JSON.stringify({ ...sala, timer: null })
     const cmds: unknown[][] = [
       ['SET', `sala:${sala.id}`, jsonStr, 'EX', ttlSegundos],
-      [!sala.privada && !sala.eliminada ? 'SADD' : 'SREM', 'salas:publicas', sala.id],
+      [!sala.privada && !sala.eliminada && !sinNadie ? 'SADD' : 'SREM', 'salas:publicas', sala.id],
     ]
     await this.pipeline(cmds)
   }
@@ -236,13 +242,16 @@ class UpstashRedisStorage implements IStorage {
       }
       const s = (typeof raw === 'string' ? JSON.parse(raw) : raw) as Sala
       if (!s.privada && !s.eliminada) {
-        resultado.push({
-          id: sid,
-          fase: s.estado.fase,
-          j1: s.estado.lobby.jugador1.nombre || null,
-          j2: s.estado.lobby.jugador2.nombre || null,
-          hayEspacio: !s.estado.jugador1.conectado || !s.estado.jugador2.conectado,
-        })
+        const sinNadie = !s.estado.jugador1.conectado && !s.estado.jugador2.conectado && (s.estado.lobby.espectadores || 0) === 0
+        if (!sinNadie) {
+          resultado.push({
+            id: sid,
+            fase: s.estado.fase,
+            j1: s.estado.lobby.jugador1.nombre || null,
+            j2: s.estado.lobby.jugador2.nombre || null,
+            hayEspacio: !s.estado.jugador1.conectado || !s.estado.jugador2.conectado,
+          })
+        }
       }
     }
     return resultado
@@ -332,12 +341,15 @@ class IoRedisStorage implements IStorage {
   }
 
   async guardarSala(sala: Sala): Promise<void> {
-    const ttlSegundos = (sala.estado.fase === 'draft' || sala.estado.fase === 'fin')
-      ? 1200
-      : Math.ceil(CONFIG.TTL_SIN_JUGADORES / 1000)
+    const sinNadie = !sala.estado.jugador1.conectado && !sala.estado.jugador2.conectado && (sala.estado.lobby.espectadores || 0) === 0
+    const ttlSegundos = sinNadie
+      ? 180
+      : (sala.estado.fase === 'draft' || sala.estado.fase === 'fin')
+        ? 1200
+        : Math.ceil(CONFIG.TTL_SIN_JUGADORES / 1000)
     const jsonStr = JSON.stringify({ ...sala, timer: null })
     await this.client.set(`sala:${sala.id}`, jsonStr, 'EX', ttlSegundos)
-    if (!sala.privada && !sala.eliminada) {
+    if (!sala.privada && !sala.eliminada && !sinNadie) {
       await this.client.sadd('salas:publicas', sala.id)
     } else {
       await this.client.srem('salas:publicas', sala.id)
@@ -360,13 +372,16 @@ class IoRedisStorage implements IStorage {
       }
       const s = JSON.parse(raw) as Sala
       if (!s.privada && !s.eliminada) {
-        res.push({
-          id: sid,
-          fase: s.estado.fase,
-          j1: s.estado.lobby.jugador1.nombre || null,
-          j2: s.estado.lobby.jugador2.nombre || null,
-          hayEspacio: !s.estado.jugador1.conectado || !s.estado.jugador2.conectado,
-        })
+        const sinNadie = !s.estado.jugador1.conectado && !s.estado.jugador2.conectado && (s.estado.lobby.espectadores || 0) === 0
+        if (!sinNadie) {
+          res.push({
+            id: sid,
+            fase: s.estado.fase,
+            j1: s.estado.lobby.jugador1.nombre || null,
+            j2: s.estado.lobby.jugador2.nombre || null,
+            hayEspacio: !s.estado.jugador1.conectado || !s.estado.jugador2.conectado,
+          })
+        }
       }
     }
     return res

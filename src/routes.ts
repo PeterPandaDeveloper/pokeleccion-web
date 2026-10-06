@@ -327,20 +327,52 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       if (!validarToken(tk)) return json(res,403,{error:'Token no válido.'})
       const rolPropio = estado.jugador1.token===tk ? 'jugador1' : estado.jugador2.token===tk ? 'jugador2' : null
       if (!rolPropio) return json(res,403,{error:'Solo los jugadores pueden eliminar la sala.'})
+
+      const otroRol = rolPropio === 'jugador1' ? 'jugador2' : 'jugador1'
+      const otroJugador = estado[otroRol]
+      const rivalPresente = Boolean(otroJugador?.nombre && otroJugador?.conectado)
+      const campoCount = rolPropio === 'jugador1' ? 'buzzJ1Count' : 'buzzJ2Count'
+      const buzzSuficiente = (estado.lobby[campoCount] || 0) >= 3 || Boolean(b.forzar)
+      const tiempoEsperaExpirado = Boolean(
+        sala.eliminacionPendiente &&
+        sala.eliminacionPendiente.solicitante === rolPropio &&
+        Date.now() - sala.eliminacionPendiente.creadoEn >= 15_000
+      )
+
+      // Borrado inmediato si:
+      // 1) El jugador está solo (rival ausente o desconectado)
+      // 2) Avisó al menos 3 veces al rival (o flag forzar activo)
+      // 3) Ya solicitó eliminación hace más de 15s y el rival no ha confirmado
+      if (!rivalPresente || buzzSuficiente || tiempoEsperaExpirado) {
+        const nombre = estado[rolPropio].nombre || (rolPropio === 'jugador1' ? 'Jugador 1' : 'Jugador 2')
+        const razon = !rivalPresente ? 'sin rival presente' : buzzSuficiente ? 'inactividad (3 avisos)' : 'tiempo de espera agotado'
+        agregarMensajeSistema(sala, `🗑️ ${nombre} forzó la eliminación de la sala (${razon}).`)
+        if (sala.timer) clearTimeout(sala.timer)
+        await storage.eliminarSala(salaId)
+        return json(res, 200, { ok: true, eliminado: true, forzado: true })
+      }
+
+      // Si no hay solicitud previa, crearla
       if (!sala.eliminacionPendiente) {
         sala.eliminacionPendiente = { solicitante: rolPropio, creadoEn: Date.now() }
-        const nombre = estado[rolPropio].nombre || (rolPropio==='jugador1'?'Jugador 1':'Jugador 2')
-        agregarMensajeSistema(sala, `🗑️ ${nombre} quiere eliminar la sala. Espera a que el otro jugador confirme.`)
-        return responderConSala(res, 200, sala, {ok:true, pending:true, solicitante:rolPropio})
+        const nombre = estado[rolPropio].nombre || (rolPropio === 'jugador1' ? 'Jugador 1' : 'Jugador 2')
+        agregarMensajeSistema(sala, `🗑️ ${nombre} quiere eliminar la sala. Espera a que el otro jugador confirme o pulsa de nuevo en 15s para forzar.`)
+        return responderConSala(res, 200, sala, { ok: true, pending: true, solicitante: rolPropio, segRestantes: 15 })
       }
+
+      // Si es el mismo solicitante antes de cumplirse los 15s
       if (sala.eliminacionPendiente.solicitante === rolPropio) {
-        return json(res,200,{ok:true, pending:true, solicitante:rolPropio})
+        const transcurrido = Date.now() - sala.eliminacionPendiente.creadoEn
+        const segRestantes = Math.max(1, Math.ceil((15_000 - transcurrido) / 1000))
+        return json(res, 200, { ok: true, pending: true, solicitante: rolPropio, segRestantes })
       }
-      const nombre = estado[rolPropio].nombre || (rolPropio==='jugador1'?'Jugador 1':'Jugador 2')
+
+      // Si es el otro jugador confirmando, eliminación por consenso
+      const nombre = estado[rolPropio].nombre || (rolPropio === 'jugador1' ? 'Jugador 1' : 'Jugador 2')
       agregarMensajeSistema(sala, `🗑️ ${nombre} confirmó la eliminación de la sala.`)
       if (sala.timer) clearTimeout(sala.timer)
       await storage.eliminarSala(salaId)
-      return json(res,200,{ok:true, eliminado:true})
+      return json(res, 200, { ok: true, eliminado: true, forzado: false })
     }
 
     // ── A partir de aquí se requiere token válido ────────────────────────────
@@ -447,13 +479,17 @@ export async function handleRequest(req: http.IncomingMessage, res: http.ServerR
       if (!rolPropio) return json(res,403,{error:'Token no válido.'})
       const ahora = Date.now()
       const campoBuzz = rolPropio==='jugador1' ? 'ultimoBuzzJ1' : 'ultimoBuzzJ2'
+      const campoCount = rolPropio==='jugador1' ? 'buzzJ1Count' : 'buzzJ2Count'
       if (ahora-estado.lobby[campoBuzz]<CONFIG.BUZZ_COOLDOWN_MS)
         return json(res,429,{error:'Espera antes de volver a avisar.'})
       estado.lobby[campoBuzz] = ahora
+      estado.lobby[campoCount] = (estado.lobby[campoCount] || 0) + 1
+      const count = estado.lobby[campoCount]
       const nombre = estado[rolPropio].nombre||rolPropio
       const rolRival = rolPropio==='jugador1' ? 'jugador2' : 'jugador1'
-      agregarMensajeSistema(sala,`🔔 ${nombre} te avisa: ¡ey, sigue!`, rolPropio, rolRival)
-      return responderConSala(res, 200, sala, {ok:true})
+      const extraTxt = count >= 3 ? ' (¡3 avisos! El rival puede forzar el borrado de sala si no respondes)' : ''
+      agregarMensajeSistema(sala,`🔔 ${nombre} te avisa: ¡ey, sigue!${extraTxt}`, rolPropio, rolRival)
+      return responderConSala(res, 200, sala, {ok:true, buzzCount: count})
     }
 
     // Heartbeat

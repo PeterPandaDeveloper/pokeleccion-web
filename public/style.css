@@ -510,6 +510,17 @@ button:active {
   box-shadow: 0 3px 0 #dc2626;
 }
 
+.hint-eliminar-afk {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  font-size: 0.68rem;
+  font-style: italic;
+  color: #6b7280;
+  text-align: center;
+  margin: 3px 0 2px 0;
+  line-height: 1.35;
+  opacity: 0.85;
+}
+
 .btn-util.btn-tomar-j1 {
   color: #b91c1c;
   background: #fffcfc;

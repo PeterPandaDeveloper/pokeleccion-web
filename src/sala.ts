@@ -27,6 +27,7 @@ export interface EstadoSala {
     espectadores: number; ultimaLimpieza: number
     // ts del último buzz para anti-spam
     ultimoBuzzJ1: number; ultimoBuzzJ2: number
+    buzzJ1Count: number; buzzJ2Count: number
   }
   config: VotoConfig|null
   jugador1: Jugador; jugador2: Jugador
@@ -62,6 +63,7 @@ export function crearEstado(): EstadoSala {
       jugador2: { nombre:'', listo:false, voto:null, bloqueado:false },
       espectadores: 0, ultimaLimpieza: 0,
       ultimoBuzzJ1: 0, ultimoBuzzJ2: 0,
+      buzzJ1Count: 0, buzzJ2Count: 0,
     },
     config: null,
     jugador1: { equipo:[], picksPropios:[], conectado:false, token:null, nombre:'', lastSeen:0 },
@@ -135,6 +137,7 @@ export function limpiarSelecciones(sala: Sala): void {
     espectadores: esp,
     ultimaLimpieza: Math.max(ts, Date.now()),
     ultimoBuzzJ1: 0, ultimoBuzzJ2: 0,
+    buzzJ1Count: 0, buzzJ2Count: 0,
   }
   estado.jugador1 = { equipo: [], picksPropios: [], conectado: j1.conectado, token: j1.token, nombre: j1.nombre, lastSeen: j1.lastSeen }
   estado.jugador2 = { equipo: [], picksPropios: [], conectado: j2.conectado, token: j2.token, nombre: j2.nombre, lastSeen: j2.lastSeen }

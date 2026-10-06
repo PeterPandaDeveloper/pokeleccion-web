@@ -51,23 +51,61 @@ window.marcarListo     = marcarListo
 window.limpiarSala     = limpiarSala
 window.copiarEnlace    = copiarEnlace
 window.crearNuevaSala  = crearNuevaSala
+let conteoBuzzLocal = 0
+let eliminacionSolicitadaEn = 0
+window.registrarBuzz = () => { conteoBuzzLocal++ }
+window.getBuzzCount = () => conteoBuzzLocal
+
 window.eliminarSala    = async () => {
   if (!estado.miToken || estado.miRol === 'espectador') return
-  if (!confirm('¿Solicitar la eliminación de la sala para ambos jugadores?')) return
+
+  const otroRol = estado.miRol === 'jugador1' ? 'jugador2' : 'jugador1'
+  const est = prevEstadoG
+  const otroPresente = Boolean(est && est[otroRol]?.nombre && est[otroRol]?.conectado)
+  const buzzCount = window.getBuzzCount ? window.getBuzzCount() : 0
+  const espera15s = eliminacionSolicitadaEn > 0 && (Date.now() - eliminacionSolicitadaEn >= 15_000)
+  const puedeForzar = !otroPresente || buzzCount >= 3 || espera15s
+
+  let confirmMsg = ''
+  if (!otroPresente) {
+    confirmMsg = t('confirm_delete_alone') || '¿Eliminar la sala inmediatamente? (Estás solo en la sala)'
+  } else if (buzzCount >= 3) {
+    confirmMsg = t('confirm_delete_forced') || '¿Forzar el borrado de la sala por inactividad del rival (3 avisos)?'
+  } else if (espera15s) {
+    confirmMsg = t('confirm_delete_pending') || 'El rival no ha respondido. ¿Forzar el borrado de la sala ahora?'
+  } else {
+    confirmMsg = t('confirm_delete_room') || '¿Solicitar la eliminación de la sala para ambos jugadores?'
+  }
+
+  if (!confirm(confirmMsg)) return
+
   try {
     const r = await fetch(`/api/sala/${estado.salaId}/eliminar`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({token: estado.miToken})
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        token: estado.miToken,
+        forzar: puedeForzar
+      })
     })
     const d = await r.json()
-    if (!r.ok) { mostrarToast('⚠️ '+d.error,'err'); return }
+    if (!r.ok) { mostrarToast('⚠️ ' + (d.error || 'Error'), 'err'); return }
     if (d.eliminado) {
-      mostrarToast('🗑 Sala eliminada por consenso','ok')
+      limpiarSesion()
+      const msg = d.forzado ? (t('toast_room_deleted_forced') || '🗑 Sala eliminada por inactividad') : (t('toast_room_deleted') || '🗑 Sala eliminada con éxito')
+      mostrarToast(msg, 'ok')
       setTimeout(() => window.location.href = '/', 700)
-    } else {
-      mostrarToast('🗑 Solicitud enviada. Espera a que el otro jugador confirme.','info')
+    } else if (d.pending) {
+      eliminacionSolicitadaEn = Date.now()
+      if (d.segRestantes) {
+        mostrarToast(t('toast_room_delete_waiting', { s: d.segRestantes }) || `🗑 Solicitud enviada. Puedes forzar el borrado en ${d.segRestantes}s`, 'info')
+      } else {
+        mostrarToast(t('toast_room_delete_pending') || '🗑 Solicitud enviada. Espera a que el otro jugador confirme.', 'info')
+      }
     }
-  } catch(e) { mostrarToast('⚠️ Error al eliminar la sala','err') }
+  } catch(e) {
+    mostrarToast('⚠️ ' + (t('toast_delete_err') || 'Error al eliminar la sala'), 'err')
+  }
 }
 window.mostrarInfo     = mostrarInfo
 window.cerrarInfo      = cerrarInfo

@@ -70,6 +70,7 @@ export const I18N = {
     claim_p1: "Claim Player 1",
     claim_p2: "Claim Player 2",
     delete_room: "Delete room",
+    hint_delete_afk: "* If alone or buzzing rival 3 times, deletes immediately",
 
     // Chat
     chat_title: "💬 PokéChat",
@@ -192,7 +193,16 @@ export const I18N = {
     toast_ready_wait: "✅ Ready! Waiting for rival to confirm.",
     toast_reset_filters: "🧹 Filters reset to default values",
     confirm_reset_all: "Reset all filters and restart with default values?",
-    confirm_full_restart: "Completely restart the duel?"
+    confirm_full_restart: "Completely restart the duel?",
+    confirm_delete_alone: "Delete the room immediately? (You are alone in the room)",
+    confirm_delete_forced: "Force room deletion due to rival inactivity (3 buzz alerts)?",
+    confirm_delete_pending: "Rival hasn't confirmed. Force deletion now?",
+    confirm_delete_room: "Request room deletion? (If rival does not respond in 15s or you buzz 3 times, you can force delete)",
+    toast_room_deleted_forced: "🗑️ Room deleted due to inactivity",
+    toast_room_deleted: "🗑️ Room deleted successfully",
+    toast_room_delete_waiting: "🗑️ Request sent. You can force deletion in {s}s",
+    toast_room_delete_pending: "🗑️ Request sent. Waiting for rival confirmation.",
+    toast_delete_err: "Error deleting room"
   },
 
   es: {
@@ -250,6 +260,7 @@ export const I18N = {
     claim_p1: "Tomar Jugador 1",
     claim_p2: "Tomar Jugador 2",
     delete_room: "Eliminar sala",
+    hint_delete_afk: "* Si estás solo o avisas 3 veces al rival, se eliminará al instante",
 
     // Chat
     chat_title: "💬 PokéChat",
@@ -372,7 +383,16 @@ export const I18N = {
     toast_ready_wait: "✅ ¡Listo! Esperando a que tu rival confirme.",
     toast_reset_filters: "🧹 Filtros restablecidos a valores por defecto",
     confirm_reset_all: "¿Restablecer todos los filtros y empezar de nuevo con los valores por defecto?",
-    confirm_full_restart: "¿Reiniciar el duelo completo?"
+    confirm_full_restart: "¿Reiniciar el duelo completo?",
+    confirm_delete_alone: "¿Eliminar la sala inmediatamente? (Estás solo en la sala)",
+    confirm_delete_forced: "¿Forzar el borrado de la sala por inactividad del rival (3 avisos)?",
+    confirm_delete_pending: "El rival no ha respondido. ¿Forzar el borrado de la sala ahora?",
+    confirm_delete_room: "¿Solicitar eliminar la sala? (Si el rival no responde en 15s o le avisas 3 veces, podrás forzar el borrado)",
+    toast_room_deleted_forced: "🗑️ Sala eliminada por inactividad",
+    toast_room_deleted: "🗑️ Sala eliminada con éxito",
+    toast_room_delete_waiting: "🗑️ Solicitud enviada. Podrás forzar el borrado en {s}s",
+    toast_room_delete_pending: "🗑️ Solicitud enviada. Esperando confirmación del rival.",
+    toast_delete_err: "Error al eliminar la sala"
   }
 }
 

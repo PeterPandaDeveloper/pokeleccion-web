@@ -543,29 +543,28 @@ export async function enviarChat() {
 export async function enviarBuzz() {
   try {
     await post('/buzz', {})
-    mostrarToast('🔔 Aviso enviado','ok')
+    mostrarToast(t('toast_buzz_sent') || '🔔 Rival alerted!','ok')
     Sonido.click()
+    if (typeof window.registrarBuzz === 'function') window.registrarBuzz()
     if (window.forzarActualizar) window.forzarActualizar()
     // Deshabilitar todos los botones de buzz 8s
     const btn = document.getElementById('btn-buzz')
     const btnL = document.getElementById('btn-buzz-lobby')
     if (btn)  btn.disabled = true
     if (btnL) btnL.disabled = true
-    if (btn) {
-      btn.disabled = true
-      let s = 8
-      const iv = setInterval(() => {
-        s--
-        if (btn)  btn.textContent  = `🔔 ${s}s`
-        if (btnL) btnL.textContent = `🔔 ${s}s`
-        if (s <= 0) {
-          clearInterval(iv)
-          if (btn)  { btn.disabled=false;  btn.textContent='🔔 Avisar' }
-          if (btnL) { btnL.disabled=false; btnL.textContent='🔔 Avisar' }
-        }
-      }, 1000)
-    }
-  } catch(e) { mostrarToast('⚠️ '+e.message,'err') }
+    let s = 8
+    const iv = setInterval(() => {
+      s--
+      if (btn)  btn.textContent  = `🔔 ${s}s`
+      if (btnL) btnL.textContent = `🔔 ${s}s`
+      if (s <= 0) {
+        clearInterval(iv)
+        const buzzTxt = t('chat_buzz') || 'Buzz'
+        if (btn)  { btn.disabled=false;  btn.innerHTML = `<span class="btn-buzz-icon">🔔</span><span class="btn-buzz-txt" data-i18n="chat_buzz">${buzzTxt}</span>` }
+        if (btnL) { btnL.disabled=false; btnL.innerHTML = `<span class="btn-buzz-icon">🔔</span><span class="btn-buzz-txt" data-i18n="chat_buzz">${buzzTxt}</span>` }
+      }
+    }, 1000)
+  } catch(e) { mostrarToast('⚠️ '+(e.message||e),'err') }
 }
 
 // ─── ELECCIÓN ────────────────────────────────────────────────────────────────
