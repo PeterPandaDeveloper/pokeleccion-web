@@ -189,7 +189,30 @@ export async function syncDraft(est) {
 
   // Reglas activas en el encabezado
   const reglasPill = document.getElementById('reglas-pill')
-  if (reglasPill && est.reglas) reglasPill.textContent = est.reglas
+  if (reglasPill && est.reglas) {
+    let r = est.reglas.replace(/\s*\([Cc]lash\s*[Rr]oyale\)/gi, '')
+    const isEn = getLanguage() === 'en'
+    if (isEn) {
+      r = r
+        .replace(/Sin legendarios/g, 'No legendaries')
+        .replace(/Sin gimmicks/g, 'No gimmicks')
+        .replace(/Sin formas regionales/g, 'No regional forms')
+        .replace(/Modo Oculto/g, 'Blind Mode')
+        .replace(/rondas?/g, 'rounds')
+        .replace(/Copa Bebé \(bebés con futuro\)/g, 'Little Cup')
+        .replace(/Tipos únicos en equipo/g, 'Unique types')
+        .replace(/Tipos únicos/g, 'Unique types')
+        .replace(/Sin restricciones/g, 'No restrictions')
+        .replace(/Regiones:/g, 'Regions:')
+        .replace(/Tipos:/g, 'Types:')
+        .replace(/Colores:/g, 'Colors:')
+        .replace(/Solo evolucionados al máximo/g, 'Fully evolved only')
+        .replace(/Sin evolución posible/g, 'Single stage only')
+        .replace(/Sin evolución/g, 'Single stage only')
+        .replace(/Solo primera etapa/g, 'First stage only')
+    }
+    reglasPill.innerHTML = r.split(' · ').map(item => `<span class="regla-item">${item.trim()}</span>`).join('<span class="regla-sep"> · </span>')
+  }
 
   // Espectadores
   const espN = est.lobby.espectadores || 0

@@ -130,7 +130,7 @@ export function etiquetaConfig(c: VotoConfig): string {
   if (c.minBST) p.push(`📊 BST ≥ ${c.minBST}`)
   if (c.maxBST) p.push(`📊 BST ≤ ${c.maxBST}`)
   p.push(`🎯 ${c.numRondas} ronda${c.numRondas > 1 ? 's' : ''}`)
-  if (c.modoOculto) p.push('🙈 Modo Oculto (Clash Royale)')
+  if (c.modoOculto) p.push('🙈 Modo Oculto')
   return p.length ? p.join(' · ') : '🎯 Sin restricciones'
 }
 
