@@ -5,7 +5,49 @@ import { mostrarToast } from './modal.js'
 import { fetchNombre, imgUrl, imgSprite, getPokemonData } from './pokeapi.js'
 import { TIMER_SEG, SUBSTITUTE_IMG } from './constantes.js'
 
+const TIPO_COLORES = {
+  normal: '#9fa19f', fire: '#e62829', water: '#2980ef', grass: '#3fa129',
+  electric: '#d4a017', ice: '#3dcef3', fighting: '#c03028', poison: '#9141cb',
+  ground: '#915121', flying: '#81b9ef', psychic: '#ef4179', bug: '#91a119',
+  rock: '#afa981', ghost: '#704170', dragon: '#5060e1', steel: '#60a1b8',
+  dark: '#50413f', fairy: '#e076b0'
+}
+
+export let superAyudaActiva = localStorage.getItem('poke_super_ayuda') === 'true'
+
+export function actualizarBotonSuperAyudaUI() {
+  const btns = [
+    document.getElementById('btn-super-ayuda'),
+    document.getElementById('btn-super-ayuda-lobby')
+  ].filter(Boolean)
+
+  btns.forEach(b => {
+    if (superAyudaActiva) {
+      b.innerHTML = '🧠 Súper Ayuda: <b style="color:var(--yellow-lt,#aed581)">ON</b>'
+      b.classList.add('super-ayuda-on')
+    } else {
+      b.innerHTML = '🧠 Súper Ayuda: <span style="opacity:0.7">OFF</span>'
+      b.classList.remove('super-ayuda-on')
+    }
+  })
+}
+
+export function toggleSuperAyuda() {
+  superAyudaActiva = !superAyudaActiva
+  localStorage.setItem('poke_super_ayuda', String(superAyudaActiva))
+  actualizarBotonSuperAyudaUI()
+  Sonido.click()
+
+  if (superAyudaActiva) {
+    mostrarToast('🧠 Súper Ayuda ACTIVADA: Ficha técnica visible al pasar el cursor o pulsar un Pokémon', 'ok')
+  } else {
+    ocultarDexTooltip()
+    mostrarToast('🧠 Súper Ayuda DESACTIVADA', 'info')
+  }
+}
+
 export function mostrarDexTooltip(id, el) {
+  if (!superAyudaActiva) return
   const data = getPokemonData(id)
   if (!data) return
   let tt = document.getElementById('dex-tooltip')
@@ -16,38 +58,92 @@ export function mostrarDexTooltip(id, el) {
     document.body.appendChild(tt)
   }
 
-  const rect = el.getBoundingClientRect()
-  const top = rect.bottom + window.scrollY + 8
-  const left = Math.max(10, Math.min(window.innerWidth - 270, rect.left + window.scrollX - 40))
-
   const s = data.stats || { hp:0, atk:0, def:0, spa:0, spd:0, spe:0 }
-  const bar = (v, max=180) => Math.min(100, Math.round((v / max) * 100))
+  const bar = (v, max=180) => Math.min(100, Math.max(4, Math.round((v / max) * 100)))
+
+  const tiposHTML = (data.types || []).map(t => {
+    const bg = TIPO_COLORES[t.toLowerCase()] || '#4caf50'
+    return `<span class="dex-tt-type" style="background:${bg};border:1px solid rgba(255,255,255,0.4);">${t.toUpperCase()}</span>`
+  }).join('')
 
   tt.innerHTML = `
+    <div class="dex-tt-topbar">
+      <span class="dex-tt-badge">🧠 SÚPER AYUDA</span>
+      <span class="dex-tt-gen">GEN ${data.gen || 1}</span>
+    </div>
     <div class="dex-tt-header">
-      <img src="${data.sprite || imgSprite(id)}" class="dex-tt-sprite" alt="${data.name}"/>
+      <div class="dex-tt-sprite-wrap">
+        <img src="${data.sprite || imgSprite(id)}" class="dex-tt-sprite" alt="${data.name}"/>
+      </div>
       <div class="dex-tt-info">
-        <span class="dex-tt-num">#${data.id} · Gen ${data.gen || 1}</span>
-        <strong class="dex-tt-nom">${data.name}</strong>
+        <div class="dex-tt-title-row">
+          <strong class="dex-tt-nom">${data.name}</strong>
+          <span class="dex-tt-id">#${data.id}</span>
+        </div>
         <div class="dex-tt-types">
-          ${(data.types || []).map(t => `<span class="dex-tt-type type-${t}">${t.toUpperCase()}</span>`).join('')}
+          ${tiposHTML}
         </div>
       </div>
     </div>
     <div class="dex-tt-stats">
-      <div class="dex-stat-row"><span>HP</span><div class="dex-bar-track"><div class="dex-bar-fill bar-hp" style="width:${bar(s.hp)}%"></div></div><b>${s.hp}</b></div>
-      <div class="dex-stat-row"><span>ATK</span><div class="dex-bar-track"><div class="dex-bar-fill bar-atk" style="width:${bar(s.atk)}%"></div></div><b>${s.atk}</b></div>
-      <div class="dex-stat-row"><span>DEF</span><div class="dex-bar-track"><div class="dex-bar-fill bar-def" style="width:${bar(s.def)}%"></div></div><b>${s.def}</b></div>
-      <div class="dex-stat-row"><span>SPA</span><div class="dex-bar-track"><div class="dex-bar-fill bar-spa" style="width:${bar(s.spa)}%"></div></div><b>${s.spa}</b></div>
-      <div class="dex-stat-row"><span>SPD</span><div class="dex-bar-track"><div class="dex-bar-fill bar-spd" style="width:${bar(s.spd)}%"></div></div><b>${s.spd}</b></div>
-      <div class="dex-stat-row"><span>SPE</span><div class="dex-bar-track"><div class="dex-bar-fill bar-spe" style="width:${bar(s.spe)}%"></div></div><b>${s.spe}</b></div>
+      <div class="dex-stat-row">
+        <span class="dex-stat-label">PS</span>
+        <div class="dex-bar-track"><div class="dex-bar-fill bar-hp" style="width:${bar(s.hp)}%"></div></div>
+        <b class="dex-stat-val">${s.hp}</b>
+      </div>
+      <div class="dex-stat-row">
+        <span class="dex-stat-label">ATQ</span>
+        <div class="dex-bar-track"><div class="dex-bar-fill bar-atk" style="width:${bar(s.atk)}%"></div></div>
+        <b class="dex-stat-val">${s.atk}</b>
+      </div>
+      <div class="dex-stat-row">
+        <span class="dex-stat-label">DEF</span>
+        <div class="dex-bar-track"><div class="dex-bar-fill bar-def" style="width:${bar(s.def)}%"></div></div>
+        <b class="dex-stat-val">${s.def}</b>
+      </div>
+      <div class="dex-stat-row">
+        <span class="dex-stat-label">AT.ESP</span>
+        <div class="dex-bar-track"><div class="dex-bar-fill bar-spa" style="width:${bar(s.spa)}%"></div></div>
+        <b class="dex-stat-val">${s.spa}</b>
+      </div>
+      <div class="dex-stat-row">
+        <span class="dex-stat-label">DF.ESP</span>
+        <div class="dex-bar-track"><div class="dex-bar-fill bar-spd" style="width:${bar(s.spd)}%"></div></div>
+        <b class="dex-stat-val">${s.spd}</b>
+      </div>
+      <div class="dex-stat-row">
+        <span class="dex-stat-label">VEL</span>
+        <div class="dex-bar-track"><div class="dex-bar-fill bar-spe" style="width:${bar(s.spe)}%"></div></div>
+        <b class="dex-stat-val">${s.spe}</b>
+      </div>
     </div>
     <div class="dex-tt-footer">
-      <div class="dex-tt-bst">BST: <strong>${data.bst || 0}</strong></div>
-      <div class="dex-tt-abil">Hab: <span>${(data.abilities || []).slice(0, 2).join(' / ') || '—'}</span></div>
-      ${data.height && data.weight ? `<div class="dex-tt-phys">${data.height}m · ${data.weight}kg</div>` : ''}
+      <div class="dex-tt-bst-box">
+        <span>BST TOTAL</span>
+        <strong>${data.bst || 0}</strong>
+      </div>
+      ${(data.abilities && data.abilities.length) ? `
+        <div class="dex-tt-abil-box">
+          <small>Habilidades:</small>
+          <span>${data.abilities.slice(0, 2).join(' · ')}</span>
+        </div>` : ''}
+      ${data.height && data.weight ? `
+        <div class="dex-tt-phys-box">
+          <span>📏 ${data.height}m</span>
+          <span>⚖️ ${data.weight}kg</span>
+        </div>` : ''}
     </div>
   `
+
+  const rect = el.getBoundingClientRect()
+  const ttWidth = 280
+  const ttHeight = 240
+  let top = rect.bottom + window.scrollY + 8
+  if (rect.bottom + ttHeight > window.innerHeight && rect.top - ttHeight > 0) {
+    top = rect.top + window.scrollY - ttHeight - 8
+  }
+  const left = Math.max(10, Math.min(window.innerWidth - ttWidth - 10, rect.left + window.scrollX - 20))
+
   tt.style.top = `${top}px`
   tt.style.left = `${left}px`
   tt.style.display = 'block'

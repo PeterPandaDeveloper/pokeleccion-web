@@ -11,7 +11,7 @@ import {
 import {
   syncDraft, flashBatalla, resetarEstadoRender, resetear,
   enviarChat, enviarBuzz, copiarCodigo, copiarResumenDuelo, abrirShowdown, renderChat,
-  solicitarRevancha,
+  solicitarRevancha, toggleSuperAyuda, actualizarBotonSuperAyudaUI,
 } from './draft.js'
 import { cargarPokedex } from './pokeapi.js'
 
@@ -33,6 +33,7 @@ window.aplicarPreset      = aplicarPreset
 window.onSliderBSTMin     = onSliderBSTMin
 window.onSliderBSTMax     = onSliderBSTMax
 window.actualizarBSTPreview = actualizarBSTPreview
+window.toggleSuperAyuda   = toggleSuperAyuda
 window.unirseAlLobby   = async (...args) => {
   await unirseAlLobby(...args)
   // Iniciar heartbeat tras unirse exitosamente
@@ -308,6 +309,7 @@ function setConexion(ok) {
 async function iniciar() {
   construirTipos()
   actualizarDisplaySala()
+  actualizarBotonSuperAyudaUI()
 
   // Mostrar tutorial si es la primera vez
   if (!localStorage.getItem('tutorial-visto')) {

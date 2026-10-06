@@ -2063,28 +2063,59 @@ body.buzz-shake {
 }
 .presets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
   margin-top: 8px;
+}
+@media (max-width: 620px) {
+  .presets-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .btn-preset {
+    padding: 8px 4px !important;
+  }
+  .preset-ico {
+    font-size: 1.15rem !important;
+  }
+  .preset-tit {
+    font-size: 0.52rem !important;
+  }
+  .preset-desc {
+    font-size: 0.8rem !important;
+  }
+}
+@media (max-width: 440px) {
+  .presets-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .btn-preset {
+    flex-direction: row !important;
+    gap: 10px;
+    text-align: left !important;
+    padding: 8px 12px !important;
+  }
 }
 .btn-preset {
   background: #f1f8e9;
   border: 2px solid #aed581;
-  border-radius: 4px;
-  padding: 8px 6px;
+  border-radius: 6px;
+  padding: 10px 8px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   transition: all 0.15s ease;
-  box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  user-select: none;
 }
 .btn-preset:hover {
   background: #dcedc8;
   border-color: #7cb342;
   transform: translateY(-1px);
-  box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.14);
 }
 .btn-preset:active {
   transform: translateY(1px);
@@ -2092,8 +2123,9 @@ body.buzz-shake {
 }
 .btn-preset.preset-active {
   background: #fff9c4;
-  border-color: #fbc02d;
-  box-shadow: 0 0 0 2px #f57f17, 0 3px 0 rgba(0,0,0,0.2);
+  border-color: #f57f17;
+  box-shadow: 0 0 0 2px #fbc02d, 0 3px 0 #e65100;
+  transform: translateY(-1px);
 }
 .preset-ico {
   font-size: 1.4rem;
@@ -2106,14 +2138,48 @@ body.buzz-shake {
   margin-top: 4px;
 }
 .btn-preset.preset-active .preset-tit {
-  color: #e65100;
+  color: #b71c1c;
 }
 .preset-desc {
   font-family: 'VT323', monospace;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   color: #555;
   margin-top: 2px;
   line-height: 1.1;
+}
+
+/* ── BOTÓN SISTEMA DE SÚPER AYUDA ── */
+.btn-super-ayuda {
+  background: #e8f5e9;
+  border: 2px solid #81c784;
+  color: #2e7d32;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+  user-select: none;
+}
+.btn-super-ayuda:hover {
+  background: #c8e6c9;
+  border-color: #4caf50;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+}
+.btn-super-ayuda:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+}
+.btn-super-ayuda.super-ayuda-on {
+  background: #1b5e20;
+  border-color: #a5d6a7;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.45), 0 2px 0 rgba(0,0,0,0.25);
 }
 
 /* ── BST REWORK & PREVIEW TÁCTIL ── */
@@ -2242,17 +2308,17 @@ body.buzz-shake {
   margin-top: 2px;
 }
 
-/* ── DEXCARD TACTICAL TOOLTIP ── */
+/* ── DEXCARD TACTICAL TOOLTIP (SÚPER AYUDA) ── */
 .dex-tooltip {
   position: absolute;
   z-index: 10000;
-  width: 260px;
-  background: #1e2621;
+  width: 280px;
+  background: #0d1a12;
   color: #e8f5e9;
-  border: 3px solid #43a047;
+  border: 3px solid #2e7d32;
   border-radius: 8px;
   padding: 10px 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 0 2px #1b5e20;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.7), inset 0 0 0 1px #81c784;
   pointer-events: none;
   font-family: 'VT323', monospace;
   animation: dexTooltipFade 0.12s ease-out;
@@ -2261,39 +2327,79 @@ body.buzz-shake {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+.dex-tt-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.dex-tt-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: #a5d6a7;
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid #4caf50;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+.dex-tt-gen {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.42rem;
+  color: #ffca28;
+}
 .dex-tt-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  border-bottom: 1px solid #388e3c;
-  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.25);
+  padding-bottom: 8px;
   margin-bottom: 8px;
 }
+.dex-tt-sprite-wrap {
+  width: 58px;
+  height: 58px;
+  background: radial-gradient(circle, #25442c 0%, #0d1a12 80%);
+  border: 2px solid #43a047;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 .dex-tt-sprite {
-  width: 54px;
-  height: 54px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
   image-rendering: pixelated;
-  background: rgba(255,255,255,0.06);
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.1);
 }
 .dex-tt-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   flex: 1;
+  min-width: 0;
 }
-.dex-tt-num {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.45rem;
-  color: #a5d6a7;
+.dex-tt-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 }
 .dex-tt-nom {
-  font-size: 1.3rem;
+  font-family: 'VT323', monospace;
+  font-size: 1.45rem;
   color: #ffffff;
   text-transform: capitalize;
   line-height: 1;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dex-tt-id {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: #81c784;
 }
 .dex-tt-types {
   display: flex;
@@ -2303,80 +2409,103 @@ body.buzz-shake {
 }
 .dex-tt-type {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.42rem;
-  padding: 2px 5px;
+  font-size: 0.4rem;
+  padding: 2px 6px;
   border-radius: 3px;
   color: #ffffff;
   text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+  letter-spacing: 0.5px;
 }
 .dex-tt-stats {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   margin-bottom: 8px;
 }
 .dex-stat-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.95rem;
 }
-.dex-stat-row span {
-  width: 28px;
+.dex-stat-label {
+  width: 34px;
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.45rem;
+  font-size: 0.42rem;
   color: #b0bec5;
 }
 .dex-bar-track {
   flex: 1;
-  height: 6px;
-  background: rgba(255,255,255,0.12);
-  border-radius: 3px;
+  height: 7px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
   overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
 }
 .dex-bar-fill {
   height: 100%;
-  border-radius: 3px;
-  transition: width 0.2s ease;
+  border-radius: 4px;
+  transition: width 0.25s ease;
 }
-.dex-stat-row b {
+.dex-stat-val {
   width: 26px;
   text-align: right;
-  font-size: 0.95rem;
+  font-family: 'VT323', monospace;
+  font-size: 1.15rem;
   color: #ffffff;
+  line-height: 1;
 }
-.bar-hp  { background: #ef5350; }
-.bar-atk { background: #ffa726; }
-.bar-def { background: #ffee58; }
-.bar-spa { background: #42a5f5; }
-.bar-spd { background: #66bb6a; }
-.bar-spe { background: #ab47bc; }
+.bar-hp  { background: #e74c3c; }
+.bar-atk { background: #e67e22; }
+.bar-def { background: #f1c40f; }
+.bar-spa { background: #3498db; }
+.bar-spd { background: #2ecc71; }
+.bar-spe { background: #9b59b6; }
 
 .dex-tt-footer {
-  border-top: 1px solid #388e3c;
-  padding-top: 6px;
+  border-top: 1px solid rgba(76, 175, 80, 0.25);
+  padding-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  font-size: 0.95rem;
+  gap: 4px;
 }
-.dex-tt-bst {
-  color: #ffca28;
+.dex-tt-bst-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 193, 7, 0.12);
+  border: 1px solid #ffd54f;
+  padding: 3px 8px;
+  border-radius: 4px;
 }
-.dex-tt-bst strong {
+.dex-tt-bst-box span {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.55rem;
-  color: #fff;
+  font-size: 0.45rem;
+  color: #ffecb3;
 }
-.dex-tt-abil {
+.dex-tt-bst-box strong {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  color: #ffeb3b;
+  text-shadow: 0 0 6px rgba(255, 235, 59, 0.5);
+}
+.dex-tt-abil-box {
+  display: flex;
+  gap: 4px;
+  font-size: 0.95rem;
   color: #cfd8dc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.dex-tt-abil span {
-  color: #ffffff;
+.dex-tt-abil-box small {
+  color: #81c784;
 }
-.dex-tt-phys {
+.dex-tt-phys-box {
+  display: flex;
+  gap: 10px;
+  font-size: 0.88rem;
   color: #90a4ae;
-  font-size: 0.85rem;
+  margin-top: 2px;
 }
 
 /* ── BOTÓN DE REVANCHA INMEDIATA ── */

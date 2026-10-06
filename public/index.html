@@ -51,7 +51,10 @@
     <div class="titulo-bloque">
       <h1 class="title">Desafío de Pokélección</h1>
       <p class="subtitle">Elige tu equipo · Compatible con Pokémon Showdown</p>
-      <button class="btn-tutorial-link" onclick="mostrarTutorial()">¿Cómo jugar?</button>
+      <div class="lobby-header-btns" style="display:flex; justify-content:center; gap:10px; margin-top:8px; flex-wrap:wrap;">
+        <button class="btn-tutorial-link" onclick="mostrarTutorial()">¿Cómo jugar?</button>
+        <button type="button" class="btn-super-ayuda" id="btn-super-ayuda-lobby" onclick="toggleSuperAyuda()" title="Fichas técnicas con estadísticas de Pokémon">🧠 Súper Ayuda: <span style="opacity:0.7">OFF</span></button>
+      </div>
     </div>
 
     <!-- PASO 1: nombre/rol (Flujo Party Game) -->
@@ -208,11 +211,11 @@
         <div class="box-gba config-panel" id="config-panel-wrap">
           <h3 class="panel-title">Configuración del duelo</h3>
 
-          <!-- Presets Rápidos -->
+          <!-- Presets Rápidos (Toggle) -->
           <div class="presets-section">
             <div class="cfg-label-row">
-              <label class="cfg-label">⚡ Presets Rápidos</label>
-              <span class="cfg-hint">Configura el duelo en 1 clic</span>
+              <label class="cfg-label">Presets Rápidos</label>
+              <span class="cfg-hint">Configura en 1 clic · Clic de nuevo para restaurar tu ajuste</span>
             </div>
             <div class="presets-grid">
               <button type="button" class="btn-preset" id="preset-casual" onclick="aplicarPreset('casual')">
@@ -229,11 +232,6 @@
                 <span class="preset-ico">🍼</span>
                 <span class="preset-tit">Copa Bebé</span>
                 <small class="preset-desc">Primera etapa, BST ≤ 360</small>
-              </button>
-              <button type="button" class="btn-preset" id="preset-caos" onclick="aplicarPreset('caos')">
-                <span class="preset-ico">🎲</span>
-                <span class="preset-tit">Caos Total</span>
-                <small class="preset-desc">Todo permitido, legendarios ON</small>
               </button>
             </div>
           </div>
@@ -512,6 +510,7 @@
       <div class="round-pill" id="ronda-txt">Ronda 0 / 6</div>
       <div class="esp-pill" id="esp-pill" style="display:none">👁 <span id="esp-count-draft">0</span></div>
       <div class="conn-pill conn-ok" id="conn-pill">🟢 Conectado</div>
+      <button type="button" class="btn-super-ayuda" id="btn-super-ayuda" onclick="toggleSuperAyuda()" title="Fichas técnicas con estadísticas de Pokémon">🧠 Súper Ayuda: <span style="opacity:0.7">OFF</span></button>
       <button class="btn-copiar-sala-draft" onclick="copiarEnlace()" title="Copiar enlace de sala">🔗</button>
       <button class="btn-reiniciar" onclick="resetear()">↺ Reiniciar</button>
     </div>

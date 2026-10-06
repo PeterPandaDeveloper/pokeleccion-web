@@ -38,7 +38,18 @@ export function onRolChange() {
   document.getElementById('btn-unirse').textContent    = r==='espectador'?'Entrar a mirar':'Entrar'
 }
 
+export let presetActivo = null
+export let snapshotPrevio = null
+
+export function desactivarPresetVisual() {
+  if (presetActivo) {
+    presetActivo = null
+    document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('preset-active'))
+  }
+}
+
 export function toggleRegion(btn) {
+  desactivarPresetVisual()
   const r = btn.dataset.r; Sonido.click()
   if (r==='todas') {
     regionesSel.clear(); regionesSel.add('todas')
@@ -57,6 +68,7 @@ export function toggleRegion(btn) {
 }
 
 export function toggleTipo(btn) {
+  desactivarPresetVisual()
   const t=btn.dataset.t
   tiposSel.has(t)?(tiposSel.delete(t),btn.classList.remove('active')):(tiposSel.add(t),btn.classList.add('active'))
   document.getElementById('tipo-grid')?.classList.toggle('has-selected', tiposSel.size > 0)
@@ -66,6 +78,7 @@ export function toggleTipo(btn) {
 }
 
 export function toggleColor(btn) {
+  desactivarPresetVisual()
   const c=btn.dataset.c
   coloresSel.has(c)?(coloresSel.delete(c),btn.classList.remove('active')):(coloresSel.add(c),btn.classList.add('active'))
   if (coloresSel.size) {
@@ -78,6 +91,7 @@ export function toggleColor(btn) {
 }
 
 export function syncRestr(el) {
+  desactivarPresetVisual()
   const ids=['chk-finales','chk-sinevo','chk-base','chk-copabebe']
   const activos = ids.filter(id=>document.getElementById(id)?.checked)
   if (activos.length>1) {
@@ -205,6 +219,7 @@ export function actualizarBSTPreview() {
 }
 
 export function onSliderBSTMin(val) {
+  desactivarPresetVisual()
   const num = parseInt(val, 10)
   const minInput = document.getElementById('bst-min')
   if (minInput) minInput.value = num <= 180 ? '' : String(num)
@@ -212,6 +227,7 @@ export function onSliderBSTMin(val) {
 }
 
 export function onSliderBSTMax(val) {
+  desactivarPresetVisual()
   const num = parseInt(val, 10)
   const maxInput = document.getElementById('bst-max')
   if (maxInput) maxInput.value = num >= 780 ? '' : String(num)
@@ -219,9 +235,46 @@ export function onSliderBSTMax(val) {
 }
 
 export function aplicarPreset(tipo) {
+  // Toggle: Si ya está activo este preset, desclicar y restaurar la configuración anterior
+  if (presetActivo === tipo) {
+    desactivarPresetVisual()
+    Sonido.click()
+
+    if (snapshotPrevio) {
+      aplicarVotoEnUI(snapshotPrevio)
+      mostrarToast('↩️ Configuración previa restaurada', 'info')
+    } else {
+      regionesSel = new Set(['todas'])
+      tiposSel.clear()
+      coloresSel.clear()
+      aplicarVotoEnUI({
+        regiones: ['todas'], tipos: [], colores: [], modoTipos: 'OR',
+        sinLegendarios: false, soloFinales: false, soloSinEvolucion: false,
+        soloBase: false, copaBebe: false, noDuplicadosTipo: false,
+        sinGimmicks: false, sinFormasRegionales: false,
+        minBST: null, maxBST: null, numRondas: 6, modoOculto: true
+      })
+      mostrarToast('↩️ Preset desactivado', 'info')
+    }
+    actualizarBSTPreview()
+    if (estado.miToken && estado.miRol !== 'espectador' && !yaListo) {
+      votarConfig()
+    }
+    return
+  }
+
+  // Si no había ningún preset activo, capturar snapshot de la configuración actual
+  if (!presetActivo) {
+    snapshotPrevio = leerVoto()
+  }
+
+  presetActivo = tipo
+  document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('preset-active'))
+  document.getElementById(`preset-${tipo}`)?.classList.add('preset-active')
+
   const setChk = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val }
 
-  // Limpiar tipos y colores
+  // Limpiar tipos y colores para aplicar preset
   tiposSel.clear()
   coloresSel.clear()
   document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('active'))
@@ -248,7 +301,7 @@ export function aplicarPreset(tipo) {
     if (bstMax) bstMax.value = ''
     if (numR) numR.value = '6'
     setChk('chk-oculto', true)
-    mostrarToast('⚡ Modo Casual seleccionado', 'ok')
+    mostrarToast('☕ Modo Casual activado (clic de nuevo para restaurar)', 'ok')
   } else if (tipo === 'competitivo') {
     regionesSel = new Set(['todas'])
     setChk('chk-sin-leg', true)
@@ -263,7 +316,7 @@ export function aplicarPreset(tipo) {
     if (bstMax) bstMax.value = ''
     if (numR) numR.value = '6'
     setChk('chk-oculto', true)
-    mostrarToast('🏆 Modo Competitivo Élite seleccionado', 'ok')
+    mostrarToast('🏆 Modo Competitivo activado (clic de nuevo para restaurar)', 'ok')
   } else if (tipo === 'copabebe') {
     regionesSel = new Set(['todas'])
     setChk('chk-sin-leg', true)
@@ -278,22 +331,7 @@ export function aplicarPreset(tipo) {
     if (bstMax) bstMax.value = '360'
     if (numR) numR.value = '6'
     setChk('chk-oculto', true)
-    mostrarToast('🍼 Modo Copa Bebé seleccionado', 'ok')
-  } else if (tipo === 'caos') {
-    regionesSel = new Set(['todas'])
-    setChk('chk-sin-leg', false)
-    setChk('chk-finales', false)
-    setChk('chk-sinevo', false)
-    setChk('chk-base', false)
-    setChk('chk-copabebe', false)
-    setChk('chk-nodup', false)
-    setChk('chk-gimmicks', false)
-    setChk('chk-formas-reg', false)
-    if (bstMin) bstMin.value = ''
-    if (bstMax) bstMax.value = ''
-    if (numR) numR.value = '6'
-    setChk('chk-oculto', true)
-    mostrarToast('🎲 Modo Caos Total seleccionado', 'ok')
+    mostrarToast('🍼 Modo Copa Bebé activado (clic de nuevo para restaurar)', 'ok')
   }
 
   document.querySelectorAll('.rbtn').forEach(b => {
@@ -302,11 +340,13 @@ export function aplicarPreset(tipo) {
   const hintR = document.getElementById('hint-regiones')
   if (hintR) hintR.textContent = 'Selección: todas'
 
-  document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('preset-active'))
-  document.getElementById(`preset-${tipo}`)?.classList.add('preset-active')
-
   Sonido.click()
   actualizarBSTPreview()
+
+  // Sincronización reactiva con el lobby y servidor
+  if (estado.miToken && estado.miRol !== 'espectador' && !yaListo) {
+    votarConfig()
+  }
 }
 
 /** Aplica un voto del servidor a los botones/checkboxes de la UI. */
