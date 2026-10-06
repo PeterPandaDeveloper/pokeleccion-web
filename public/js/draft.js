@@ -205,7 +205,6 @@ export async function syncDraft(est) {
     document.getElementById('turno-alert').style.color = 'var(--text)'
     document.getElementById('timer-wrap').style.display = 'none'
     document.getElementById('opciones-render').innerHTML = ''
-    if (est.config?.modoOculto) await revelarTodo(est)
     await renderEquipos(est)
     if (!exportGen) {
       Sonido.finDraft()
@@ -359,14 +358,13 @@ async function renderEquipos(est) {
   const g2 = document.getElementById('equipo-j2')
   const modoOculto = est.config?.modoOculto
   const esEspectador = !estado.miRol || estado.miRol === 'espectador'
-  const esFin = est.turnoDe === 'FIN'
 
   for (let i = 0; i < est.jugador1.equipo.length; i++) {
     const id = est.jugador1.equipo[i]
     const key = `j1_${i}_${id}`
     if (!rendJ1.has(key)) {
-      // En Modo Oculto, el rival (J2) no ve los Pokémon de J1 hasta que finaliza el draft
-      const ocultar = modoOculto && estado.miRol === 'jugador2' && !esEspectador && !esFin
+      // En Modo Oculto, el rival (J2) no ve los Pokémon de J1 (secreto para duelo en Showdown)
+      const ocultar = modoOculto && estado.miRol === 'jugador2' && !esEspectador
       g1.appendChild(await crearMini(id, 'slide-in-right', ocultar))
       rendJ1.add(key)
     }
@@ -376,8 +374,8 @@ async function renderEquipos(est) {
     const id = est.jugador2.equipo[i]
     const key = `j2_${i}_${id}`
     if (!rendJ2.has(key)) {
-      // En Modo Oculto, el rival (J1) no ve los Pokémon de J2 hasta que finaliza el draft
-      const ocultar = modoOculto && estado.miRol === 'jugador1' && !esEspectador && !esFin
+      // En Modo Oculto, el rival (J1) no ve los Pokémon de J2 (secreto para duelo en Showdown)
+      const ocultar = modoOculto && estado.miRol === 'jugador1' && !esEspectador
       g2.appendChild(await crearMini(id, 'slide-in-left', ocultar))
       rendJ2.add(key)
     }
@@ -734,7 +732,7 @@ export async function solicitarRevancha(btn) {
     mostrarToast('⚠️ ' + (err.message || 'Error al pedir revancha'), 'err')
     if (btn) {
       btn.disabled = false
-      btn.textContent = '⚡ Revancha Inmediata'
+      btn.textContent = '⚔️ Revancha'
     }
   }
 }

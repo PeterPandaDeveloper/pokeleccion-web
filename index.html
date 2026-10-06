@@ -505,13 +505,11 @@
 
           <!-- Acciones -->
           <div class="cfg-acciones" id="cfg-acciones">
-            <button class="btn-accion btn-votar" onclick="votarConfig('propio')">🗳 Votar mi configuración</button>
-            <button class="btn-accion btn-votar-j2" id="btn-votar-j2" onclick="votarConfigOtro()" style="display:none">
-              Elegir config. del otro jugador
-            </button>
-            <button class="btn-accion btn-listo" id="btn-listo" onclick="marcarListo()" style="display:none">
-              ¡Listo para el duelo!
-            </button>
+            <div class="cfg-votos-row">
+              <button type="button" class="btn-accion btn-votar" onclick="votarConfig('propio')">🗳 Votar mi config.</button>
+              <button type="button" class="btn-accion btn-votar-j2" id="btn-votar-j2" onclick="votarConfigOtro()" style="display:none">🤝 Config. del rival</button>
+            </div>
+            <button type="button" class="btn-accion btn-listo" id="btn-listo" onclick="marcarListo()" style="display:none">⚔️ ¡Listo para el duelo!</button>
           </div>
           <div id="msg-pool" class="msg-cargando" style="display:none">
             <span class="spin">⚙</span> Preparando el grupo de Pokémon...
@@ -607,21 +605,20 @@
           <h3 class="j1-color" id="sd-title-j1">Jugador 1</h3>
           <textarea id="sd-j1" readonly></textarea>
           <div class="export-btns">
-            <button class="btn-accion" onclick="copiarCodigo('sd-j1',this)">📋 Copiar mi equipo</button>
-            <button class="btn-showdown j1-showdown" onclick="abrirShowdown('sd-j1')">⚡ Abrir en Showdown</button>
+            <button type="button" class="btn-fin-accion btn-fin-copiar" onclick="copiarCodigo('sd-j1',this)">📋 Copiar equipo</button>
+            <button type="button" class="btn-fin-accion btn-fin-showdown" onclick="abrirShowdown('sd-j1')">⚡ Abrir Showdown</button>
+            <button type="button" class="btn-fin-accion btn-fin-revancha" onclick="solicitarRevancha(this)">⚔️ Revancha</button>
           </div>
         </div>
         <div class="export-col" id="export-col-j2">
           <h3 class="j2-color" id="sd-title-j2">Jugador 2</h3>
           <textarea id="sd-j2" readonly></textarea>
           <div class="export-btns">
-            <button class="btn-accion" onclick="copiarCodigo('sd-j2',this)">📋 Copiar mi equipo</button>
-            <button class="btn-showdown j2-showdown" onclick="abrirShowdown('sd-j2')">⚡ Abrir en Showdown</button>
+            <button type="button" class="btn-fin-accion btn-fin-copiar" onclick="copiarCodigo('sd-j2',this)">📋 Copiar equipo</button>
+            <button type="button" class="btn-fin-accion btn-fin-showdown" onclick="abrirShowdown('sd-j2')">⚡ Abrir Showdown</button>
+            <button type="button" class="btn-fin-accion btn-fin-revancha" onclick="solicitarRevancha(this)">⚔️ Revancha</button>
           </div>
         </div>
-      </div>
-      <div class="fin-acciones-row" style="text-align:center; margin-top:20px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-        <button class="btn-revancha" id="btn-revancha" onclick="solicitarRevancha(this)">⚡ Revancha Inmediata (Mismas Reglas)</button>
       </div>
     </div>
 

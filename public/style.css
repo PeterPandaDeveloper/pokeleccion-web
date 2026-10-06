@@ -165,84 +165,96 @@ button:active {
 }
 
 .btn-votar {
-  background: linear-gradient(180deg, #ffa726 0%, #f57c00 50%, #e65100 100%);
-  border: 3px solid #bf360c !important;
-  color: #ffffff !important;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.5px;
-  padding: 12px 18px;
-  border-radius: 6px;
-  text-shadow: 1px 1px 0 #7f0000;
-  box-shadow: 0 4px 0 #7f0000, 0 0 14px rgba(245, 124, 0, 0.4);
-  cursor: pointer;
-  transition: transform 0.08s, filter 0.15s, box-shadow 0.15s;
-  user-select: none;
-}
-.btn-votar:hover {
-  filter: brightness(1.12);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 #7f0000, 0 0 18px rgba(245, 124, 0, 0.6);
-}
-.btn-votar:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 #7f0000;
-}
-
-.btn-votar-j2 {
-  background: linear-gradient(180deg, #42a5f5 0%, #1e88e5 50%, #1565c0 100%);
-  border: 3px solid #0d47a1 !important;
+  background: linear-gradient(180deg, #2e7d32 0%, #1b5e20 100%);
+  border: 2px solid #66bb6a !important;
   color: #ffffff !important;
   font-family: 'Press Start 2P', monospace;
   font-size: 0.62rem;
   letter-spacing: 0.5px;
-  padding: 12px 18px;
+  padding: 12px 14px;
   border-radius: 6px;
-  text-shadow: 1px 1px 0 #002171;
-  box-shadow: 0 4px 0 #002171, 0 0 14px rgba(30, 136, 229, 0.4);
+  text-shadow: 1px 1px 0 #0d3810;
+  box-shadow: 0 4px 0 #0d3810, 0 2px 8px rgba(27, 94, 32, 0.35);
   cursor: pointer;
   transition: transform 0.08s, filter 0.15s, box-shadow 0.15s;
   user-select: none;
+  text-align: center;
+  line-height: 1.4;
+}
+.btn-votar:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #0d3810, 0 4px 12px rgba(27, 94, 32, 0.55);
+}
+.btn-votar:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #0d3810;
+}
+
+.btn-votar-j2 {
+  background: linear-gradient(180deg, #00796b 0%, #004d40 100%);
+  border: 2px solid #4db6ac !important;
+  color: #ffffff !important;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.5px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  text-shadow: 1px 1px 0 #00251a;
+  box-shadow: 0 4px 0 #00251a, 0 2px 8px rgba(0, 77, 64, 0.35);
+  cursor: pointer;
+  transition: transform 0.08s, filter 0.15s, box-shadow 0.15s;
+  user-select: none;
+  text-align: center;
+  line-height: 1.4;
 }
 .btn-votar-j2:hover {
-  filter: brightness(1.12);
+  filter: brightness(1.15);
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 #002171, 0 0 18px rgba(30, 136, 229, 0.6);
+  box-shadow: 0 6px 0 #00251a, 0 4px 12px rgba(0, 77, 64, 0.55);
 }
 .btn-votar-j2:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 #002171;
+  box-shadow: 0 1px 0 #00251a;
 }
 
 .btn-listo {
-  background: linear-gradient(180deg, #66bb6a 0%, #43a047 50%, #2e7d32 100%);
-  border: 3px solid #1b5e20 !important;
+  width: 100%;
+  background: linear-gradient(180deg, #ffa000 0%, #f57c00 50%, #e65100 100%);
+  border: 2px solid #ffe082 !important;
   color: #ffffff !important;
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   letter-spacing: 0.5px;
-  padding: 12px 20px;
+  padding: 14px 20px;
   border-radius: 6px;
-  text-shadow: 1px 1px 0 #003300;
-  box-shadow: 0 4px 0 #003300, 0 0 16px rgba(67, 160, 71, 0.5);
+  text-shadow: 1px 1px 0 #8c3b00;
+  box-shadow: 0 4px 0 #b26a00, 0 3px 12px rgba(245, 124, 0, 0.45);
   cursor: pointer;
   transition: transform 0.08s, filter 0.15s, box-shadow 0.15s;
   user-select: none;
+  text-align: center;
+  line-height: 1.4;
+  box-sizing: border-box;
 }
 .btn-listo:hover {
-  filter: brightness(1.12);
+  filter: brightness(1.15);
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 #003300, 0 0 20px rgba(67, 160, 71, 0.7);
+  box-shadow: 0 6px 0 #b26a00, 0 6px 18px rgba(245, 124, 0, 0.65);
 }
 .btn-listo:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 #003300;
+  box-shadow: 0 1px 0 #b26a00;
 }
 .btn-listo:disabled {
-  opacity: 0.5;
+  background: #78909c !important;
+  border-color: #b0bec5 !important;
+  color: #eceff1 !important;
+  text-shadow: none;
+  box-shadow: 0 3px 0 #455a64;
   cursor: not-allowed;
-  box-shadow: none;
   transform: none;
+  opacity: 0.85;
 }
 
 .btn-reiniciar {
@@ -900,20 +912,31 @@ button:active {
 
 .cfg-acciones {
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  width: 100%;
   margin-top: 16px;
   padding-top: 14px;
   border-top: 2px dashed #a0c0a0;
+  box-sizing: border-box;
 }
 
-.cfg-acciones button {
-  flex: 1 1 200px;
-  max-width: 320px;
-  text-align: center;
-  justify-content: center;
+.cfg-votos-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.cfg-votos-row .btn-accion {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+@media (max-width: 520px) {
+  .cfg-votos-row {
+    flex-direction: column;
+  }
 }
 
 .controles-draft {
@@ -1806,8 +1829,99 @@ textarea:focus {
 }
 .btn-tutorial-link:hover { color:var(--yellow-lt); border-color:var(--yellow); }
 
-/* ════ EXPORT BTNS ════ */
-.export-btns { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+/* ════ EXPORT BTNS & FIN ACCIONES ════ */
+.export-btns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .export-btns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.btn-fin-accion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.52rem;
+  line-height: 1.35;
+  padding: 10px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid;
+  transition: transform 0.08s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+  text-align: center;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.btn-fin-copiar {
+  background: linear-gradient(180deg, #2e7d32 0%, #1b5e20 100%);
+  border-color: #66bb6a;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #0d3810;
+  box-shadow: 0 3px 0 #0d3810;
+}
+.btn-fin-copiar:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 #0d3810;
+}
+.btn-fin-copiar:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #0d3810;
+}
+
+.btn-fin-showdown {
+  background: linear-gradient(180deg, #00796b 0%, #004d40 100%);
+  border-color: #4db6ac;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #00251a;
+  box-shadow: 0 3px 0 #00251a;
+}
+.btn-fin-showdown:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 #00251a;
+}
+.btn-fin-showdown:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #00251a;
+}
+
+.btn-fin-revancha {
+  background: linear-gradient(180deg, #d84315 0%, #bf360c 100%);
+  border-color: #ff8a65;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #4e1400;
+  box-shadow: 0 3px 0 #4e1400;
+}
+.btn-fin-revancha:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 #4e1400;
+}
+.btn-fin-revancha:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #4e1400;
+}
+.btn-fin-revancha:disabled {
+  background: #78909c !important;
+  border-color: #b0bec5 !important;
+  color: #eceff1 !important;
+  text-shadow: none;
+  box-shadow: 0 2px 0 #455a64;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.85;
+}
 
 /* ════ SALA ID BADGE EN LOBBY ════ */
 .sala-id-badge {
@@ -2600,37 +2714,7 @@ body.buzz-shake {
   margin-top: 2px;
 }
 
-/* ── BOTÓN DE REVANCHA INMEDIATA ── */
-.btn-revancha {
-  background: #e65100;
-  color: #ffffff;
-  border: 2px solid #ffb74d;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.65rem;
-  padding: 12px 20px;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.15s ease;
-  box-shadow: 0 4px 0 #bf360c, 0 0 12px rgba(255, 152, 0, 0.4);
-  letter-spacing: 0.5px;
-}
-.btn-revancha:hover {
-  background: #f57c00;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 #bf360c, 0 0 16px rgba(255, 152, 0, 0.6);
-}
-.btn-revancha:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 #bf360c;
-}
-.btn-revancha:disabled {
-  background: #78909c;
-  border-color: #b0bec5;
-  box-shadow: none;
-  cursor: not-allowed;
-  transform: none;
-  opacity: 0.85;
-}
+
 
 /* ── BOTONES DE COPIAR CÓDIGO DE SALA ── */
 .sala-header-actions {
