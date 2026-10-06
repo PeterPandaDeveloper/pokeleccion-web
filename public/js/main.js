@@ -1,6 +1,7 @@
 import { estado, fetchEstado, guardarSesion, limpiarSesion, iniciarHeartbeat, detenerHeartbeat } from './api.js'
 import { Sonido }        from './sonido.js'
 import { mostrarToast, mostrarInfo, cerrarInfo, mostrarTutorial, cerrarTutorial } from './modal.js'
+import { actualizarTextosDOM, getLanguage, setLanguage, t } from './i18n.js'
 import {
   construirTipos, onRolChange, toggleRegion, toggleTipo, toggleColor, syncRestr,
   leerVoto, etiquetaVoto, unirseAlLobby, crearSalaParty, unirsePorCodigo, votarConfig, votarConfigDelOtro, marcarListo,
@@ -21,6 +22,7 @@ let enDraft = false
 let prevEstadoG = null
 
 // ─── EXPONER AL HTML (onclick=) ───────────────────────────────────────────────
+window.cambiarIdioma      = setLanguage
 window.onRolChange        = onRolChange
 window.toggleRegion       = toggleRegion
 window.toggleTipo         = toggleTipo
@@ -153,18 +155,23 @@ async function cargarSalasPublicas() {
     const box = document.getElementById('salas-publicas')
     if (!box) return
     if (!lista.length) {
-      box.innerHTML = '<p class="sin-salas">No hay salas públicas activas. ¡Crea una nueva!</p>'
+      box.innerHTML = `<p class="sin-salas">${t('no_active_rooms')}</p>`
       return
     }
-    box.innerHTML = lista.map(s => `
-      <button class="sala-item" onclick="window.unirseASala('${s.id}')">
-        <span class="sala-item-id">${s.id}</span>
-        <span class="sala-item-info">
-          ${s.j1 ? `🔴 ${s.j1}` : '🔴 Libre'} · ${s.j2 ? `🟢 ${s.j2}` : '🟢 Libre'}
-        </span>
-        <span class="sala-fase fase-${s.fase}">${s.fase === 'lobby' ? 'En lobby' : s.fase === 'draft' ? 'Jugando' : 'Finalizada'}</span>
-      </button>
-    `).join('')
+    const isEn = getLanguage() === 'en'
+    const openTxt = t('room_open_slot')
+    box.innerHTML = lista.map(s => {
+      const faseTxt = s.fase === 'lobby' ? t('fase_lobby') : s.fase === 'draft' ? t('fase_draft') : t('fase_fin')
+      return `
+        <button class="sala-item" onclick="window.unirseASala('${s.id}')">
+          <span class="sala-item-id">${s.id}</span>
+          <span class="sala-item-info">
+            ${s.j1 ? `🔴 ${s.j1}` : `🔴 ${openTxt}`} · ${s.j2 ? `🟢 ${s.j2}` : `🟢 ${openTxt}`}
+          </span>
+          <span class="sala-fase fase-${s.fase}">${faseTxt}</span>
+        </button>
+      `
+    }).join('')
   } catch {}
 }
 
@@ -305,15 +312,22 @@ function detectarCambios(est) {
 function setConexion(ok) {
   const p = document.getElementById('conn-pill')
   if (!p) return
-  p.textContent  = ok ? '🟢 Conectado' : '🔴 Sin conexión'
+  p.textContent  = ok ? t('connected') : t('disconnected')
   p.className    = `conn-pill ${ok ? 'conn-ok' : 'conn-err'}`
 }
 
 // ─── INICIO ───────────────────────────────────────────────────────────────────
 async function iniciar() {
+  actualizarTextosDOM()
   construirTipos()
   actualizarDisplaySala()
   actualizarBotonSuperAyudaUI()
+
+  // Sincronizar tras cambio de idioma
+  window.addEventListener('idiomaCambiado', () => {
+    if (!estado.salaId) cargarSalasPublicas()
+    setConexion(true)
+  })
 
   // Mostrar tutorial si es la primera vez
   if (!localStorage.getItem('tutorial-visto')) {

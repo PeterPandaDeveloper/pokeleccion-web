@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Desafío de Pokélección</title>
+<title data-i18n="title">PokéDraft Royale</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -32,15 +32,15 @@
 <!-- MODAL TUTORIAL -->
 <div id="modal-tutorial" class="modal-overlay" style="display:none">
   <div class="modal-box modal-tutorial-box">
-    <h3 class="modal-titulo">🎁 ¿Cómo jugar?</h3>
+    <h3 class="modal-titulo" data-i18n="tutorial_title">🎁 How to Play?</h3>
     <div class="tutorial-pasos">
-      <div class="tutorial-paso"><span class="paso-num">1</span><div><strong>Crea o únete a una sala</strong><br>Comparte el enlace con tu rival. Elige tu rol (Jugador 1 o 2) y escribe tu nombre.</div></div>
-      <div class="tutorial-paso"><span class="paso-num">2</span><div><strong>Vota la configuración</strong><br>Cada jugador elige región, tipos y restricciones. Se aplica el resultado combinado de ambos votos.</div></div>
-      <div class="tutorial-paso"><span class="paso-num">3</span><div><strong>¡Confirma cuando estés listo!</strong><br>Ambos jugadores deben confirmar. El sistema prepara el pool de Pokémon.</div></div>
-      <div class="tutorial-paso"><span class="paso-num">4</span><div><strong>Elige por turnos (10 segundos)</strong><br>Cada turno aparecen 2 Pokémon. Eliges uno, el otro va al rival. Hay 6 rondas.</div></div>
-      <div class="tutorial-paso"><span class="paso-num">5</span><div><strong>Exporta a Pokémon Showdown</strong><br>Al terminar, copia tu equipo y ábrelo directamente en Showdown para batalla.</div></div>
+      <div class="tutorial-paso"><span class="paso-num">1</span><div><strong data-i18n="tuto_p1_tit">Create or join a room</strong><br><span data-i18n="tuto_p1_txt">Share the link or code with your rival. Choose your role and nickname.</span></div></div>
+      <div class="tutorial-paso"><span class="paso-num">2</span><div><strong data-i18n="tuto_p2_tit">Vote game rules</strong><br><span data-i18n="tuto_p2_txt">Each player picks regions, types, and restrictions. Consensus merges both choices.</span></div></div>
+      <div class="tutorial-paso"><span class="paso-num">3</span><div><strong data-i18n="tuto_p3_tit">Confirm when ready!</strong><br><span data-i18n="tuto_p3_txt">Both players confirm. The system filters and pre-loads the Pokémon pool.</span></div></div>
+      <div class="tutorial-paso"><span class="paso-num">4</span><div><strong data-i18n="tuto_p4_tit">Turn-based drafting (10s)</strong><br><span data-i18n="tuto_p4_txt">Two Pokémon appear on each turn. Pick one before the timer runs out.</span></div></div>
+      <div class="tutorial-paso"><span class="paso-num">5</span><div><strong data-i18n="tuto_p5_tit">Export to Pokémon Showdown</strong><br><span data-i18n="tuto_p5_txt">Once completed, copy your team directly into Pokémon Showdown for battle!</span></div></div>
     </div>
-    <button class="btn-accion" style="width:100%;margin-top:16px" onclick="cerrarTutorial()">¡Entendido, a jugar!</button>
+    <button class="btn-accion" style="width:100%;margin-top:16px" onclick="cerrarTutorial()" data-i18n="tuto_btn_close">Got it, let's play!</button>
   </div>
 </div>
 
@@ -49,23 +49,27 @@
   <div class="main-container lobby-container">
 
     <div class="titulo-bloque">
-      <h1 class="title">Desafío de Pokélección</h1>
-      <p class="subtitle">Elige tu equipo · Compatible con Pokémon Showdown</p>
-      <div class="lobby-header-btns" style="display:flex; justify-content:center; gap:10px; margin-top:8px; flex-wrap:wrap;">
-        <button class="btn-tutorial-link" onclick="mostrarTutorial()">¿Cómo jugar?</button>
-        <button type="button" class="btn-super-ayuda" id="btn-super-ayuda-lobby" onclick="toggleSuperAyuda()" title="Fichas técnicas con estadísticas de Pokémon">🧠 Súper Ayuda: <span style="opacity:0.7">OFF</span></button>
+      <h1 class="title" data-i18n="title">PokéDraft Royale</h1>
+      <p class="subtitle" data-i18n="subtitle">Draft your team · Compatible with Pokémon Showdown</p>
+      <div class="lobby-header-btns" style="display:flex; justify-content:center; gap:10px; margin-top:8px; flex-wrap:wrap; align-items:center;">
+        <button class="btn-tutorial-link" onclick="mostrarTutorial()" data-i18n="how_to_play">How to Play?</button>
+        <button type="button" class="btn-super-ayuda" id="btn-super-ayuda-lobby" onclick="toggleSuperAyuda()" data-i18n-title="super_assist_title" title="Tactical data cards with base stats">🧠 <span data-i18n="super_assist">Super Assist</span>: <span style="opacity:0.7">OFF</span></button>
+        <div class="lang-switch-wrap">
+          <button type="button" class="btn-lang" data-lang="en" onclick="cambiarIdioma('en')">🇬🇧 EN</button>
+          <button type="button" class="btn-lang" data-lang="es" onclick="cambiarIdioma('es')">🇪🇸 ES</button>
+        </div>
       </div>
     </div>
 
     <!-- PASO 1: nombre/rol (Flujo Party Game) -->
     <div id="paso-nombre" class="lobby-step">
       <div class="box-gba party-onboarding-box">
-        <h2 class="step-title" id="paso-titulo">Entrenador Pokémon</h2>
+        <h2 class="step-title" id="paso-titulo" data-i18n="trainer_title">Pokémon Trainer</h2>
 
         <div class="party-form">
           <div class="input-row party-input-row" id="fila-nombre">
-            <label class="ctrl-label">Nombre</label>
-            <input type="text" id="input-nombre" maxlength="20" placeholder="Tu nombre de entrenador..." autocomplete="off"/>
+            <label class="ctrl-label" data-i18n="trainer_name_label">Name</label>
+            <input type="text" id="input-nombre" maxlength="20" placeholder="Your trainer nickname..." data-i18n-ph="trainer_name_ph" autocomplete="off"/>
           </div>
 
           <!-- Dos botones principales de Party Game -->
@@ -73,49 +77,49 @@
             <button class="btn-party-primary" id="btn-party-crear" onclick="crearSalaParty()">
               <span class="party-btn-icon">🎮</span>
               <span class="party-btn-text">
-                <strong>Crear Sala</strong>
-                <small>Ser anfitrión y generar enlace</small>
+                <strong data-i18n="btn_create_room_title">Create Room</strong>
+                <small data-i18n="btn_create_room_sub">Host game & generate invite link</small>
               </span>
             </button>
             <button class="btn-party-secondary" id="btn-party-unirse" onclick="unirsePorCodigo()">
               <span class="party-btn-icon">🤝</span>
               <span class="party-btn-text">
-                <strong>Unirse a Sala</strong>
-                <small>Entrar con código o enlace</small>
+                <strong data-i18n="btn_join_room_title">Join Room</strong>
+                <small data-i18n="btn_join_room_sub">Enter with code or link</small>
               </span>
             </button>
           </div>
 
           <div class="party-codigo-row">
-            <input type="text" id="input-codigo-sala" maxlength="8" placeholder="Código de sala (ej: A1B2C3)" autocomplete="off" style="text-transform:uppercase"/>
-            <button class="btn-entrar-codigo" onclick="unirsePorCodigo()">Entrar</button>
+            <input type="text" id="input-codigo-sala" maxlength="8" placeholder="Room code (e.g. A1B2C3)" data-i18n-ph="code_input_ph" autocomplete="off" style="text-transform:uppercase"/>
+            <button class="btn-entrar-codigo" onclick="unirsePorCodigo()" data-i18n="btn_enter_code">Join</button>
           </div>
 
           <!-- Retrocompatibilidad de hooks -->
           <div style="display:none">
             <select id="rol-selector" onchange="onRolChange()">
-              <option value="jugador1">🔴 Jugador 1</option>
-              <option value="jugador2">🟢 Jugador 2</option>
-              <option value="espectador">👁 Espectador</option>
+              <option value="jugador1">🔴 Player 1</option>
+              <option value="jugador2">🟢 Player 2</option>
+              <option value="espectador">👁 Spectator</option>
             </select>
-            <input type="text" id="input-nombre-esp" maxlength="20" placeholder="Tu nombre como espectador..." autocomplete="off"/>
-            <button id="btn-unirse" onclick="unirseAlLobby()">Entrar</button>
+            <input type="text" id="input-nombre-esp" maxlength="20" placeholder="Spectator name..." autocomplete="off"/>
+            <button id="btn-unirse" onclick="unirseAlLobby()">Enter</button>
           </div>
 
           <div class="sala-selector-row party-sala-row">
-            <span class="sala-actual">Sala actual: <strong id="sala-id-display">—</strong></span>
-            <button class="btn-copiar-sala" onclick="copiarEnlace()">🔗 Copiar enlace</button>
+            <span class="sala-actual"><span data-i18n="current_room">Current room:</span> <strong id="sala-id-display">—</strong></span>
+            <button class="btn-copiar-sala" onclick="copiarEnlace()" data-i18n="copy_link">🔗 Copy link</button>
           </div>
         </div>
 
         <!-- Selector de salas públicas -->
         <div class="salas-section">
           <div class="salas-header">
-            <span class="salas-label">Salas activas</span>
-            <button class="btn-sala-nueva" onclick="crearSalaParty()">+ Nueva sala</button>
+            <span class="salas-label" data-i18n="active_rooms">Active rooms</span>
+            <button class="btn-sala-nueva" onclick="crearSalaParty()" data-i18n="new_room">+ New room</button>
           </div>
           <div id="salas-publicas" class="salas-lista">
-            <p class="sin-salas">Cargando salas...</p>
+            <p class="sin-salas" data-i18n="loading_rooms">Loading rooms...</p>
           </div>
         </div>
       </div>
@@ -128,32 +132,32 @@
         <!-- Panel jugadores -->
         <div class="box-gba jugadores-panel">
           <div class="sala-title-row">
-            <h3 class="panel-title">Sala <span id="sala-id-lobby" class="sala-id-badge"></span></h3>
+            <h3 class="panel-title"><span data-i18n="room_lbl">Room</span> <span id="sala-id-lobby" class="sala-id-badge"></span></h3>
             <div class="sala-header-actions">
-              <button class="btn-copiar-codigo-lobby" onclick="copiarCodigoSala()" title="Copiar código de 6 caracteres">📋 Copiar código</button>
-              <button class="btn-copiar-sala-lobby" onclick="copiarEnlace()" title="Copiar enlace directo">🔗 Enlace</button>
+              <button class="btn-copiar-codigo-lobby" onclick="copiarCodigoSala()" data-i18n-title="copy_code_hint" title="Copy 6-character room code" data-i18n="copy_code">📋 Copy code</button>
+              <button class="btn-copiar-sala-lobby" onclick="copiarEnlace()" data-i18n-title="copy_link_hint" title="Copy direct invite link" data-i18n="copy_link_btn">🔗 Link</button>
             </div>
           </div>
           <div class="jugador-slot j1-slot">
             <span class="slot-ico">🔴</span>
             <div class="slot-info">
-              <span class="slot-nom" id="nom-j1-lobby">Esperando...</span>
+              <span class="slot-nom" id="nom-j1-lobby" data-i18n="waiting_player">Waiting...</span>
               <span class="slot-est" id="est-j1-lobby">—</span>
             </div>
           </div>
           <div class="jugador-slot j2-slot">
             <span class="slot-ico">🟢</span>
             <div class="slot-info">
-              <span class="slot-nom" id="nom-j2-lobby">Esperando...</span>
+              <span class="slot-nom" id="nom-j2-lobby" data-i18n="waiting_player">Waiting...</span>
               <span class="slot-est" id="est-j2-lobby">—</span>
             </div>
           </div>
           <div class="esp-section-wrap" id="esp-section-wrap">
             <div class="esp-badge" id="esp-badge" style="display:none">
-              👁 <span id="esp-count">0</span> espectador(es)
+              👁 <span id="esp-count">0</span> spectator(s)
             </div>
             <div class="esp-custom-box" id="esp-custom-box" style="display:none">
-              <span class="esp-custom-lbl">Tu avatar:</span>
+              <span class="esp-custom-lbl" data-i18n="your_avatar">Your avatar:</span>
               <div class="esp-avatar-picker" id="esp-avatar-picker">
                 <button type="button" class="btn-avatar-esp avatar-active" data-avatar="🍿" onclick="seleccionarAvatarEsp('🍿')">🍿</button>
                 <button type="button" class="btn-avatar-esp" data-avatar="🕶️" onclick="seleccionarAvatarEsp('🕶️')">🕶️</button>
@@ -168,44 +172,44 @@
           </div>
           <div class="aviso-demo">
             <span class="ico-demo">🗳</span>
-            <div><strong>Votación democrática</strong><br>Ambos votan · gana el consenso</div>
+            <div><strong data-i18n="democratic_title">Democratic Voting</strong><br><span data-i18n="democratic_sub">Both vote · consensus merges rules</span></div>
           </div>
           <div id="cooldown-msg" class="cooldown-msg" style="display:none"></div>
           <div id="panel-limpiar" class="panel-limpiar" style="display:none">
             <div class="panel-limpiar-header">
-              <span class="panel-limpiar-title">Ajustes de sala</span>
-              <label class="tog-privada-compact" title="Ocultar de la lista pública">
+              <span class="panel-limpiar-title" data-i18n="room_settings">Room settings</span>
+              <label class="tog-privada-compact" data-i18n-title="private_title" title="Hide from public room list">
                 <input type="checkbox" id="chk-privada" onchange="togglePrivada()">
                 <svg class="btn-flat-ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span>Privada</span>
+                <span data-i18n="private_lbl">Private</span>
               </label>
             </div>
             <div class="panel-limpiar-grid">
-              <button class="btn-util btn-limpiar" onclick="limpiarSala()" title="Restablecer todos los filtros a valores por defecto">
+              <button class="btn-util btn-limpiar" onclick="limpiarSala()" title="Reset filters">
                 <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"/></svg>
-                <span class="btn-txt">Restablecer filtros</span>
+                <span class="btn-txt" data-i18n="reset_filters">Reset filters</span>
               </button>
               <button class="btn-util btn-keepalive" onclick="mantenerViva()">
                 <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span class="btn-txt">Mantener sala viva</span>
+                <span class="btn-txt" data-i18n="keep_alive">Keep room alive</span>
               </button>
               <div id="intercambio-btns" class="intercambio-btns">
                 <button class="btn-util btn-liberar" id="btn-liberar" onclick="liberarSlot()" style="display:none">
                   <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                  <span class="btn-txt">Dejar mi slot</span>
+                  <span class="btn-txt" data-i18n="leave_slot">Leave my slot</span>
                 </button>
                 <button class="btn-util btn-tomar-j1" id="btn-tomar-j1" onclick="tomarSlot('jugador1')" style="display:none">
                   <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                  <span class="btn-txt">Tomar Jugador 1</span>
+                  <span class="btn-txt" data-i18n="claim_p1">Claim Player 1</span>
                 </button>
                 <button class="btn-util btn-tomar-j2" id="btn-tomar-j2" onclick="tomarSlot('jugador2')" style="display:none">
                   <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                  <span class="btn-txt">Tomar Jugador 2</span>
+                  <span class="btn-txt" data-i18n="claim_p2">Claim Player 2</span>
                 </button>
               </div>
               <button class="btn-util btn-eliminar-sala" onclick="eliminarSala()">
                 <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                <span class="btn-txt">Eliminar sala</span>
+                <span class="btn-txt" data-i18n="delete_room">Delete room</span>
               </button>
             </div>
           </div>
@@ -213,20 +217,20 @@
           <!-- CHAT DEL LOBBY -->
           <div class="chat-panel" id="chat-panel-lobby">
             <div class="chat-titulo">
-              <span>💬 PokéChat</span>
-              <span class="chat-status-led">● EN VIVO</span>
+              <span data-i18n="chat_title">💬 PokéChat</span>
+              <span class="chat-status-led" data-i18n="chat_live">● LIVE</span>
             </div>
             <div class="chat-mensajes" id="chat-mensajes-lobby"></div>
             <div class="chat-input-container">
-              <input type="text" id="chat-input-lobby" maxlength="200" placeholder="Escribe un mensaje..." class="chat-input"/>
+              <input type="text" id="chat-input-lobby" maxlength="200" placeholder="Type a message..." data-i18n-ph="chat_ph" class="chat-input"/>
               <div class="chat-actions-row">
-                <button type="button" onclick="enviarChat()" class="btn-chat-send" title="Enviar mensaje">
+                <button type="button" onclick="enviarChat()" class="btn-chat-send" title="Send message">
                   <span class="btn-chat-icon">↵</span>
-                  <span class="btn-chat-txt">Enviar</span>
+                  <span class="btn-chat-txt" data-i18n="chat_send">Send</span>
                 </button>
-                <button type="button" onclick="enviarBuzz()" id="btn-buzz-lobby" class="btn-buzz" title="Avisar al otro jugador">
+                <button type="button" onclick="enviarBuzz()" id="btn-buzz-lobby" class="btn-buzz" title="Buzz rival">
                   <span class="btn-buzz-icon">🔔</span>
-                  <span class="btn-buzz-txt">Avisar</span>
+                  <span class="btn-buzz-txt" data-i18n="chat_buzz">Buzz</span>
                 </button>
               </div>
             </div>
@@ -235,29 +239,29 @@
 
         <!-- Panel configuración -->
         <div class="box-gba config-panel" id="config-panel-wrap">
-          <h3 class="panel-title">Configuración del duelo</h3>
+          <h3 class="panel-title" data-i18n="config_title">Duel Configuration</h3>
 
           <!-- Presets Rápidos (Toggle) -->
           <div class="presets-section">
             <div class="cfg-label-row">
-              <label class="cfg-label">Presets Rápidos</label>
-              <span class="cfg-hint">Configura en 1 clic · Clic de nuevo para restaurar tu ajuste</span>
+              <label class="cfg-label" data-i18n="presets_title">Quick Presets</label>
+              <span class="cfg-hint" data-i18n="presets_hint">1-click config · Click again to restore your custom settings</span>
             </div>
             <div class="presets-grid">
               <button type="button" class="btn-preset" id="preset-casual" onclick="aplicarPreset('casual')">
                 <span class="preset-ico">☕</span>
-                <span class="preset-tit">Casual</span>
-                <small class="preset-desc">Sin legendarios, 6 rondas</small>
+                <span class="preset-tit" data-i18n="preset_casual_tit">Casual</span>
+                <small class="preset-desc" data-i18n="preset_casual_desc">No legendaries, 6 rounds</small>
               </button>
               <button type="button" class="btn-preset" id="preset-competitivo" onclick="aplicarPreset('competitivo')">
                 <span class="preset-ico">🏆</span>
-                <span class="preset-tit">Competitivo</span>
-                <small class="preset-desc">Finales, BST 500+, tipos únicos</small>
+                <span class="preset-tit" data-i18n="preset_comp_tit">Competitive</span>
+                <small class="preset-desc" data-i18n="preset_comp_desc">Final evos, 500+ BST, unique types</small>
               </button>
               <button type="button" class="btn-preset" id="preset-copabebe" onclick="aplicarPreset('copabebe')">
                 <span class="preset-ico">🍼</span>
-                <span class="preset-tit">Copa Bebé</span>
-                <small class="preset-desc">Primera etapa, BST ≤ 360</small>
+                <span class="preset-tit" data-i18n="preset_baby_tit">Little Cup</span>
+                <small class="preset-desc" data-i18n="preset_baby_desc">First stage, BST ≤ 360</small>
               </button>
             </div>
           </div>
@@ -267,12 +271,12 @@
           <!-- Región (multi) -->
           <div class="cfg-grupo">
             <div class="cfg-label-row">
-              <label class="cfg-label">Región</label>
+              <label class="cfg-label" data-i18n="regions_title">Regions</label>
               <button class="btn-info-small" onclick="mostrarInfo('region')">?</button>
             </div>
             <div class="region-grid">
               <button class="rbtn rbtn-todas active" data-r="todas" onclick="toggleRegion(this)">
-                <span class="rbtn-nombre">🌐 Todas</span>
+                <span class="rbtn-nombre" data-i18n="region_all_btn">🌐 All</span>
                 <span class="rbtn-starters">
                   <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" alt="Pikachu" class="rbtn-sprite" loading="lazy">
                   <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png" alt="Eevee" class="rbtn-sprite" loading="lazy">
@@ -360,28 +364,28 @@
                 </span>
               </button>
             </div>
-            <p class="cfg-hint" id="hint-regiones">Selección: todas</p>
+            <p class="cfg-hint" id="hint-regiones" data-i18n="regions_all">Selection: all</p>
           </div>
 
           <!-- Tipos -->
           <div class="cfg-grupo">
             <div class="cfg-label-row">
-              <label class="cfg-label">Tipos</label>
-              <span class="cfg-hint">Uno o más (opcional)</span>
+              <label class="cfg-label" data-i18n="types_title">Types</label>
+              <span class="cfg-hint" data-i18n="types_hint">One or more (optional)</span>
             </div>
             <div class="tipo-grid" id="tipo-grid"></div>
             <div class="modo-tipos" id="modo-tipos-row" style="display:none">
-              <span class="cfg-hint">Modo:</span>
-              <label class="radio-lbl"><input type="radio" name="modoTipos" value="OR" checked> Al menos uno</label>
-              <label class="radio-lbl"><input type="radio" name="modoTipos" value="AND"> Todos exactos</label>
+              <span class="cfg-hint" data-i18n="types_mode_lbl">Mode:</span>
+              <label class="radio-lbl"><input type="radio" name="modoTipos" value="OR" checked> <span data-i18n="types_mode_or">At least one</span></label>
+              <label class="radio-lbl"><input type="radio" name="modoTipos" value="AND"> <span data-i18n="types_mode_and">All exact</span></label>
             </div>
           </div>
 
           <!-- Colores -->
           <div class="cfg-grupo">
             <div class="cfg-label-row">
-              <label class="cfg-label">Colores</label>
-              <span class="cfg-hint">Elige uno o más colores</span>
+              <label class="cfg-label" data-i18n="colors_title">Colors</label>
+              <span class="cfg-hint" data-i18n="colors_hint">Choose one or more colors</span>
             </div>
             <div class="tipo-grid color-grid" id="color-grid"></div>
           </div>
@@ -389,38 +393,38 @@
           <!-- Etapa evolutiva -->
           <div class="cfg-grupo">
             <div class="cfg-label-row">
-              <label class="cfg-label">Etapa evolutiva</label>
+              <label class="cfg-label" data-i18n="evo_title">Evolutionary Stage</label>
               <button class="btn-info-small" onclick="mostrarInfo('evolucion')">?</button>
             </div>
             <div class="restr-grid">
-              <label class="tog"><input type="checkbox" id="chk-finales" onchange="syncRestr(this)"> Solo completamente evolucionados</label>
-              <label class="tog"><input type="checkbox" id="chk-sinevo"  onchange="syncRestr(this)"> Sin ninguna evolución posible</label>
-              <label class="tog"><input type="checkbox" id="chk-base"    onchange="syncRestr(this)"> Solo primera etapa (cualquier cadena)</label>
+              <label class="tog"><input type="checkbox" id="chk-finales" onchange="syncRestr(this)"> <span data-i18n="evo_final">Fully evolved only</span></label>
+              <label class="tog"><input type="checkbox" id="chk-sinevo"  onchange="syncRestr(this)"> <span data-i18n="evo_single">Single stage only (no evos)</span></label>
+              <label class="tog"><input type="checkbox" id="chk-base"    onchange="syncRestr(this)"> <span data-i18n="evo_base">First stage only (any chain)</span></label>
               <label class="tog tog-destacada">
                 <input type="checkbox" id="chk-copabebe" onchange="syncRestr(this)">
-                🍼 Copa Bebé — primera etapa de cadenas evolutivas largas
+                <span data-i18n="evo_baby">🍼 Little Cup — first stage of multi-stage evolutions</span>
                 <button class="btn-info-inline" onclick="mostrarInfo('copabebe')">?</button>
               </label>
             </div>
-            <div class="incomp-warn" id="warn-evolucion" style="display:none">
-              ⚠️ Solo puede activarse una opción de etapa a la vez.
+            <div class="incomp-warn" id="warn-evolucion" style="display:none" data-i18n="evo_warn">
+              ⚠️ Only one evolution stage option can be active at a time.
             </div>
           </div>
 
           <!-- Otras restricciones -->
           <div class="cfg-grupo">
-            <label class="cfg-label">Otras restricciones</label>
+            <label class="cfg-label" data-i18n="other_restr_title">Other Restrictions</label>
             <div class="restr-grid">
-              <label class="tog"><input type="checkbox" id="chk-sin-leg"> Sin legendarios ni míticos</label>
-              <label class="tog"><input type="checkbox" id="chk-gimmicks"> Sin gimmicks / ultraentes / paradojas</label>
-              <label class="tog"><input type="checkbox" id="chk-formas-reg"> Sin formas regionales</label>
+              <label class="tog"><input type="checkbox" id="chk-sin-leg"> <span data-i18n="restr_no_leg">No legendaries or mythicals</span></label>
+              <label class="tog"><input type="checkbox" id="chk-gimmicks"> <span data-i18n="restr_no_gimmicks">No gimmicks / ultra beasts / paradox</span></label>
+              <label class="tog"><input type="checkbox" id="chk-formas-reg"> <span data-i18n="restr_no_reg">No regional forms</span></label>
               <label class="tog">
-                <input type="checkbox" id="chk-nodup"> Sin tipos repetidos en el equipo
+                <input type="checkbox" id="chk-nodup"> <span data-i18n="restr_no_dup">No duplicate types on team</span>
                 <button class="btn-info-inline" onclick="mostrarInfo('nodup')">?</button>
               </label>
               <label class="tog tog-destacada">
                 <input type="checkbox" id="chk-oculto" checked>
-                🙈 Modo Oculto (Draft a ciegas)
+                <span data-i18n="restr_blind">🙈 Blind Mode (Secret Draft)</span>
                 <button class="btn-info-inline" onclick="mostrarInfo('modoOculto')">?</button>
               </label>
             </div>
@@ -431,17 +435,17 @@
           <!-- BST con Sliders y Previews Dinámicas -->
           <div class="cfg-grupo bst-grupo-rework">
             <div class="cfg-label-row">
-              <label class="cfg-label">📊 BST (Estadísticas Base Totales)</label>
+              <label class="cfg-label" data-i18n="bst_title">📊 BST (Base Stat Total)</label>
               <button class="btn-info-small" onclick="mostrarInfo('bst')">?</button>
             </div>
             <div class="bst-row">
               <div class="bst-input-col">
-                <label class="cfg-hint">Mínimo</label>
+                <label class="cfg-hint" data-i18n="bst_min">Minimum</label>
                 <input type="number" id="bst-min" min="0" max="780" step="10" placeholder="0" class="bst-input" oninput="actualizarBSTPreview()"/>
                 <input type="range" id="slider-bst-min" min="180" max="780" step="10" value="180" class="bst-slider" oninput="onSliderBSTMin(this.value)"/>
               </div>
               <div class="bst-input-col">
-                <label class="cfg-hint">Máximo</label>
+                <label class="cfg-hint" data-i18n="bst_max">Maximum</label>
                 <input type="number" id="bst-max" min="0" max="780" step="10" placeholder="780" class="bst-input" oninput="actualizarBSTPreview()"/>
                 <input type="range" id="slider-bst-max" min="180" max="780" step="10" value="780" class="bst-slider" oninput="onSliderBSTMax(this.value)"/>
               </div>
@@ -450,27 +454,27 @@
             <!-- Preview táctil con sprites e indicador de piscina -->
             <div class="bst-preview-box">
               <div class="bst-poke-card min-card">
-                <span class="bst-card-tag">Límite Inferior</span>
+                <span class="bst-card-tag" data-i18n="bst_lower_tag">Lower Limit</span>
                 <div class="bst-card-sprite-wrap">
                   <img id="bst-sprite-min" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/172.png" alt="Min Poke" class="bst-sprite-img" />
                 </div>
-                <strong id="bst-nom-min" class="bst-poke-name">Sin mínimo</strong>
-                <span id="bst-val-min" class="bst-poke-stat">Cualquiera</span>
+                <strong id="bst-nom-min" class="bst-poke-name" data-i18n="bst_no_min">No minimum</strong>
+                <span id="bst-val-min" class="bst-poke-stat" data-i18n="bst_any">Any</span>
               </div>
 
               <div class="bst-middle-indicator">
                 <span class="bst-indicator-icon">⚖️</span>
-                <span class="bst-indicator-lbl">Piscina elegible</span>
+                <span class="bst-indicator-lbl" data-i18n="bst_pool_lbl">Eligible Pool</span>
                 <strong id="bst-pool-count" class="bst-indicator-val">1136 Pokémon</strong>
               </div>
 
               <div class="bst-poke-card max-card">
-                <span class="bst-card-tag">Límite Superior</span>
+                <span class="bst-card-tag" data-i18n="bst_upper_tag">Upper Limit</span>
                 <div class="bst-card-sprite-wrap">
                   <img id="bst-sprite-max" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png" alt="Max Poke" class="bst-sprite-img" />
                 </div>
-                <strong id="bst-nom-max" class="bst-poke-name">Sin límite</strong>
-                <span id="bst-val-max" class="bst-poke-stat">Hasta 780+</span>
+                <strong id="bst-nom-max" class="bst-poke-name" data-i18n="bst_no_max">No maximum</strong>
+                <span id="bst-val-max" class="bst-poke-stat" data-i18n="bst_up_to">Up to 780+</span>
               </div>
             </div>
           </div>
@@ -480,11 +484,11 @@
           <!-- Número de rondas -->
           <div class="cfg-grupo">
             <div class="cfg-label-row">
-              <label class="cfg-label">Rondas</label>
-              <span class="cfg-hint">Pokémon por equipo (1–6)</span>
+              <label class="cfg-label" data-i18n="rounds_title">Rounds</label>
+              <span class="cfg-hint" data-i18n="rounds_hint">Pokémon per team (1–6)</span>
             </div>
             <div class="bst-row">
-              <label class="cfg-hint">Pokémon cada uno:</label>
+              <label class="cfg-hint" data-i18n="rounds_each">Pokémon each:</label>
               <select id="num-rondas" class="num-rondas-sel">
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -506,13 +510,13 @@
           <!-- Acciones -->
           <div class="cfg-acciones" id="cfg-acciones">
             <div class="cfg-votos-row">
-              <button type="button" class="btn-accion btn-votar" onclick="votarConfig('propio')">🗳 Votar mi config.</button>
-              <button type="button" class="btn-accion btn-votar-j2" id="btn-votar-j2" onclick="votarConfigOtro()" style="display:none">🤝 Config. del rival</button>
+              <button type="button" class="btn-accion btn-votar" onclick="votarConfig('propio')" data-i18n="btn_vote_my">🗳 Vote my config</button>
+              <button type="button" class="btn-accion btn-votar-j2" id="btn-votar-j2" onclick="votarConfigOtro()" style="display:none" data-i18n="btn_vote_rival">🤝 Copy rival's config</button>
             </div>
-            <button type="button" class="btn-accion btn-listo" id="btn-listo" onclick="marcarListo()" style="display:none">⚔️ ¡Listo para el duelo!</button>
+            <button type="button" class="btn-accion btn-listo" id="btn-listo" onclick="marcarListo()" style="display:none" data-i18n="btn_ready">⚔️ Ready for duel!</button>
           </div>
           <div id="msg-pool" class="msg-cargando" style="display:none">
-            <span class="spin">⚙</span> Preparando el grupo de Pokémon...
+            <span class="spin">⚙</span> <span data-i18n="preparing_pool">Preparing Pokémon pool...</span>
           </div>
         </div>
 
@@ -526,31 +530,35 @@
   <div class="main-container">
 
     <div class="titulo-bloque">
-      <h1 class="title">Desafío de Pokélección</h1>
+      <h1 class="title" data-i18n="title">PokéDraft Royale</h1>
       <div id="reglas-pill" class="reglas-pill"></div>
     </div>
 
     <div class="controles-draft">
-      <div class="round-pill" id="ronda-txt">Ronda 0 / 6</div>
+      <div class="round-pill" id="ronda-txt">Round 0 / 6</div>
       <div class="esp-pill" id="esp-pill" style="display:none">👁 <span id="esp-count-draft">0</span></div>
-      <div class="conn-pill conn-ok" id="conn-pill">🟢 Conectado</div>
-      <button type="button" class="btn-super-ayuda" id="btn-super-ayuda" onclick="toggleSuperAyuda()" title="Fichas técnicas con estadísticas de Pokémon">🧠 Súper Ayuda: <span style="opacity:0.7">OFF</span></button>
-      <button class="btn-copiar-codigo-draft" onclick="copiarCodigoSala()" title="Copiar código de sala">📋</button>
-      <button class="btn-copiar-sala-draft" onclick="copiarEnlace()" title="Copiar enlace de sala">🔗</button>
-      <button class="btn-reiniciar" onclick="resetear()">↺ Reiniciar</button>
+      <div class="conn-pill conn-ok" id="conn-pill" data-i18n="connected">🟢 Connected</div>
+      <button type="button" class="btn-super-ayuda" id="btn-super-ayuda" onclick="toggleSuperAyuda()" data-i18n-title="super_assist_title" title="Tactical data cards with base stats">🧠 <span data-i18n="super_assist">Super Assist</span>: <span style="opacity:0.7">OFF</span></button>
+      <div class="lang-switch-wrap">
+        <button type="button" class="btn-lang" data-lang="en" onclick="cambiarIdioma('en')">🇬🇧 EN</button>
+        <button type="button" class="btn-lang" data-lang="es" onclick="cambiarIdioma('es')">🇪🇸 ES</button>
+      </div>
+      <button class="btn-copiar-codigo-draft" onclick="copiarCodigoSala()" data-i18n-title="copy_code_hint" title="Copy room code">📋</button>
+      <button class="btn-copiar-sala-draft" onclick="copiarEnlace()" data-i18n-title="copy_link_hint" title="Copy room link">🔗</button>
+      <button class="btn-reiniciar" onclick="resetear()" data-i18n="btn_reset">↺ Reset</button>
     </div>
 
     <div class="arena">
       <div class="team-panel">
         <div class="player-header">
-          <h2 class="player-name j1-color" id="nom-j1-draft">Jugador 1</h2>
+          <h2 class="player-name j1-color" id="nom-j1-draft">Player 1</h2>
           <span class="team-badge" id="badge-j1">0/6</span>
         </div>
         <div class="poke-grid" id="equipo-j1"></div>
       </div>
 
       <div class="draft-zone">
-        <h2 class="turno-msg" id="turno-alert">Esperando...</h2>
+        <h2 class="turno-msg" id="turno-alert" data-i18n="waiting_draft">Waiting...</h2>
         <div class="timer-wrap" id="timer-wrap" style="display:none">
           <svg class="timer-ring" viewBox="0 0 80 80">
             <circle class="ring-bg" cx="40" cy="40" r="34"/>
@@ -560,27 +568,27 @@
           <span class="timer-num" id="timer-num">10</span>
         </div>
         <div class="cards-container" id="opciones-render"></div>
-        <div class="aviso-random" id="random-tag" style="display:none">
-          ⚡ Tiempo agotado — Pokémon asignado al azar
+        <div class="aviso-random" id="random-tag" style="display:none" data-i18n="time_out_random">
+          ⚡ Time expired — Random Pokémon assigned
         </div>
 
         <!-- Chat en draft -->
         <div class="chat-panel chat-panel-draft">
           <div class="chat-titulo">
-            <span>💬 PokéChat</span>
-            <span class="chat-status-led">● EN VIVO</span>
+            <span data-i18n="chat_title">💬 PokéChat</span>
+            <span class="chat-status-led" data-i18n="chat_live">● LIVE</span>
           </div>
           <div class="chat-mensajes" id="chat-mensajes"></div>
           <div class="chat-input-container">
-            <input type="text" id="chat-input" maxlength="200" placeholder="Escribe un mensaje..." class="chat-input"/>
+            <input type="text" id="chat-input" maxlength="200" placeholder="Type a message..." data-i18n-ph="chat_ph" class="chat-input"/>
             <div class="chat-actions-row">
-              <button type="button" onclick="enviarChat()" class="btn-chat-send" title="Enviar mensaje">
+              <button type="button" onclick="enviarChat()" class="btn-chat-send" title="Send message">
                 <span class="btn-chat-icon">↵</span>
-                <span class="btn-chat-txt">Enviar</span>
+                <span class="btn-chat-txt" data-i18n="chat_send">Send</span>
               </button>
-              <button type="button" onclick="enviarBuzz()" id="btn-buzz" class="btn-buzz" title="Avisar al otro jugador">
+              <button type="button" onclick="enviarBuzz()" id="btn-buzz" class="btn-buzz" title="Buzz rival">
                 <span class="btn-buzz-icon">🔔</span>
-                <span class="btn-buzz-txt">Avisar</span>
+                <span class="btn-buzz-txt" data-i18n="chat_buzz">Buzz</span>
               </button>
             </div>
           </div>
@@ -589,7 +597,7 @@
 
       <div class="team-panel">
         <div class="player-header">
-          <h2 class="player-name j2-color" id="nom-j2-draft">Jugador 2</h2>
+          <h2 class="player-name j2-color" id="nom-j2-draft">Player 2</h2>
           <span class="team-badge" id="badge-j2">0/6</span>
         </div>
         <div class="poke-grid" id="equipo-j2"></div>
@@ -598,25 +606,25 @@
 
     <!-- Exportar -->
     <div id="showdown-box" class="showdown-area" style="display:none">
-      <h2 class="export-title">Exportar a Showdown</h2>
-      <p class="nota-regla">⚠️ <strong>Regla:</strong> Puedes cambiar ataques, habilidades y objetos. Los Pokémon son obligatorios.</p>
+      <h2 class="export-title" data-i18n="export_title">Export to Showdown</h2>
+      <p class="nota-regla" data-i18n="rule_note">⚠️ <strong>Rule:</strong> You may change moves, abilities, and items. The drafted Pokémon are mandatory.</p>
       <div class="export-grid">
         <div class="export-col" id="export-col-j1">
-          <h3 class="j1-color" id="sd-title-j1">Jugador 1</h3>
+          <h3 class="j1-color" id="sd-title-j1">Player 1</h3>
           <textarea id="sd-j1" readonly></textarea>
           <div class="export-btns">
-            <button type="button" class="btn-fin-accion btn-fin-copiar" onclick="copiarCodigo('sd-j1',this)">📋 Copiar equipo</button>
-            <button type="button" class="btn-fin-accion btn-fin-showdown" onclick="abrirShowdown('sd-j1')">⚡ Abrir Showdown</button>
-            <button type="button" class="btn-fin-accion btn-fin-revancha" onclick="solicitarRevancha(this)">⚔️ Revancha</button>
+            <button type="button" class="btn-fin-accion btn-fin-copiar" onclick="copiarCodigo('sd-j1',this)" data-i18n="btn_copy_team">📋 Copy team</button>
+            <button type="button" class="btn-fin-accion btn-fin-showdown" onclick="abrirShowdown('sd-j1')" data-i18n="btn_open_showdown">⚡ Open Showdown</button>
+            <button type="button" class="btn-fin-accion btn-fin-revancha" onclick="solicitarRevancha(this)" data-i18n="btn_rematch">⚔️ Rematch</button>
           </div>
         </div>
         <div class="export-col" id="export-col-j2">
-          <h3 class="j2-color" id="sd-title-j2">Jugador 2</h3>
+          <h3 class="j2-color" id="sd-title-j2">Player 2</h3>
           <textarea id="sd-j2" readonly></textarea>
           <div class="export-btns">
-            <button type="button" class="btn-fin-accion btn-fin-copiar" onclick="copiarCodigo('sd-j2',this)">📋 Copiar equipo</button>
-            <button type="button" class="btn-fin-accion btn-fin-showdown" onclick="abrirShowdown('sd-j2')">⚡ Abrir Showdown</button>
-            <button type="button" class="btn-fin-accion btn-fin-revancha" onclick="solicitarRevancha(this)">⚔️ Revancha</button>
+            <button type="button" class="btn-fin-accion btn-fin-copiar" onclick="copiarCodigo('sd-j2',this)" data-i18n="btn_copy_team">📋 Copy team</button>
+            <button type="button" class="btn-fin-accion btn-fin-showdown" onclick="abrirShowdown('sd-j2')" data-i18n="btn_open_showdown">⚡ Open Showdown</button>
+            <button type="button" class="btn-fin-accion btn-fin-revancha" onclick="solicitarRevancha(this)" data-i18n="btn_rematch">⚔️ Rematch</button>
           </div>
         </div>
       </div>

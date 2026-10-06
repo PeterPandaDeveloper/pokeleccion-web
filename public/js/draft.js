@@ -4,6 +4,7 @@ import { estado, API, get, post, fetchEstado } from './api.js'
 import { mostrarToast } from './modal.js'
 import { fetchNombre, imgUrl, imgSprite, getPokemonData } from './pokeapi.js'
 import { TIMER_SEG, SUBSTITUTE_IMG } from './constantes.js'
+import { getLanguage, t } from './i18n.js'
 
 const TIPO_COLORES = {
   normal: '#9fa19f', fire: '#e62829', water: '#2980ef', grass: '#3fa129',
@@ -21,16 +22,21 @@ export function actualizarBotonSuperAyudaUI() {
     document.getElementById('btn-super-ayuda-lobby')
   ].filter(Boolean)
 
+  const lbl = t('super_assist')
+  const onTxt = t('super_assist_on')
+  const offTxt = t('super_assist_off')
+
   btns.forEach(b => {
     if (superAyudaActiva) {
-      b.innerHTML = '🧠 Súper Ayuda: <b style="color:var(--yellow-lt,#aed581)">ON</b>'
+      b.innerHTML = `🧠 ${lbl}: <b style="color:var(--yellow-lt,#aed581)">${onTxt}</b>`
       b.classList.add('super-ayuda-on')
     } else {
-      b.innerHTML = '🧠 Súper Ayuda: <span style="opacity:0.7">OFF</span>'
+      b.innerHTML = `🧠 ${lbl}: <span style="opacity:0.7">${offTxt}</span>`
       b.classList.remove('super-ayuda-on')
     }
   })
 }
+window.actualizarBotonSuperAyudaUI = actualizarBotonSuperAyudaUI
 
 export function toggleSuperAyuda() {
   superAyudaActiva = !superAyudaActiva
@@ -38,11 +44,14 @@ export function toggleSuperAyuda() {
   actualizarBotonSuperAyudaUI()
   Sonido.click()
 
+  const isEn = getLanguage() === 'en'
   if (superAyudaActiva) {
-    mostrarToast('🧠 Súper Ayuda ACTIVADA: Ficha técnica visible al pasar el cursor o pulsar un Pokémon', 'ok')
+    mostrarToast(isEn
+      ? '🧠 Super Assist ON: Stats card visible on hover/tap'
+      : '🧠 Súper Ayuda ACTIVADA: Ficha técnica visible al pasar el cursor o pulsar un Pokémon', 'ok')
   } else {
     ocultarDexTooltip()
-    mostrarToast('🧠 Súper Ayuda DESACTIVADA', 'info')
+    mostrarToast(isEn ? '🧠 Super Assist OFF' : '🧠 Súper Ayuda DESACTIVADA', 'info')
   }
 }
 
@@ -66,9 +75,14 @@ export function mostrarDexTooltip(id, el) {
     return `<span class="dex-tt-type" style="background:${bg};border:1px solid rgba(255,255,255,0.4);">${t.toUpperCase()}</span>`
   }).join('')
 
+  const isEn = getLanguage() === 'en'
+  const sl = isEn
+    ? { hp: 'HP', atk: 'ATK', def: 'DEF', spa: 'SP.ATK', spd: 'SP.DEF', spe: 'SPD', abil: 'Abilities:', bst: 'TOTAL BST' }
+    : { hp: 'PS', atk: 'ATQ', def: 'DEF', spa: 'AT.ESP', spd: 'DF.ESP', spe: 'VEL', abil: 'Habilidades:', bst: 'BST TOTAL' }
+
   tt.innerHTML = `
     <div class="dex-tt-topbar">
-      <span class="dex-tt-badge">🧠 SÚPER AYUDA</span>
+      <span class="dex-tt-badge">🧠 ${t('super_assist').toUpperCase()}</span>
       <span class="dex-tt-gen">GEN ${data.gen || 1}</span>
     </div>
     <div class="dex-tt-header">
@@ -87,44 +101,44 @@ export function mostrarDexTooltip(id, el) {
     </div>
     <div class="dex-tt-stats">
       <div class="dex-stat-row">
-        <span class="dex-stat-label">PS</span>
+        <span class="dex-stat-label">${sl.hp}</span>
         <div class="dex-bar-track"><div class="dex-bar-fill bar-hp" style="width:${bar(s.hp)}%"></div></div>
         <b class="dex-stat-val">${s.hp}</b>
       </div>
       <div class="dex-stat-row">
-        <span class="dex-stat-label">ATQ</span>
+        <span class="dex-stat-label">${sl.atk}</span>
         <div class="dex-bar-track"><div class="dex-bar-fill bar-atk" style="width:${bar(s.atk)}%"></div></div>
         <b class="dex-stat-val">${s.atk}</b>
       </div>
       <div class="dex-stat-row">
-        <span class="dex-stat-label">DEF</span>
+        <span class="dex-stat-label">${sl.def}</span>
         <div class="dex-bar-track"><div class="dex-bar-fill bar-def" style="width:${bar(s.def)}%"></div></div>
         <b class="dex-stat-val">${s.def}</b>
       </div>
       <div class="dex-stat-row">
-        <span class="dex-stat-label">AT.ESP</span>
+        <span class="dex-stat-label">${sl.spa}</span>
         <div class="dex-bar-track"><div class="dex-bar-fill bar-spa" style="width:${bar(s.spa)}%"></div></div>
         <b class="dex-stat-val">${s.spa}</b>
       </div>
       <div class="dex-stat-row">
-        <span class="dex-stat-label">DF.ESP</span>
+        <span class="dex-stat-label">${sl.spd}</span>
         <div class="dex-bar-track"><div class="dex-bar-fill bar-spd" style="width:${bar(s.spd)}%"></div></div>
         <b class="dex-stat-val">${s.spd}</b>
       </div>
       <div class="dex-stat-row">
-        <span class="dex-stat-label">VEL</span>
+        <span class="dex-stat-label">${sl.spe}</span>
         <div class="dex-bar-track"><div class="dex-bar-fill bar-spe" style="width:${bar(s.spe)}%"></div></div>
         <b class="dex-stat-val">${s.spe}</b>
       </div>
     </div>
     <div class="dex-tt-footer">
       <div class="dex-tt-bst-box">
-        <span>BST TOTAL</span>
+        <span>${sl.bst}</span>
         <strong>${data.bst || 0}</strong>
       </div>
       ${(data.abilities && data.abilities.length) ? `
         <div class="dex-tt-abil-box">
-          <small>Habilidades:</small>
+          <small>${sl.abil}</small>
           <span>${data.abilities.slice(0, 2).join(' · ')}</span>
         </div>` : ''}
       ${data.height && data.weight ? `
@@ -185,7 +199,7 @@ export async function syncDraft(est) {
   // Ronda y badges de progreso
   const totalRondas = est.config?.numRondas ?? 6
   if (est.rondaActual !== prevRonda) {
-    document.getElementById('ronda-txt').textContent = `Ronda ${est.rondaActual} / ${totalRondas}`
+    document.getElementById('ronda-txt').textContent = t('round_pill', { cur: est.rondaActual, tot: totalRondas })
     prevRonda = est.rondaActual
   }
   const b1 = document.getElementById('badge-j1'), b2 = document.getElementById('badge-j2')
@@ -201,7 +215,7 @@ export async function syncDraft(est) {
   // ── FIN ──────────────────────────────────────────────────────────────────
   if (est.turnoDe === 'FIN') {
     detenerTimer()
-    document.getElementById('turno-alert').textContent = '¡Duelo finalizado!'
+    document.getElementById('turno-alert').textContent = t('duel_finished')
     document.getElementById('turno-alert').style.color = 'var(--text)'
     document.getElementById('timer-wrap').style.display = 'none'
     document.getElementById('opciones-render').innerHTML = ''
@@ -235,9 +249,11 @@ export async function syncDraft(est) {
       const cambio = est.turnoDe !== prevTurno
       prevTurno = est.turnoDe
       const esYo   = est.turnoDe === estado.miRol
-      const nomT   = est[est.turnoDe]?.nombre || (est.turnoDe === 'jugador1' ? 'Jugador 1' : 'Jugador 2')
+      const isEn   = getLanguage() === 'en'
+      const defaultName = est.turnoDe === 'jugador1' ? (isEn ? 'Player 1' : 'Jugador 1') : (isEn ? 'Player 2' : 'Jugador 2')
+      const nomT   = est[est.turnoDe]?.nombre || defaultName
       const ta     = document.getElementById('turno-alert')
-      ta.textContent = esYo ? `¡Tu turno, ${nomT}!` : `Turno de ${nomT}...`
+      ta.textContent = esYo ? t('your_turn', { name: nomT }) : t('rival_turn', { name: nomT })
       ta.style.color = esYo ? 'var(--yellow-lt)' : 'var(--green-lt)'
       ta.classList.remove('pulso'); void ta.offsetWidth; ta.classList.add('pulso')
       if (cambio) esYo ? Sonido.miTurno() : Sonido.esperando()
@@ -307,7 +323,7 @@ async function renderCartas(est) {
     c.innerHTML = `
       <div class="poke-card-oculta-rival">
         <span class="ico-oculto">🙈</span>
-        <p class="txt-oculto-rival"><strong>${nomT}</strong> está eligiendo su Pokémon en secreto...</p>
+        <p class="txt-oculto-rival">${t('rival_picking_secret', { name: `<strong>${nomT}</strong>` })}</p>
       </div>
     `
     return
@@ -612,12 +628,15 @@ async function generarExport(est) {
     document.getElementById('sd-j2').value = ''
   }
 
-  const nomJ1 = est.jugador1.nombre || 'Jugador 1'
-  const nomJ2 = est.jugador2.nombre || 'Jugador 2'
+  const isEn = getLanguage() === 'en'
+  const defaultJ1 = isEn ? 'Player 1' : 'Jugador 1'
+  const defaultJ2 = isEn ? 'Player 2' : 'Jugador 2'
+  const nomJ1 = est.jugador1.nombre || defaultJ1
+  const nomJ2 = est.jugador2.nombre || defaultJ2
   const t1 = document.getElementById('sd-title-j1')
   const t2 = document.getElementById('sd-title-j2')
-  if (t1) t1.textContent = esJ1 ? `Tu Equipo (${nomJ1})` : nomJ1
-  if (t2) t2.textContent = esJ2 ? `Tu Equipo (${nomJ2})` : nomJ2
+  if (t1) t1.textContent = esJ1 ? t('your_team', { name: nomJ1 }) : nomJ1
+  if (t2) t2.textContent = esJ2 ? t('your_team', { name: nomJ2 }) : nomJ2
 }
 
 async function fmtEquipo(equipo) {
@@ -710,29 +729,29 @@ export async function copiarResumenDuelo(btn) {
 
 export async function solicitarRevancha(btn) {
   if (estado.miRol !== 'jugador1' && estado.miRol !== 'jugador2') {
-    mostrarToast('⚠️ Solo los duelistas pueden solicitar o aceptar revancha', 'err')
+    mostrarToast(getLanguage() === 'en' ? '⚠️ Only duelists can request or accept a rematch' : '⚠️ Solo los duelistas pueden solicitar o aceptar revancha', 'err')
     return
   }
   try {
     if (btn) {
       btn.disabled = true
-      btn.textContent = '⏳ Solicitando revancha...'
+      btn.textContent = t('btn_requesting_rematch')
     }
     const res = await post('/revancha', {})
     if (res?.iniciada) {
-      mostrarToast('⚔️ ¡Revancha aceptada! Comenzando nuevo duelo...', 'ok')
+      mostrarToast(t('rematch_accepted'), 'ok')
       Sonido.miTurno?.()
     } else {
-      mostrarToast('⚔️ Solicitud de revancha enviada a tu rival. Esperando confirmación...', 'ok')
+      mostrarToast(t('rematch_sent'), 'ok')
       Sonido.click?.()
-      if (btn) btn.textContent = '⏳ Esperando que acepte tu rival...'
+      if (btn) btn.textContent = t('btn_waiting_rematch_rival')
     }
     if (window.forzarActualizar) await window.forzarActualizar()
   } catch (err) {
     mostrarToast('⚠️ ' + (err.message || 'Error al pedir revancha'), 'err')
     if (btn) {
       btn.disabled = false
-      btn.textContent = '⚔️ Revancha'
+      btn.textContent = t('btn_rematch')
     }
   }
 }
@@ -742,11 +761,11 @@ export function abrirShowdown(idEl) {
   if (!txt) return
   window.open(`https://play.pokemonshowdown.com/teambuilder#${encodeURIComponent(txt)}`, '_blank','noopener,noreferrer')
   Sonido.copiar()
-  mostrarToast('🎮 Showdown abierto en nueva pestaña','ok')
+  mostrarToast(getLanguage() === 'en' ? '🎮 Showdown opened in new tab' : '🎮 Showdown abierto en nueva pestaña','ok')
 }
 
 export async function resetear() {
-  if (!confirm('¿Reiniciar el duelo completo?')) return
+  if (!confirm(t('confirm_full_restart'))) return
   Sonido.limpiar()
   try { await get('/reset') } catch {}
   resetarEstadoRender()

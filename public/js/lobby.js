@@ -4,6 +4,7 @@ import { estado, API, post, guardarSesion, fetchEstado } from './api.js'
 import { mostrarInfo, mostrarToast } from './modal.js'
 import { precargaBatch, evoCache, typeCache, bstCache, colorCache, pokemonFullCache } from './pokeapi.js'
 import { renderChat } from './draft.js'
+import { getLanguage, t, COLOR_NOMBRES } from './i18n.js'
 
 // ─── ESTADO LOCAL DE CONFIG ───────────────────────────────────────────────────
 export let regionesSel  = new Set(['todas'])
@@ -26,7 +27,11 @@ export function construirTipos() {
   }
   const colorGrid = document.getElementById('color-grid')
   if (colorGrid) {
-    colorGrid.innerHTML = COLORES.map(c => `<button class="cbtn" data-c="${c}" style="--cc:${COLOR_HEX[c]}" onclick="window.toggleColor(this)">${c}</button>`).join('')
+    const lang = getLanguage()
+    colorGrid.innerHTML = COLORES.map(c => {
+      const nom = (COLOR_NOMBRES[lang] && COLOR_NOMBRES[lang][c]) || c
+      return `<button class="cbtn" data-c="${c}" style="--cc:${COLOR_HEX[c]}" onclick="window.toggleColor(this)">${nom}</button>`
+    }).join('')
   }
 }
 
@@ -64,7 +69,7 @@ export function toggleRegion(btn) {
     }
   }
   document.getElementById('hint-regiones').textContent =
-    regionesSel.has('todas') ? 'Selección: todas' : 'Selección: '+[...regionesSel].join(', ')
+    regionesSel.has('todas') ? t('regions_all') : t('regions_selected', { list: [...regionesSel].join(', ') })
 }
 
 export function toggleTipo(btn) {
@@ -125,28 +130,29 @@ export function leerVoto() {
 }
 
 export function etiquetaVoto(v) {
-  if (!v) return 'Sin voto'
+  const isEn = getLanguage() === 'en'
+  if (!v) return isEn ? 'No vote' : 'Sin voto'
   const p=[]
-  if (v.regiones&&!v.regiones.includes('todas')) p.push('📍 Regiones: '+v.regiones.join(', '))
+  if (v.regiones&&!v.regiones.includes('todas')) p.push((isEn ? '📍 Regions: ' : '📍 Regiones: ')+v.regiones.join(', '))
   if (v.tipos?.length) {
-    const modo = v.modoTipos==='AND' ? 'todos estos tipos' : 'cualquiera de estos tipos'
-    p.push('⚔️ Tipos: '+v.tipos.join(', ')+' ('+modo+')')
+    const modo = isEn ? (v.modoTipos==='AND' ? 'all of these types' : 'any of these types') : (v.modoTipos==='AND' ? 'todos estos tipos' : 'cualquiera de estos tipos')
+    p.push((isEn ? '⚔️ Types: ' : '⚔️ Tipos: ')+v.tipos.join(', ')+' ('+modo+')')
   }
-  if (v.colores?.length) p.push('🎨 Colores: '+v.colores.join(', '))
-  if (v.sinLegendarios)   p.push('🚫 Sin legendarios')
-  if (v.soloFinales)      p.push('⬆️ Solo evolucionados al máximo')
-  if (v.soloSinEvolucion) p.push('⛔ Sin evolución posible')
-  if (v.soloBase)         p.push('🐣 Solo primera etapa')
-  if (v.copaBebe)         p.push('🍼 Copa Bebé (bebés con futuro)')
-  if (v.noDuplicadosTipo) p.push('🔄 Tipos únicos en equipo')
-  if (v.sinGimmicks) p.push('🪄 Sin gimmicks')
-  if (v.sinFormasRegionales) p.push('🗺️ Sin formas regionales')
-  if (v.minBST) p.push('📊 BST mínimo: '+v.minBST)
-  if (v.maxBST) p.push('📊 BST máximo: '+v.maxBST)
+  if (v.colores?.length) p.push((isEn ? '🎨 Colors: ' : '🎨 Colores: ')+v.colores.join(', '))
+  if (v.sinLegendarios)   p.push(isEn ? '🚫 No legendaries' : '🚫 Sin legendarios')
+  if (v.soloFinales)      p.push(isEn ? '⬆️ Fully evolved only' : '⬆️ Solo evolucionados al máximo')
+  if (v.soloSinEvolucion) p.push(isEn ? '⛔ Single stage only' : '⛔ Sin evolución posible')
+  if (v.soloBase)         p.push(isEn ? '🐣 First stage only' : '🐣 Solo primera etapa')
+  if (v.copaBebe)         p.push(isEn ? '🍼 Little Cup' : '🍼 Copa Bebé (bebés con futuro)')
+  if (v.noDuplicadosTipo) p.push(isEn ? '🔄 Unique types on team' : '🔄 Tipos únicos en equipo')
+  if (v.sinGimmicks) p.push(isEn ? '🪄 No gimmicks' : '🪄 Sin gimmicks')
+  if (v.sinFormasRegionales) p.push(isEn ? '🗺️ No regional forms' : '🗺️ Sin formas regionales')
+  if (v.minBST) p.push((isEn ? '📊 Min BST: ' : '📊 BST mínimo: ')+v.minBST)
+  if (v.maxBST) p.push((isEn ? '📊 Max BST: ' : '📊 BST máximo: ')+v.maxBST)
   const nr = v.numRondas ?? NUM_RONDAS_DEFAULT
-  p.push(`🎯 ${nr} ronda${nr > 1 ? 's' : ''}`)
-  if (v.modoOculto) p.push('🙈 Modo Oculto')
-  return p.length ? p.join(' · ') : '🎯 Sin restricciones'
+  p.push(isEn ? `🎯 ${nr} round${nr > 1 ? 's' : ''}` : `🎯 ${nr} ronda${nr > 1 ? 's' : ''}`)
+  if (v.modoOculto) p.push(isEn ? '🙈 Blind Mode' : '🙈 Modo Oculto')
+  return p.length ? p.join(' · ') : (isEn ? '🎯 No restrictions' : '🎯 Sin restricciones')
 }
 
 const CONFIG_CTRLS = '.config-panel input, .config-panel select, .rbtn, .tbtn, .tog input, .bst-input, .btn-votar, .btn-votar-j2, .btn-preset, .bst-slider'
@@ -184,8 +190,8 @@ export function actualizarBSTPreview() {
     if (valMinEl) valMinEl.textContent = `BST ${closestMin.bst}`
     if (imgMinEl) imgMinEl.src = closestMin.sprite
   } else {
-    if (nomMinEl) nomMinEl.textContent = 'Sin mínimo'
-    if (valMinEl) valMinEl.textContent = 'Cualquiera'
+    if (nomMinEl) nomMinEl.textContent = t('bst_no_min')
+    if (valMinEl) valMinEl.textContent = t('bst_any')
     if (imgMinEl) imgMinEl.src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/172.png'
   }
 
@@ -205,8 +211,8 @@ export function actualizarBSTPreview() {
     if (valMaxEl) valMaxEl.textContent = `BST ${closestMax.bst}`
     if (imgMaxEl) imgMaxEl.src = closestMax.sprite
   } else {
-    if (nomMaxEl) nomMaxEl.textContent = 'Sin límite'
-    if (valMaxEl) valMaxEl.textContent = 'Hasta 780+'
+    if (nomMaxEl) nomMaxEl.textContent = t('bst_no_max')
+    if (valMaxEl) valMaxEl.textContent = t('bst_up_to')
     if (imgMaxEl) imgMaxEl.src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png'
   }
 
@@ -588,14 +594,14 @@ export async function unirseAlLobby() {
 }
 
 export async function votarConfig() {
-  if (yaListo) { mostrarToast('Ya confirmaste tu configuración.','err'); return }
+  if (yaListo) { mostrarToast(t('status_ready'), 'err'); return }
   const voto = leerVoto()
   try {
     const res = await post('/lobby/votar', { voto })
     Sonido.votar(); yaVote = true
-    document.querySelector('.btn-votar').textContent = '✏️ Cambiar mi voto'
+    document.querySelector('.btn-votar').textContent = t('btn_change_vote')
     document.getElementById('btn-listo').style.display = 'inline-block'
-    mostrarToast('✅ Voto registrado','ok')
+    mostrarToast(t('toast_vote_registered'), 'ok')
     if (res && res.lobby && window.aplicarEstado) {
       await window.aplicarEstado(res)
     } else if (window.forzarActualizar) {
@@ -605,23 +611,23 @@ export async function votarConfig() {
 }
 
 export async function votarConfigDelOtro() {
-  if (yaListo) { mostrarToast('Ya confirmaste tu configuración.','err'); return }
+  if (yaListo) { mostrarToast(t('status_ready'), 'err'); return }
   const otroRol = estado.miRol === 'jugador1' ? 'jugador2' : 'jugador1'
   try {
     const est = await fetchEstado()
     const votoOtro = est.lobby?.[otroRol]?.voto
     if (!votoOtro) {
       Sonido.error()
-      mostrarToast('⚠️ El otro jugador aún no ha votado.','err')
+      mostrarToast(getLanguage() === 'en' ? '⚠️ The other player has not voted yet.' : '⚠️ El otro jugador aún no ha votado.', 'err')
       return
     }
     aplicarVotoEnUI(votoOtro)
     const voto = leerVoto()
     const res = await post('/lobby/votar', { voto })
     Sonido.votar(); yaVote = true
-    document.querySelector('.btn-votar').textContent = '✏️ Cambiar mi voto'
+    document.querySelector('.btn-votar').textContent = t('btn_change_vote')
     document.getElementById('btn-listo').style.display = 'inline-block'
-    mostrarToast('✅ Configuración del rival copiada y votada','ok')
+    mostrarToast(t('toast_vote_copied'), 'ok')
     if (res && res.lobby && window.aplicarEstado) {
       await window.aplicarEstado(res)
     } else if (window.forzarActualizar) {
@@ -631,7 +637,11 @@ export async function votarConfigDelOtro() {
 }
 
 export async function marcarListo() {
-  if (!yaVote) { Sonido.error(); mostrarToast('Primero elige una configuración.','err'); return }
+  if (!yaVote) {
+    Sonido.error()
+    mostrarToast(getLanguage() === 'en' ? 'Please choose your configuration first.' : 'Primero elige una configuración.', 'err')
+    return
+  }
   if (yaListo) return
   document.getElementById('msg-pool').style.display='flex'
   document.getElementById('btn-listo').disabled=true
@@ -640,15 +650,18 @@ export async function marcarListo() {
     document.getElementById('msg-pool').style.display='none'
     const numRondasLocal = parseInt(document.getElementById('num-rondas')?.value || String(NUM_RONDAS_DEFAULT))
     if (ids.length < numRondasLocal * 2) {
-      Sonido.error(); mostrarToast(`Solo ${ids.length} Pokémon disponibles. Necesitas al menos ${numRondasLocal * 2}. Ajusta los filtros.`,'err')
+      Sonido.error()
+      mostrarToast(getLanguage() === 'en'
+        ? `Only ${ids.length} Pokémon available. You need at least ${numRondasLocal * 2}. Adjust filters.`
+        : `Solo ${ids.length} Pokémon disponibles. Necesitas al menos ${numRondasLocal * 2}. Ajusta los filtros.`, 'err')
       document.getElementById('btn-listo').disabled=false; return
     }
     const res = await post('/lobby/listo',{idsValidos:ids})
     Sonido.listo(); yaListo=true
-    document.getElementById('btn-listo').textContent='⌛ Esperando al otro jugador...'
+    document.getElementById('btn-listo').textContent = t('btn_waiting_rival')
     // Bloquear controles de config
     bloquearConfig()
-    mostrarToast('✅ ¡Listo! Esperando al otro jugador.','ok')
+    mostrarToast(t('toast_ready_wait'), 'ok')
     if (res && res.fase && window.aplicarEstado) {
       await window.aplicarEstado(res)
     } else if (window.forzarActualizar) {
@@ -717,7 +730,7 @@ export function restablecerFiltrosPorDefecto() {
 
 export async function limpiarSala() {
   if (cooldownLimpiar) return
-  if (!confirm('¿Restablecer todos los filtros y empezar de nuevo con los valores por defecto?')) return
+  if (!confirm(t('confirm_reset_all'))) return
   try {
     const res = await post('/lobby/limpiar',{})
     Sonido.limpiar(); cooldownLimpiar=true
@@ -734,21 +747,26 @@ export async function limpiarSala() {
     const iv=setInterval(()=>{
       seg--
       const msg=document.getElementById('cooldown-msg')
+      const isEn = getLanguage() === 'en'
       if (seg<=0) {
         clearInterval(iv); cooldownLimpiar=false
         if (btn) {
           btn.disabled = false
           const txt = btn.querySelector('.btn-txt')
-          if (txt) txt.textContent = 'Restablecer filtros'
-          else btn.textContent = 'Restablecer filtros'
+          if (txt) txt.textContent = t('reset_filters')
+          else btn.textContent = t('reset_filters')
         }
         if (msg) msg.style.display='none'
       } else {
-        if (msg) { msg.style.display='block'; msg.textContent=`Puedes restablecer en ${seg}s` }
+        if (msg) {
+          msg.style.display='block'
+          msg.textContent = isEn ? `You can reset in ${seg}s` : `Puedes restablecer en ${seg}s`
+        }
         if (btn) {
           const txt = btn.querySelector('.btn-txt')
-          if (txt) txt.textContent = `Restablecer (${seg}s)`
-          else btn.textContent = `Restablecer (${seg}s)`
+          const resetTxt = isEn ? `Reset (${seg}s)` : `Restablecer (${seg}s)`
+          if (txt) txt.textContent = resetTxt
+          else btn.textContent = resetTxt
         }
       }
     },1000)
@@ -893,19 +911,19 @@ export function actualizarLobbyUI(est) {
     }
     if (yaVote && !mi.bloqueado) {
       const btnVotar = document.querySelector('.btn-votar')
-      if (btnVotar) btnVotar.textContent = '✏️ Cambiar mi voto'
+      if (btnVotar) btnVotar.textContent = t('btn_change_vote')
       const btnListo = document.getElementById('btn-listo')
       if (btnListo) btnListo.style.display = 'inline-block'
     }
     if (yaListo && mi.bloqueado) {
       const btnListo = document.getElementById('btn-listo')
-      if (btnListo) { btnListo.textContent = '⌛ Esperando al otro jugador...'; btnListo.disabled = true }
+      if (btnListo) { btnListo.textContent = t('btn_waiting_rival'); btnListo.disabled = true }
     }
   }
 
-  document.getElementById('nom-j1-lobby').textContent=lj1.nombre||'Esperando...'
-  document.getElementById('nom-j2-lobby').textContent=lj2.nombre||'Esperando...'
-  const ico=lj=>(lj.listo?'✅ Listo':lj.voto?'🗳 Votó':lj.nombre?'🟡 En sala':'—')
+  document.getElementById('nom-j1-lobby').textContent=lj1.nombre||t('waiting_player')
+  document.getElementById('nom-j2-lobby').textContent=lj2.nombre||t('waiting_player')
+  const ico=lj=>(lj.listo?t('status_ready'):lj.voto?t('status_voted'):lj.nombre?t('status_in_room'):t('status_empty'))
   document.getElementById('est-j1-lobby').textContent=ico(lj1)
   document.getElementById('est-j2-lobby').textContent=ico(lj2)
 
@@ -932,7 +950,7 @@ export function actualizarLobbyUI(est) {
   }
   if (lj1.voto&&lj2.voto) {
     const b=document.getElementById('cfg-acordado')
-    if (b) { b.style.display='block'; b.innerHTML=`<strong>Configuración acordada:</strong> ${etiquetaVoto(resolverLocal(lj1.voto,lj2.voto))}` }
+    if (b) { b.style.display='block'; b.innerHTML=`<strong>${t('democratic_agreed')}:</strong> ${etiquetaVoto(resolverLocal(lj1.voto,lj2.voto))}` }
   }
 }
 
@@ -979,7 +997,8 @@ export function seleccionarAvatarEsp(avatar) {
 }
 
 export function volverAlMenuPrincipal() {
-  if (confirm('¿Deseas salir de la sala y volver al menú principal?')) {
+  const isEn = getLanguage() === 'en'
+  if (confirm(isEn ? 'Leave the room and return to the main menu?' : '¿Deseas salir de la sala y volver al menú principal?')) {
     localStorage.removeItem('poke_sesion')
     estado.salaId = ''
     estado.miRol = ''
@@ -987,3 +1006,15 @@ export function volverAlMenuPrincipal() {
     location.href = location.pathname
   }
 }
+
+// Sincronizar dinámicamente al cambiar de idioma
+window.addEventListener('idiomaCambiado', () => {
+  construirTipos()
+  actualizarBSTPreview()
+  const hintReg = document.getElementById('hint-regiones')
+  if (hintReg) {
+    hintReg.textContent = regionesSel.has('todas')
+      ? t('regions_all')
+      : t('regions_selected', { list: [...regionesSel].join(', ') })
+  }
+})

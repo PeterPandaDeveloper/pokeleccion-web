@@ -2461,6 +2461,57 @@ body.buzz-shake {
   box-shadow: 0 0 10px rgba(76, 175, 80, 0.45), 0 2px 0 rgba(0,0,0,0.25);
 }
 
+/* ── SELECTOR DE IDIOMA (EN / ES) ── */
+.lang-switch-wrap {
+  display: inline-flex;
+  align-items: center;
+  background: #ffffff;
+  border: 2px solid #81c784;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.08);
+  height: 29px;
+  vertical-align: middle;
+}
+
+.btn-lang {
+  background: transparent;
+  border: none;
+  color: #444444;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.52rem;
+  padding: 5px 9px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  height: 100%;
+}
+
+.btn-lang:hover {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.btn-lang.active {
+  background: #2e7d32;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .lang-switch-wrap {
+    height: 26px;
+  }
+  .btn-lang {
+    font-size: 0.46rem;
+    padding: 4px 6px;
+  }
+}
+
 /* ── BST REWORK & PREVIEW TÁCTIL ── */
 .bst-grupo-rework {
   margin-bottom: 16px;
