@@ -44,21 +44,6 @@
   </div>
 </div>
 
-<!-- NAVBAR RETRO GBA -->
-<header class="poke-navbar">
-  <div class="poke-nav-inner">
-    <div class="poke-nav-brand">
-      <span class="poke-nav-logo">⚡</span>
-      <span class="poke-nav-title">Pokélección</span>
-    </div>
-    <div class="poke-nav-actions">
-      <button type="button" class="btn-nav-action" onclick="mostrarTutorial()">🎁 ¿Cómo jugar?</button>
-      <button type="button" class="btn-nav-action btn-super-ayuda" id="btn-super-ayuda-nav" onclick="toggleSuperAyuda()" title="Fichas técnicas con estadísticas de Pokémon">🧠 Súper Ayuda: <span style="opacity:0.7">OFF</span></button>
-      <button type="button" class="btn-nav-action btn-nav-salir" id="btn-nav-salir" onclick="volverAlMenuPrincipal()" title="Volver al menú de inicio">🚪 Salir</button>
-    </div>
-  </div>
-</header>
-
 <!-- ══════════════════════════ LOBBY ══════════════════════════ -->
 <div id="pantalla-lobby" class="pantalla">
   <div class="main-container lobby-container">
@@ -66,6 +51,10 @@
     <div class="titulo-bloque">
       <h1 class="title">Desafío de Pokélección</h1>
       <p class="subtitle">Elige tu equipo · Compatible con Pokémon Showdown</p>
+      <div class="lobby-header-btns" style="display:flex; justify-content:center; gap:10px; margin-top:8px; flex-wrap:wrap;">
+        <button class="btn-tutorial-link" onclick="mostrarTutorial()">¿Cómo jugar?</button>
+        <button type="button" class="btn-super-ayuda" id="btn-super-ayuda-lobby" onclick="toggleSuperAyuda()" title="Fichas técnicas con estadísticas de Pokémon">🧠 Súper Ayuda: <span style="opacity:0.7">OFF</span></button>
+      </div>
     </div>
 
     <!-- PASO 1: nombre/rol (Flujo Party Game) -->
