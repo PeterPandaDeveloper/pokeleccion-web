@@ -199,10 +199,18 @@
               <span class="chat-status-led">● EN VIVO</span>
             </div>
             <div class="chat-mensajes" id="chat-mensajes-lobby"></div>
-            <div class="chat-input-row">
+            <div class="chat-input-container">
               <input type="text" id="chat-input-lobby" maxlength="200" placeholder="Escribe un mensaje..." class="chat-input"/>
-              <button onclick="enviarChat()" class="btn-chat-send" title="Enviar">↵</button>
-              <button onclick="enviarBuzz()" id="btn-buzz-lobby" class="btn-buzz" title="Avisar al otro jugador">🔔 Avisar</button>
+              <div class="chat-actions-row">
+                <button type="button" onclick="enviarChat()" class="btn-chat-send" title="Enviar mensaje">
+                  <span class="btn-chat-icon">↵</span>
+                  <span class="btn-chat-txt">Enviar</span>
+                </button>
+                <button type="button" onclick="enviarBuzz()" id="btn-buzz-lobby" class="btn-buzz" title="Avisar al otro jugador">
+                  <span class="btn-buzz-icon">🔔</span>
+                  <span class="btn-buzz-txt">Avisar</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -546,10 +554,18 @@
             <span class="chat-status-led">● EN VIVO</span>
           </div>
           <div class="chat-mensajes" id="chat-mensajes"></div>
-          <div class="chat-input-row">
+          <div class="chat-input-container">
             <input type="text" id="chat-input" maxlength="200" placeholder="Escribe un mensaje..." class="chat-input"/>
-            <button onclick="enviarChat()" class="btn-chat-send" title="Enviar">↵</button>
-            <button onclick="enviarBuzz()" id="btn-buzz" class="btn-buzz" title="Avisar al otro jugador">🔔 Avisar</button>
+            <div class="chat-actions-row">
+              <button type="button" onclick="enviarChat()" class="btn-chat-send" title="Enviar mensaje">
+                <span class="btn-chat-icon">↵</span>
+                <span class="btn-chat-txt">Enviar</span>
+              </button>
+              <button type="button" onclick="enviarBuzz()" id="btn-buzz" class="btn-buzz" title="Avisar al otro jugador">
+                <span class="btn-buzz-icon">🔔</span>
+                <span class="btn-buzz-txt">Avisar</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

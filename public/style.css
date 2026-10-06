@@ -165,32 +165,84 @@ button:active {
 }
 
 .btn-votar {
-  background: linear-gradient(135deg, #ffca28 0%, #ff8f00 100%);
-  border-color: #ef6c00;
-  color: #2e1a00;
-  font-weight: 700;
-  box-shadow: 0 4px 10px rgba(255, 143, 0, 0.24);
+  background: linear-gradient(180deg, #ffa726 0%, #f57c00 50%, #e65100 100%);
+  border: 3px solid #bf360c !important;
+  color: #ffffff !important;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+  padding: 12px 18px;
+  border-radius: 6px;
+  text-shadow: 1px 1px 0 #7f0000;
+  box-shadow: 0 4px 0 #7f0000, 0 0 14px rgba(245, 124, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.08s, filter 0.15s, box-shadow 0.15s;
+  user-select: none;
+}
+.btn-votar:hover {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #7f0000, 0 0 18px rgba(245, 124, 0, 0.6);
+}
+.btn-votar:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #7f0000;
 }
 
 .btn-votar-j2 {
-  background: linear-gradient(135deg, #64b5f6 0%, #1e88e5 100%);
-  border-color: #1565c0;
-  color: #fff;
-  font-weight: 700;
-  box-shadow: 0 4px 10px rgba(30, 136, 229, 0.2);
+  background: linear-gradient(180deg, #42a5f5 0%, #1e88e5 50%, #1565c0 100%);
+  border: 3px solid #0d47a1 !important;
+  color: #ffffff !important;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.5px;
+  padding: 12px 18px;
+  border-radius: 6px;
+  text-shadow: 1px 1px 0 #002171;
+  box-shadow: 0 4px 0 #002171, 0 0 14px rgba(30, 136, 229, 0.4);
+  cursor: pointer;
+  transition: transform 0.08s, filter 0.15s, box-shadow 0.15s;
+  user-select: none;
+}
+.btn-votar-j2:hover {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #002171, 0 0 18px rgba(30, 136, 229, 0.6);
+}
+.btn-votar-j2:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #002171;
 }
 
 .btn-listo {
-  background: linear-gradient(135deg, #66bb6a 0%, #2e7d32 100%);
-  border-color: #2e7d32;
-  color: white;
-  font-weight: 700;
-  box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+  background: linear-gradient(180deg, #66bb6a 0%, #43a047 50%, #2e7d32 100%);
+  border: 3px solid #1b5e20 !important;
+  color: #ffffff !important;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  text-shadow: 1px 1px 0 #003300;
+  box-shadow: 0 4px 0 #003300, 0 0 16px rgba(67, 160, 71, 0.5);
+  cursor: pointer;
+  transition: transform 0.08s, filter 0.15s, box-shadow 0.15s;
+  user-select: none;
 }
-
+.btn-listo:hover {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #003300, 0 0 20px rgba(67, 160, 71, 0.7);
+}
+.btn-listo:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #003300;
+}
 .btn-listo:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 .btn-reiniciar {
@@ -1636,77 +1688,102 @@ textarea:focus {
   user-select: none;
 }
 
+.chat-input-container,
 .chat-input-row {
   display: flex;
-  gap: 6px;
-  padding: 8px 10px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
   border-top: 2px solid #c8e6c8;
   background: #f0f8f0;
-  align-items: center;
 }
 
 .chat-input {
-  flex: 1;
+  width: 100%;
   min-width: 0;
   background: #ffffff;
   border: 2px solid #a0c0a0;
-  border-radius: 4px;
-  padding: 6px 10px;
+  border-radius: 6px;
+  padding: 8px 12px;
   font-family: 'VT323', monospace;
-  font-size: 1rem;
+  font-size: 1.15rem;
   color: #222;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .chat-input:focus {
   outline: none;
   border-color: #2e7d32;
-  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.25);
+}
+
+.chat-actions-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
 }
 
 .btn-chat-send {
-  background: linear-gradient(180deg, #2e7d32 0%, #1b5e20 100%);
-  border: 2px solid #144417;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(180deg, #388e3c 0%, #1b5e20 100%);
+  border: 2px solid #0f3311;
   color: #ffffff;
-  padding: 5px 12px;
-  border-radius: 4px;
-  font-size: 1.05rem;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  flex-shrink: 0;
-  box-shadow: 0 2px 0 #0f3311;
+  box-shadow: 0 3px 0 #0f3311;
   transition: transform 0.08s, filter 0.15s;
+  user-select: none;
 }
 .btn-chat-send:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #0f3311;
 }
 .btn-chat-send:active {
   transform: translateY(2px);
-  box-shadow: none;
+  box-shadow: 0 1px 0 #0f3311;
 }
 
 .btn-buzz {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   background: linear-gradient(180deg, #8e24aa 0%, #6a1b9a 100%);
   border: 2px solid #4a148c;
   color: #ffffff;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: bold;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  box-shadow: 0 2px 0 #38006b;
+  box-shadow: 0 3px 0 #38006b;
   transition: filter 0.15s, transform 0.08s;
+  user-select: none;
 }
 .btn-buzz:hover {
-  filter: brightness(1.12);
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #38006b;
 }
 .btn-buzz:active {
   transform: translateY(2px);
-  box-shadow: none;
+  box-shadow: 0 1px 0 #38006b;
 }
 .btn-buzz:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
   box-shadow: none;
 }
 
@@ -2226,60 +2303,72 @@ body.buzz-shake {
 }
 .bst-poke-card {
   flex: 1;
-  max-width: 150px;
+  max-width: 185px;
+  min-width: 130px;
   background: #ffffff;
-  border: 2px solid #81c784;
-  border-radius: 6px;
-  padding: 8px 6px;
+  border: 3px solid #66bb6a;
+  border-radius: 8px;
+  padding: 12px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-  transition: transform 0.15s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08), inset 0 0 0 1px #e8f5e9;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .bst-poke-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(46, 125, 50, 0.15);
 }
 .bst-card-tag {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.45rem;
-  color: #558b2f;
+  font-size: 0.52rem;
+  color: #2e7d32;
   text-transform: uppercase;
-  margin-bottom: 4px;
-  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  letter-spacing: 0.6px;
 }
 .bst-card-sprite-wrap {
-  width: 56px;
-  height: 56px;
+  width: 104px;
+  height: 104px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle, #e8f5e9 0%, transparent 70%);
+  background: radial-gradient(circle, #e8f5e9 0%, rgba(200, 230, 201, 0.4) 65%, transparent 100%);
   border-radius: 50%;
-  margin-bottom: 4px;
+  margin: 4px 0 6px 0;
 }
 .bst-sprite-img {
-  width: 52px;
-  height: 52px;
+  width: 96px;
+  height: 96px;
   object-fit: contain;
   image-rendering: pixelated;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.18));
+  transition: transform 0.2s ease;
+}
+.bst-poke-card:hover .bst-sprite-img {
+  transform: scale(1.08);
 }
 .bst-poke-name {
   font-family: 'VT323', monospace;
-  font-size: 1.15rem;
+  font-size: 1.35rem;
   color: #1b5e20;
   text-transform: capitalize;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  line-height: 1.1;
 }
 .bst-poke-stat {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.52rem;
-  color: #e65100;
-  margin-top: 2px;
+  font-size: 0.58rem;
+  color: #d84315;
+  background: #fbe9e7;
+  border: 1px solid #ffccbc;
+  padding: 3px 6px;
+  border-radius: 6px;
+  margin-top: 4px;
 }
 .bst-middle-indicator {
   display: flex;
@@ -2290,22 +2379,23 @@ body.buzz-shake {
   padding: 0 6px;
 }
 .bst-indicator-icon {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
 }
 .bst-indicator-lbl {
   font-family: 'VT323', monospace;
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: #555;
 }
 .bst-indicator-val {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.65rem;
-  color: #2e7d32;
-  background: #e8f5e9;
-  border: 1px solid #a5d6a7;
-  padding: 4px 8px;
+  font-size: 0.70rem;
+  color: #1b5e20;
+  background: #c8e6c9;
+  border: 2px solid #81c784;
+  padding: 4px 10px;
   border-radius: 12px;
   margin-top: 2px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
 }
 
 /* ── DEXCARD TACTICAL TOOLTIP (SÚPER AYUDA) ── */
