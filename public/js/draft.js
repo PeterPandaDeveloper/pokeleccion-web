@@ -226,6 +226,7 @@ export async function syncDraft(est) {
       document.getElementById('showdown-box').style.display = 'block'
       exportGen = true
     }
+    await renderChat(est)
     return
   }
 
@@ -486,10 +487,13 @@ export async function renderChat(est) {
 
   const html = chat.length ? chat.map(m => {
     const cls = m.rol === 'sistema' ? 'chat-sistema' : m.rol === 'jugador1' ? 'chat-j1' : m.rol === 'jugador2' ? 'chat-j2' : 'chat-esp'
-    const ts  = new Date(m.ts).toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit'})
-    const autor = m.rol === 'sistema' ? '<span class="chat-autor chat-autor-sys">⚙️ Sistema</span>' : `<span class="chat-autor">${escHTML(m.autor || 'Usuario')}</span>`
+    const ts  = new Date(m.ts).toLocaleTimeString(getLanguage() === 'en' ? 'en-US' : 'es', {hour:'2-digit',minute:'2-digit'})
+    if (m.rol === 'sistema') {
+      return `<div class="chat-msg chat-sistema"><span class="chat-texto chat-texto-sys">${escHTML(m.texto)}</span><span class="chat-ts chat-ts-sys">${ts}</span></div>`
+    }
+    const autor = `<span class="chat-autor">${escHTML(m.autor || 'Usuario')}</span>`
     return `<div class="chat-msg ${cls}"><div class="chat-msg-header">${autor}<span class="chat-ts">${ts}</span></div><span class="chat-texto">${escHTML(m.texto)}</span></div>`
-  }).join('') : '<div class="chat-vacio">💬 ¡Canal conectado!<br>Envía un mensaje para coordinar las reglas con tu rival.</div>'
+  }).join('') : `<div class="chat-vacio">${t('chat_empty')}</div>`
 
   boxes.forEach(box => { box.innerHTML = html; box.scrollTop = box.scrollHeight })
 
@@ -668,14 +672,15 @@ export function copiarCodigo(idEl, btn) {
   if (!v?.trim()) return
   copiarTexto(v).then(() => {
     Sonido.copiar()
-    const orig = btn?.innerHTML || '📋 Copiar'
+    const orig = btn?.innerHTML || t('btn_copy_team') || '📋 Copy team'
     if (btn) {
-      btn.innerHTML = '✅ Copiado'
+      btn.innerHTML = t('btn_copied') || '✅ Copied'
       btn.classList.add('copy-ok')
       setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copy-ok') }, 2000)
     }
+    mostrarToast(t('toast_copied_team'), 'ok')
   }).catch(() => {
-    mostrarToast('⚠️ No se pudo copiar al portapapeles','err')
+    mostrarToast(t('toast_copy_err') || '⚠️ Could not copy to clipboard','err')
   })
 }
 
@@ -686,15 +691,20 @@ export async function copiarAmbos(btn) {
   await copiarTexto(`=== J1 ===\n\n${j1}\n=== J2 ===\n\n${j2}`)
   Sonido.copiar()
   if (btn) {
-    btn.textContent = '✅ Copiados'
+    const orig = btn.textContent
+    btn.textContent = t('btn_copied') || '✅ Copied'
     btn.classList.add('copy-ok')
-    setTimeout(() => { btn.textContent = '📋 Copiar ambos equipos'; btn.classList.remove('copy-ok') }, 2000)
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copy-ok') }, 2000)
   }
+  mostrarToast(t('toast_copied_both') || '📋 Both teams copied to clipboard', 'ok')
 }
 
 export async function copiarResumenDuelo(btn) {
-  const j1Nom = document.getElementById('nom-j1')?.textContent?.trim() || 'Jugador 1'
-  const j2Nom = document.getElementById('nom-j2')?.textContent?.trim() || 'Jugador 2'
+  const isEn = getLanguage() === 'en'
+  const defaultJ1 = isEn ? 'Player 1' : 'Jugador 1'
+  const defaultJ2 = isEn ? 'Player 2' : 'Jugador 2'
+  const j1Nom = document.getElementById('nom-j1')?.textContent?.trim() || defaultJ1
+  const j2Nom = document.getElementById('nom-j2')?.textContent?.trim() || defaultJ2
   const j1Text = document.getElementById('sd-j1')?.value?.trim() || ''
   const j2Text = document.getElementById('sd-j2')?.value?.trim() || ''
   const salaId = estado.salaId || 'DEFAULT'
@@ -719,11 +729,11 @@ export async function copiarResumenDuelo(btn) {
   Sonido.copiar()
   if (btn) {
     const orig = btn.innerHTML
-    btn.innerHTML = '✅ ¡Resumen Copiado!'
+    btn.innerHTML = t('btn_copied') || '✅ Copied'
     btn.classList.add('copy-ok')
     setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copy-ok') }, 2500)
   }
-  mostrarToast('📋 Resumen completo del duelo copiado al portapapeles', 'ok')
+  mostrarToast(t('toast_copied_summary') || '📋 Duel summary copied to clipboard', 'ok')
 }
 
 export async function solicitarRevancha(btn) {

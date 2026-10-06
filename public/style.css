@@ -1563,27 +1563,48 @@ textarea:focus {
 
 
 
-/* ── Toast de notificación ── */
+/* ── Toast de notificación (Fondo negro, letras blancas, alta legibilidad) ── */
 .toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  z-index: 9999; padding: 12px 22px; border-radius: 10px;
-  font-family: 'VT323', monospace; font-size: 1.05rem;
-  white-space: nowrap; max-width: 90vw;
-  box-shadow: 0 4px 16px rgba(0,0,0,.5);
-  transition: opacity .4s ease;
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-family: 'Press Start 2P', 'VT323', monospace;
+  font-size: 0.66rem;
+  line-height: 1.5;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  max-width: 90vw;
   pointer-events: none;
+  background: #0d1117 !important;
+  color: #ffffff !important;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
-.toast-ok   {
-  background: linear-gradient(180deg, var(--green) 0%, var(--green-dk) 100%);
-  border: 2px solid var(--green-lt); color: var(--text);
+
+.toast-ok {
+  background: #09120c !important;
+  color: #ffffff !important;
+  border: 2px solid #22c55e !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 14px rgba(34, 197, 94, 0.4) !important;
 }
-.toast-err  {
-  background: linear-gradient(180deg, var(--red) 0%, var(--red-dk) 100%);
-  border: 2px solid var(--red-lt); color: var(--text);
+
+.toast-err {
+  background: #180909 !important;
+  color: #ffffff !important;
+  border: 2px solid #ef4444 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 14px rgba(239, 68, 68, 0.4) !important;
 }
+
 .toast-info {
-  background: linear-gradient(180deg, var(--bg-mid) 0%, var(--bg-deep) 100%);
-  border: 2px solid var(--ui-border-strong); color: var(--yellow-lt);
+  background: #0a111a !important;
+  color: #ffffff !important;
+  border: 2px solid #38bdf8 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 14px rgba(56, 189, 248, 0.4) !important;
 }
 
 /* ════ SELECTOR DE SALAS PÚBLICAS ════ */
@@ -1775,12 +1796,30 @@ textarea:focus {
 }
 
 .chat-sistema {
-  border-left: 4px solid #f57c00;
-  background: #fffcf5;
-  font-style: italic;
+  border: 1px dashed rgba(60, 184, 120, 0.35);
+  border-left: 3px solid #73a973;
+  background: rgba(240, 248, 240, 0.55);
+  padding: 4px 8px;
+  margin: 3px 0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: auto;
 }
-.chat-autor-sys {
-  color: #e65100;
+.chat-texto-sys {
+  color: #4b664b;
+  font-size: 0.8rem;
+  font-style: italic;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  line-height: 1.3;
+  flex: 1;
+}
+.chat-ts-sys {
+  font-size: 0.65rem;
+  color: #8fa08f;
+  white-space: nowrap;
 }
 
 .chat-vacio {
@@ -2015,18 +2054,6 @@ textarea:focus {
   display: inline-block;
   vertical-align: middle;
 }
-
-/* ════ TOAST ════ */
-.toast {
-  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-  z-index:9999; padding:11px 22px; border-radius:10px;
-  font-family:'VT323',monospace; font-size:1.05rem;
-  white-space:nowrap; max-width:90vw; pointer-events:none;
-  box-shadow:0 4px 16px rgba(0,0,0,.5); transition:opacity .4s ease;
-}
-.toast-ok   { background:linear-gradient(180deg,var(--green),var(--green-dk)); border:2px solid var(--green-lt); color:var(--text); }
-.toast-err  { background:linear-gradient(180deg,var(--red),var(--red-dk));   border:2px solid var(--red-lt);   color:var(--text); }
-.toast-info { background:linear-gradient(180deg,var(--bg-mid),var(--bg-deep)); border:2px solid var(--ui-border-strong); color:var(--yellow-lt); }
 
 /* ════ SHOWDOWN BUTTONS ════ */
 .btn-showdown {
@@ -3047,4 +3074,48 @@ body.buzz-shake {
   color: #ffeb3b;
   font-family: 'Press Start 2P', monospace;
   font-size: 0.72rem;
+}
+
+/* ════ FOOTER / CRÉDITOS ════ */
+.app-footer {
+  width: 100%;
+  text-align: center;
+  padding: 22px 10px 16px;
+  margin-top: 24px;
+  border-top: 1px dashed rgba(46, 125, 50, 0.3);
+}
+.footer-credit {
+  margin: 0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.62rem;
+  color: #3f603f;
+  letter-spacing: 0.35px;
+  line-height: 1.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.credit-link {
+  color: #1b5e20;
+  text-decoration: none;
+  font-weight: bold;
+  border-bottom: 2px solid #2e7d32;
+  padding-bottom: 1px;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.credit-link:hover {
+  color: #15803d;
+  border-bottom-color: #15803d;
+  transform: translateY(-1px);
+}
+.credit-author {
+  background: #e8f5e9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #a5d6a7;
 }

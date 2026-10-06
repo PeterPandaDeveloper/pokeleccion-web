@@ -260,7 +260,7 @@ export function aplicarPreset(tipo) {
         sinGimmicks: false, sinFormasRegionales: false,
         minBST: null, maxBST: null, numRondas: 6, modoOculto: true
       })
-      mostrarToast('↩️ Preset desactivado', 'info')
+      mostrarToast(t('toast_preset_off'), 'info')
     }
     actualizarBSTPreview()
     if (estado.miToken && estado.miRol !== 'espectador' && !yaListo) {
@@ -307,7 +307,7 @@ export function aplicarPreset(tipo) {
     if (bstMax) bstMax.value = ''
     if (numR) numR.value = '6'
     setChk('chk-oculto', true)
-    mostrarToast('☕ Modo Casual activado (clic de nuevo para restaurar)', 'ok')
+    mostrarToast(t('toast_preset_casual'), 'ok')
   } else if (tipo === 'competitivo') {
     regionesSel = new Set(['todas'])
     setChk('chk-sin-leg', true)
@@ -322,7 +322,7 @@ export function aplicarPreset(tipo) {
     if (bstMax) bstMax.value = ''
     if (numR) numR.value = '6'
     setChk('chk-oculto', true)
-    mostrarToast('🏆 Modo Competitivo activado (clic de nuevo para restaurar)', 'ok')
+    mostrarToast(t('toast_preset_comp'), 'ok')
   } else if (tipo === 'copabebe') {
     regionesSel = new Set(['todas'])
     setChk('chk-sin-leg', true)
@@ -337,7 +337,7 @@ export function aplicarPreset(tipo) {
     if (bstMax) bstMax.value = '360'
     if (numR) numR.value = '6'
     setChk('chk-oculto', true)
-    mostrarToast('🍼 Modo Copa Bebé activado (clic de nuevo para restaurar)', 'ok')
+    mostrarToast(t('toast_preset_baby'), 'ok')
   }
 
   document.querySelectorAll('.rbtn').forEach(b => {
@@ -460,7 +460,7 @@ export async function crearSalaParty() {
     Sonido.seleccionar()
     mostrarPasoLobby()
     await copiarEnlace()
-    mostrarToast(`🎮 Sala ${d.salaId} creada. ¡Enlace copiado al portapapeles!`, 'ok')
+    mostrarToast(t('toast_room_created_copied', { id: d.salaId }), 'ok')
     if (resUnirse.estado && window.aplicarEstado) {
       await window.aplicarEstado(resUnirse.estado)
     } else if (window.forzarActualizar) {
@@ -477,7 +477,7 @@ export async function unirsePorCodigo(codigoInput) {
   const codigo = (codigoInput || document.getElementById('input-codigo-sala')?.value || estado.salaId || '').trim().toUpperCase()
   if (!codigo) {
     Sonido.error()
-    mostrarToast('⚠️ Ingresa el código de la sala (ej: A1B2C3).', 'err')
+    mostrarToast(t('toast_enter_code'), 'err')
     return
   }
 
@@ -493,8 +493,8 @@ export async function unirsePorCodigo(codigoInput) {
   try {
     const r = await fetch(`/api/sala/${codigo}/estado`)
     if (!r.ok) {
-      if (r.status === 410) throw new Error('Esta sala ya no existe o fue eliminada.')
-      throw new Error('No se encontró la sala ' + codigo)
+      if (r.status === 410) throw new Error(t('toast_room_expired'))
+      throw new Error(t('toast_room_not_found', { code: codigo }))
     }
     const est = await r.json()
 
@@ -519,7 +519,7 @@ export async function unirsePorCodigo(codigoInput) {
       guardarSesion()
       Sonido.click()
       mostrarPasoLobby()
-      mostrarToast(`👁 Sala llena. Entraste como Espectador en la sala ${codigo}.`, 'info')
+      mostrarToast(t('toast_joined_spectator', { code: codigo }), 'info')
     } else {
       const d = await post('/lobby/unirse', { rol: rolElegido, nombre, token: '' })
       estado.miRol = rolElegido
@@ -527,7 +527,8 @@ export async function unirsePorCodigo(codigoInput) {
       guardarSesion()
       Sonido.seleccionar()
       mostrarPasoLobby()
-      mostrarToast(`✅ ¡Te uniste como ${rolElegido === 'jugador1' ? 'Jugador 1' : 'Jugador 2'} a la sala ${codigo}!`, 'ok')
+      const rolTxt = rolElegido === 'jugador1' ? (getLanguage() === 'en' ? 'Player 1' : 'Jugador 1') : (getLanguage() === 'en' ? 'Player 2' : 'Jugador 2')
+      mostrarToast(t('toast_joined_player', { role: rolTxt, code: codigo }), 'ok')
       import('./api.js').then(m => m.iniciarHeartbeat())
     }
 
@@ -544,10 +545,10 @@ export async function unirseAlLobby() {
   if (rol==='espectador') {
     if (!estado.salaId) {
       Sonido.error()
-      mostrarToast('⚠️ Para ser espectador selecciona una sala pública abajo o usa el enlace de tu amigo.', 'err')
+      mostrarToast(t('toast_need_room_esp'), 'err')
       return
     }
-    const nomEsp = document.getElementById('input-nombre-esp')?.value.trim() || 'Espectador'
+    const nomEsp = document.getElementById('input-nombre-esp')?.value.trim() || (getLanguage() === 'en' ? 'Spectator' : 'Espectador')
     estado.miRol='espectador'; estado.miToken=''; estado.miNombre=nomEsp
     try {
       await fetch(`${API()}/espectador/unirse`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:nomEsp})})
@@ -555,7 +556,7 @@ export async function unirseAlLobby() {
     window.addEventListener('beforeunload',()=>navigator.sendBeacon(`${API()}/espectador/salir`,JSON.stringify({nombre:nomEsp})))
     Sonido.click(); mostrarPasoLobby(); return
   }
-  if (!nombre) { Sonido.error(); mostrarToast('⚠️ Escribe tu nombre.','err'); return }
+  if (!nombre) { Sonido.error(); mostrarToast(t('toast_enter_name'),'err'); return }
   estado.miNombre = nombre
 
   // Auto-crear sala si el usuario entra como Jugador 1 sin haber elegido o creado una sala
@@ -568,16 +569,16 @@ export async function unirseAlLobby() {
         guardarSesion()
         actualizarDisplaySala()
         await copiarEnlace()
-        mostrarToast(`🎮 Sala ${d.salaId} creada. ¡Enlace copiado!`, 'ok')
+        mostrarToast(t('toast_room_created_copied', { id: d.salaId }), 'ok')
       }
     } catch (e) {
       Sonido.error()
-      mostrarToast('⚠️ Error creando sala automática', 'err')
+      mostrarToast(t('toast_auto_room_err'), 'err')
       return
     }
   } else if (!estado.salaId && rol === 'jugador2') {
     Sonido.error()
-    mostrarToast('⚠️ Para unirte como Jugador 2 entra con el enlace de la sala o selecciona una sala activa.', 'err')
+    mostrarToast(t('toast_need_link_j2'), 'err')
     return
   }
 
@@ -770,23 +771,23 @@ export async function limpiarSala() {
         }
       }
     },1000)
-    mostrarToast('🧹 Filtros restablecidos por defecto','ok')
-  } catch(e) { Sonido.error(); mostrarToast('⚠️ '+e.message,'err') }
+    mostrarToast(t('toast_reset_filters'), 'ok')
+  } catch(e) { Sonido.error(); mostrarToast('⚠️ ' + (e.message || e), 'err') }
 }
 
 export async function copiarCodigoSala() {
   const codigo = estado.salaId || ''
   if (!codigo) {
     Sonido.error()
-    mostrarToast('⚠️ No hay sala activa para copiar', 'err')
+    mostrarToast(t('toast_no_active_room'), 'err')
     return
   }
   try {
     await navigator.clipboard.writeText(codigo)
     Sonido.copiar()
-    mostrarToast(`📋 Código de sala copiado: ${codigo}`, 'ok', 3000)
+    mostrarToast(t('toast_copied_code', { code: codigo }), 'ok', 3000)
   } catch {
-    mostrarToast(`Código: ${codigo}`, 'info', 6000)
+    mostrarToast(t('toast_code_fallback', { code: codigo }), 'info', 6000)
   }
 }
 
@@ -795,9 +796,10 @@ export async function copiarEnlace() {
   const enlace = `${location.origin}${location.pathname}?sala=${estado.salaId}`
   try {
     await navigator.clipboard.writeText(enlace)
-    Sonido.copiar(); mostrarToast('🔗 Enlace copiado: '+enlace,'ok',4000)
+    Sonido.copiar()
+    mostrarToast(t('toast_copied_link', { url: enlace }), 'ok', 4000)
   } catch {
-    mostrarToast('Enlace: '+enlace,'info',7000)
+    mostrarToast(t('toast_link_fallback', { url: enlace }), 'info', 7000)
   }
 }
 
@@ -993,7 +995,7 @@ export function seleccionarAvatarEsp(avatar) {
     b.classList.toggle('avatar-active', b.dataset.avatar === avatar)
   })
   Sonido.click()
-  mostrarToast(`Avatar de espectador: ${avatar}`, 'ok')
+  mostrarToast(t('toast_avatar_selected', { avatar }), 'ok')
 }
 
 export function volverAlMenuPrincipal() {

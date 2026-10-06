@@ -131,12 +131,13 @@ window.mantenerViva    = async () => {
       body: JSON.stringify({token:estado.miToken})
     })
     Sonido.click()
-    mostrarToast('⏱ ¡Sala extendida por 5 minutos!', 'ok')
+    mostrarToast(t('toast_keepalive_ok'), 'ok')
   } catch {}
 }
 window.liberarSlot     = async () => {
   if (!estado.miToken || estado.miRol === 'espectador') return
-  if (!confirm('¿Dejar tu slot como jugador y pasar a espectador?')) return
+  const isEn = getLanguage() === 'en'
+  if (!confirm(isEn ? 'Leave your player slot and become a spectator?' : '¿Dejar tu slot como jugador y pasar a espectador?')) return
   try {
     const r = await fetch(`/api/sala/${estado.salaId}/intercambiar`, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -148,14 +149,16 @@ window.liberarSlot     = async () => {
     estado.miRol = 'espectador'
     guardarSesion()
     mostrarPasoLobby()
-    mostrarToast('🚪 Slot liberado, ahora eres espectador','ok')
+    mostrarToast(t('toast_slot_released'), 'ok')
     Sonido.click()
-  } catch(e) { mostrarToast('⚠️ Error al liberar slot','err') }
+  } catch(e) { mostrarToast('⚠️ ' + (e.message || 'Error'), 'err') }
 }
 window.tomarSlot       = async (rol) => {
-  if (!confirm(`¿Tomar el slot de ${rol==='jugador1'?'Jugador 1':'Jugador 2'}?`)) return
+  const isEn = getLanguage() === 'en'
+  const rolName = rol === 'jugador1' ? (isEn ? 'Player 1' : 'Jugador 1') : (isEn ? 'Player 2' : 'Jugador 2')
+  if (!confirm(isEn ? `Claim ${rolName} slot?` : `¿Tomar el slot de ${rolName}?`)) return
   try {
-    const nombreParaSlot = estado.miNombre || document.getElementById('input-nombre-esp')?.value?.trim() || 'Espectador'
+    const nombreParaSlot = estado.miNombre || document.getElementById('input-nombre-esp')?.value?.trim() || (isEn ? 'Spectator' : 'Espectador')
     estado.miNombre = nombreParaSlot
     const r = await fetch(`/api/sala/${estado.salaId}/intercambiar`, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -167,11 +170,12 @@ window.tomarSlot       = async (rol) => {
     estado.miRol = d.rol
     guardarSesion()
     mostrarPasoLobby()
-    mostrarToast(`✅ Ahora eres ${d.rol==='jugador1'?'Jugador 1':'Jugador 2'}!`, 'ok')
+    const rolTxt = d.rol === 'jugador1' ? (isEn ? 'Player 1' : 'Jugador 1') : (isEn ? 'Player 2' : 'Jugador 2')
+    mostrarToast(t('toast_slot_claimed', { role: rolTxt }), 'ok')
     Sonido.seleccionar()
     // Iniciar heartbeat
     import('./api.js').then(m => m.iniciarHeartbeat())
-  } catch(e) { mostrarToast('⚠️ Error al tomar slot','err') }
+  } catch(e) { mostrarToast('⚠️ ' + (e.message || 'Error'), 'err') }
 }
 window.togglePrivada   = async () => {
   const priv = document.getElementById('chk-privada')?.checked
@@ -181,7 +185,7 @@ window.togglePrivada   = async () => {
       body: JSON.stringify({token:estado.miToken, privada:priv})
     })
     Sonido.click()
-    mostrarToast(priv ? '🔒 Sala privada' : '🌐 Sala pública', 'info')
+    mostrarToast(priv ? t('toast_room_private') : t('toast_room_public'), 'info')
   } catch {}
 }
 
@@ -225,17 +229,18 @@ window.unirseASala = async (id) => {
       if (est.jugador1?.conectado && !est.jugador2?.conectado) {
         sel.value = 'jugador2'
         onRolChange()
-        mostrarToast(`Sala ${id}: J1 ocupado (${est.jugador1.nombre||'J1'}). ¡Seleccionado Jugador 2!`, 'ok')
+        const isEn = getLanguage() === 'en'
+        mostrarToast(isEn ? `Room ${id}: P1 occupied. Selected Player 2!` : `Sala ${id}: J1 ocupado. ¡Seleccionado Jugador 2!`, 'ok')
         return
       } else if (est.jugador1?.conectado && est.jugador2?.conectado) {
         sel.value = 'espectador'
         onRolChange()
-        mostrarToast(`Sala ${id}: Sala llena. ¡Entrarás como Espectador!`, 'info')
+        mostrarToast(t('toast_joined_spectator', { code: id }), 'info')
         return
       }
     }
   } catch {}
-  mostrarToast(`Sala ${id} seleccionada. ¡Elige tu rol!`, 'ok')
+  mostrarToast(t('toast_room_selected', { id }), 'ok')
 }
 
 // ─── MAIN LOOP & SINCRONIZACIÓN EN TIEMPO REAL ─────────────────────────────
@@ -307,7 +312,7 @@ function obtenerIntervaloPolling() {
     return 950
   }
 
-  if (prevEstadoG.fase === 'fin') return 2500
+  if (prevEstadoG.fase === 'fin') return 1200
 
   // Lobby: si ambos están listos, sincronizar rápido
   const ambosListos = prevEstadoG.lobby?.jugador1?.listo && prevEstadoG.lobby?.jugador2?.listo
