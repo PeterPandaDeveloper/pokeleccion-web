@@ -419,8 +419,24 @@ export function desbloquearConfig() {
 }
 
 // ─── ACCIONES ─────────────────────────────────────────────────────────────────
+export function asegurarNombreEntrenador() {
+  let val = (document.getElementById('input-nombre')?.value || '').trim()
+  if (!val) {
+    const continuar = confirm('¿Seguro que quieres ingresar sin colocarte tu nombre? Te llamarás "Entrenador".\n\nPresiona Aceptar para continuar como Entrenador, o Cancelar para escribir tu nombre.')
+    if (!continuar) {
+      document.getElementById('input-nombre')?.focus()
+      return null
+    }
+    val = 'Entrenador'
+    const inp = document.getElementById('input-nombre')
+    if (inp) inp.value = 'Entrenador'
+  }
+  return val
+}
+
 export async function crearSalaParty() {
-  const nombre = (document.getElementById('input-nombre')?.value || '').trim() || 'Entrenador'
+  const nombre = asegurarNombreEntrenador()
+  if (!nombre) return
   estado.miNombre = nombre
   guardarSesion()
   try {
@@ -452,16 +468,17 @@ export async function crearSalaParty() {
 }
 
 export async function unirsePorCodigo(codigoInput) {
-  const nombre = (document.getElementById('input-nombre')?.value || '').trim() || 'Entrenador'
-  estado.miNombre = nombre
-  guardarSesion()
-
   const codigo = (codigoInput || document.getElementById('input-codigo-sala')?.value || estado.salaId || '').trim().toUpperCase()
   if (!codigo) {
     Sonido.error()
     mostrarToast('⚠️ Ingresa el código de la sala (ej: A1B2C3).', 'err')
     return
   }
+
+  const nombre = asegurarNombreEntrenador()
+  if (!nombre) return
+  estado.miNombre = nombre
+  guardarSesion()
 
   estado.salaId = codigo
   guardarSesion()
@@ -644,12 +661,67 @@ export async function marcarListo() {
   }
 }
 
+export function restablecerFiltrosPorDefecto() {
+  // 1. Regiones: solo 'todas'
+  document.querySelectorAll('.rbtn').forEach(b => {
+    b.classList.toggle('active', b.dataset.r === 'todas')
+  })
+
+  // 2. Tipos: vaciar selección
+  tiposSel.clear()
+  document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('active'))
+  document.getElementById('tipo-grid')?.classList.remove('has-selected')
+  const mRow = document.getElementById('modo-tipos-row')
+  if (mRow) mRow.style.display = 'none'
+
+  // 3. Colores: vaciar selección
+  coloresSel.clear()
+  document.querySelectorAll('.cbtn').forEach(b => b.classList.remove('active'))
+
+  // 4. Checkboxes a estado por defecto
+  const setChk = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val }
+  setChk('chk-sin-leg', false)
+  setChk('chk-finales', false)
+  setChk('chk-sinevo', false)
+  setChk('chk-base', false)
+  setChk('chk-copabebe', false)
+  setChk('chk-nodup', false)
+  setChk('chk-gimmicks', false)
+  setChk('chk-formas-reg', false)
+  setChk('chk-oculto', true) // ¡Modo Oculto activo por defecto!
+
+  // 5. BST: limpio y sliders en extremos
+  const bstMin = document.getElementById('bst-min')
+  const bstMax = document.getElementById('bst-max')
+  if (bstMin) bstMin.value = ''
+  if (bstMax) bstMax.value = ''
+  const slMin = document.getElementById('slider-bst-min')
+  const slMax = document.getElementById('slider-bst-max')
+  if (slMin) slMin.value = '180'
+  if (slMax) slMax.value = '780'
+
+  // 6. Rondas a 6
+  const numREl = document.getElementById('num-rondas')
+  if (numREl) numREl.value = '6'
+
+  // 7. Presets desactivados
+  document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('preset-active'))
+
+  // 8. Ocultar advertencias
+  const wEvo = document.getElementById('warn-evolucion')
+  if (wEvo) wEvo.style.display = 'none'
+
+  // 9. Actualizar vista previa visual de BST
+  actualizarBSTPreview()
+}
+
 export async function limpiarSala() {
   if (cooldownLimpiar) return
-  if (!confirm('¿Borrar todas las selecciones y empezar de nuevo?')) return
+  if (!confirm('¿Restablecer todos los filtros y empezar de nuevo con los valores por defecto?')) return
   try {
     const res = await post('/lobby/limpiar',{})
     Sonido.limpiar(); cooldownLimpiar=true
+    restablecerFiltrosPorDefecto()
     resetLobbyEstado()
     if (res && res.lobby && window.aplicarEstado) {
       await window.aplicarEstado(res)
@@ -667,21 +739,37 @@ export async function limpiarSala() {
         if (btn) {
           btn.disabled = false
           const txt = btn.querySelector('.btn-txt')
-          if (txt) txt.textContent = 'Borrar selecciones'
-          else btn.textContent = 'Borrar selecciones'
+          if (txt) txt.textContent = 'Restablecer filtros'
+          else btn.textContent = 'Restablecer filtros'
         }
         if (msg) msg.style.display='none'
       } else {
-        if (msg) { msg.style.display='block'; msg.textContent=`Puedes limpiar en ${seg}s` }
+        if (msg) { msg.style.display='block'; msg.textContent=`Puedes restablecer en ${seg}s` }
         if (btn) {
           const txt = btn.querySelector('.btn-txt')
-          if (txt) txt.textContent = `Limpiar (${seg}s)`
-          else btn.textContent = `Limpiar (${seg}s)`
+          if (txt) txt.textContent = `Restablecer (${seg}s)`
+          else btn.textContent = `Restablecer (${seg}s)`
         }
       }
     },1000)
-    mostrarToast('🧹 Sala limpiada','ok')
+    mostrarToast('🧹 Filtros restablecidos por defecto','ok')
   } catch(e) { Sonido.error(); mostrarToast('⚠️ '+e.message,'err') }
+}
+
+export async function copiarCodigoSala() {
+  const codigo = estado.salaId || ''
+  if (!codigo) {
+    Sonido.error()
+    mostrarToast('⚠️ No hay sala activa para copiar', 'err')
+    return
+  }
+  try {
+    await navigator.clipboard.writeText(codigo)
+    Sonido.copiar()
+    mostrarToast(`📋 Código de sala copiado: ${codigo}`, 'ok', 3000)
+  } catch {
+    mostrarToast(`Código: ${codigo}`, 'info', 6000)
+  }
 }
 
 export async function copiarEnlace() {
@@ -714,6 +802,8 @@ export async function crearNuevaSala() {
 export function actualizarDisplaySala() {
   const el=document.getElementById('sala-id-display')
   if (el) el.textContent=estado.salaId||'—'
+  const elLobby = document.getElementById('sala-id-lobby')
+  if (elLobby) elLobby.textContent = estado.salaId || '—'
 }
 
 // ─── POOL DE POKÉMON ─────────────────────────────────────────────────────────
@@ -870,10 +960,30 @@ export function resetLobbyEstado() {
   cooldownLimpiar = false
   ultimoEstadoBloqueado = null
   desbloquearConfig()
-  document.getElementById('tipo-grid')?.classList.remove('has-selected')
+  restablecerFiltrosPorDefecto()
   const cp = document.getElementById('config-panel-wrap')
   if (cp) { cp.style.opacity = ''; cp.style.pointerEvents = '' }
   document.getElementById('cfg-acciones').style.display = ''
   document.getElementById('votos-display').style.display = 'none'
   document.getElementById('cfg-acordado').style.display = 'none'
+}
+
+export function seleccionarAvatarEsp(avatar) {
+  estado.miAvatarEsp = avatar
+  localStorage.setItem('poke_avatar_esp', avatar)
+  document.querySelectorAll('.btn-avatar-esp').forEach(b => {
+    b.classList.toggle('avatar-active', b.dataset.avatar === avatar)
+  })
+  Sonido.click()
+  mostrarToast(`Avatar de espectador: ${avatar}`, 'ok')
+}
+
+export function volverAlMenuPrincipal() {
+  if (confirm('¿Deseas salir de la sala y volver al menú principal?')) {
+    localStorage.removeItem('poke_sesion')
+    estado.salaId = ''
+    estado.miRol = ''
+    estado.miToken = ''
+    location.href = location.pathname
+  }
 }

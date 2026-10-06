@@ -4,9 +4,10 @@ import { mostrarToast, mostrarInfo, cerrarInfo, mostrarTutorial, cerrarTutorial 
 import {
   construirTipos, onRolChange, toggleRegion, toggleTipo, toggleColor, syncRestr,
   leerVoto, etiquetaVoto, unirseAlLobby, crearSalaParty, unirsePorCodigo, votarConfig, votarConfigDelOtro, marcarListo,
-  limpiarSala, copiarEnlace, crearNuevaSala, actualizarDisplaySala,
+  limpiarSala, copiarEnlace, copiarCodigoSala, crearNuevaSala, actualizarDisplaySala,
   actualizarLobbyUI, mostrarPasoLobby,
   aplicarPreset, onSliderBSTMin, onSliderBSTMax, actualizarBSTPreview,
+  seleccionarAvatarEsp, volverAlMenuPrincipal,
 } from './lobby.js'
 import {
   syncDraft, flashBatalla, resetarEstadoRender, resetear,
@@ -27,6 +28,9 @@ window.toggleColor        = toggleColor
 window.syncRestr          = syncRestr
 window.crearSalaParty     = crearSalaParty
 window.unirsePorCodigo    = unirsePorCodigo
+window.copiarCodigoSala   = copiarCodigoSala
+window.seleccionarAvatarEsp = seleccionarAvatarEsp
+window.volverAlMenuPrincipal = volverAlMenuPrincipal
 window.copiarResumenDuelo = copiarResumenDuelo
 window.solicitarRevancha  = solicitarRevancha
 window.aplicarPreset      = aplicarPreset

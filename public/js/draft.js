@@ -301,6 +301,19 @@ async function renderCartas(est) {
   const c    = document.getElementById('opciones-render')
   if (!c) return
 
+  const nomT = est[est.turnoDe]?.nombre || (est.turnoDe === 'jugador1' ? 'Jugador 1' : 'Jugador 2')
+
+  // En Modo Oculto, si no es mi turno y soy jugador (no espectador), ocultar las opciones que el rival está eligiendo
+  if (est.config?.modoOculto && !esYo && estado.miRol && estado.miRol !== 'espectador') {
+    c.innerHTML = `
+      <div class="poke-card-oculta-rival">
+        <span class="ico-oculto">🙈</span>
+        <p class="txt-oculto-rival"><strong>${nomT}</strong> está eligiendo su Pokémon en secreto...</p>
+      </div>
+    `
+    return
+  }
+
   // Si ya tenemos exactamente estas cartas renderizadas, solo actualizar estado visual
   const existingCards = c.querySelectorAll('.poke-card')
   if (existingCards.length === est.opcionesActuales.length && arrEq(est.opcionesActuales, prevOps)) {
@@ -352,12 +365,8 @@ async function renderEquipos(est) {
     const id = est.jugador1.equipo[i]
     const key = `j1_${i}_${id}`
     if (!rendJ1.has(key)) {
-      // Estilo Clash Royale:
-      // J1 elige en rondas impares (índices 0, 2, 4...) -> pick secreto propio de J1.
-      // J2 elige en rondas pares (índices 1, 3, 5...) y le da ese poke a J1 -> J2 sabe qué le regaló.
-      // El rival (J2) solo ve '???' para los Pokémon que J1 eligió para sí mismo.
-      const esPickPropioDeJ1 = (i % 2 === 0)
-      const ocultar = modoOculto && estado.miRol === 'jugador2' && !esEspectador && !esFin && esPickPropioDeJ1
+      // En Modo Oculto, el rival (J2) no ve los Pokémon de J1 hasta que finaliza el draft
+      const ocultar = modoOculto && estado.miRol === 'jugador2' && !esEspectador && !esFin
       g1.appendChild(await crearMini(id, 'slide-in-right', ocultar))
       rendJ1.add(key)
     }
@@ -367,12 +376,8 @@ async function renderEquipos(est) {
     const id = est.jugador2.equipo[i]
     const key = `j2_${i}_${id}`
     if (!rendJ2.has(key)) {
-      // Estilo Clash Royale:
-      // J1 elige en rondas impares (índices 0, 2, 4...) y le da ese poke a J2 -> J1 sabe qué le regaló.
-      // J2 elige en rondas pares (índices 1, 3, 5...) -> pick secreto propio de J2.
-      // El rival (J1) solo ve '???' para los Pokémon que J2 eligió para sí mismo.
-      const esPickPropioDeJ2 = (i % 2 === 1)
-      const ocultar = modoOculto && estado.miRol === 'jugador1' && !esEspectador && !esFin && esPickPropioDeJ2
+      // En Modo Oculto, el rival (J1) no ve los Pokémon de J2 hasta que finaliza el draft
+      const ocultar = modoOculto && estado.miRol === 'jugador1' && !esEspectador && !esFin
       g2.appendChild(await crearMini(id, 'slide-in-left', ocultar))
       rendJ2.add(key)
     }

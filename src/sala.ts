@@ -40,6 +40,8 @@ export interface Sala {
   id: string
   estado: EstadoSala
   pool: number[]
+  poolJ1?: number[]
+  poolJ2?: number[]
   timer: ReturnType<typeof setTimeout>|null
   creadaEn: number
   // TTL: expira si no hay jugadores conectados por X ms

@@ -44,6 +44,21 @@
   </div>
 </div>
 
+<!-- NAVBAR RETRO GBA -->
+<header class="poke-navbar">
+  <div class="poke-nav-inner">
+    <div class="poke-nav-brand">
+      <span class="poke-nav-logo">⚡</span>
+      <span class="poke-nav-title">Pokélección</span>
+    </div>
+    <div class="poke-nav-actions">
+      <button type="button" class="btn-nav-action" onclick="mostrarTutorial()">🎁 ¿Cómo jugar?</button>
+      <button type="button" class="btn-nav-action btn-super-ayuda" id="btn-super-ayuda-nav" onclick="toggleSuperAyuda()" title="Fichas técnicas con estadísticas de Pokémon">🧠 Súper Ayuda: <span style="opacity:0.7">OFF</span></button>
+      <button type="button" class="btn-nav-action btn-nav-salir" id="btn-nav-salir" onclick="volverAlMenuPrincipal()" title="Volver al menú de inicio">🚪 Salir</button>
+    </div>
+  </div>
+</header>
+
 <!-- ══════════════════════════ LOBBY ══════════════════════════ -->
 <div id="pantalla-lobby" class="pantalla">
   <div class="main-container lobby-container">
@@ -51,10 +66,6 @@
     <div class="titulo-bloque">
       <h1 class="title">Desafío de Pokélección</h1>
       <p class="subtitle">Elige tu equipo · Compatible con Pokémon Showdown</p>
-      <div class="lobby-header-btns" style="display:flex; justify-content:center; gap:10px; margin-top:8px; flex-wrap:wrap;">
-        <button class="btn-tutorial-link" onclick="mostrarTutorial()">¿Cómo jugar?</button>
-        <button type="button" class="btn-super-ayuda" id="btn-super-ayuda-lobby" onclick="toggleSuperAyuda()" title="Fichas técnicas con estadísticas de Pokémon">🧠 Súper Ayuda: <span style="opacity:0.7">OFF</span></button>
-      </div>
     </div>
 
     <!-- PASO 1: nombre/rol (Flujo Party Game) -->
@@ -111,7 +122,7 @@
         <!-- Selector de salas públicas -->
         <div class="salas-section">
           <div class="salas-header">
-            <span class="salas-label">Salas públicas disponibles</span>
+            <span class="salas-label">Salas activas</span>
             <button class="btn-sala-nueva" onclick="crearSalaParty()">+ Nueva sala</button>
           </div>
           <div id="salas-publicas" class="salas-lista">
@@ -129,7 +140,10 @@
         <div class="box-gba jugadores-panel">
           <div class="sala-title-row">
             <h3 class="panel-title">Sala <span id="sala-id-lobby" class="sala-id-badge"></span></h3>
-            <button class="btn-copiar-sala-lobby" onclick="copiarEnlace()">🔗 Copiar enlace</button>
+            <div class="sala-header-actions">
+              <button class="btn-copiar-codigo-lobby" onclick="copiarCodigoSala()" title="Copiar código de 6 caracteres">📋 Copiar código</button>
+              <button class="btn-copiar-sala-lobby" onclick="copiarEnlace()" title="Copiar enlace directo">🔗 Enlace</button>
+            </div>
           </div>
           <div class="jugador-slot j1-slot">
             <span class="slot-ico">🔴</span>
@@ -145,8 +159,23 @@
               <span class="slot-est" id="est-j2-lobby">—</span>
             </div>
           </div>
-          <div class="esp-badge" id="esp-badge" style="display:none">
-            👁 <span id="esp-count">0</span> espectador(es)
+          <div class="esp-section-wrap" id="esp-section-wrap">
+            <div class="esp-badge" id="esp-badge" style="display:none">
+              👁 <span id="esp-count">0</span> espectador(es)
+            </div>
+            <div class="esp-custom-box" id="esp-custom-box" style="display:none">
+              <span class="esp-custom-lbl">Tu avatar:</span>
+              <div class="esp-avatar-picker" id="esp-avatar-picker">
+                <button type="button" class="btn-avatar-esp avatar-active" data-avatar="🍿" onclick="seleccionarAvatarEsp('🍿')">🍿</button>
+                <button type="button" class="btn-avatar-esp" data-avatar="🕶️" onclick="seleccionarAvatarEsp('🕶️')">🕶️</button>
+                <button type="button" class="btn-avatar-esp" data-avatar="👑" onclick="seleccionarAvatarEsp('👑')">👑</button>
+                <button type="button" class="btn-avatar-esp" data-avatar="🎮" onclick="seleccionarAvatarEsp('🎮')">🎮</button>
+                <button type="button" class="btn-avatar-esp" data-avatar="🧙" onclick="seleccionarAvatarEsp('🧙')">🧙</button>
+                <button type="button" class="btn-avatar-esp" data-avatar="⚡" onclick="seleccionarAvatarEsp('⚡')">⚡</button>
+                <button type="button" class="btn-avatar-esp" data-avatar="☕" onclick="seleccionarAvatarEsp('☕')">☕</button>
+                <button type="button" class="btn-avatar-esp" data-avatar="🕵️" onclick="seleccionarAvatarEsp('🕵️')">🕵️</button>
+              </div>
+            </div>
           </div>
           <div class="aviso-demo">
             <span class="ico-demo">🗳</span>
@@ -163,9 +192,9 @@
               </label>
             </div>
             <div class="panel-limpiar-grid">
-              <button class="btn-util btn-limpiar" onclick="limpiarSala()">
-                <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3l3 3-9 9H9v-3l9-9z"/><path d="M3 21h18"/></svg>
-                <span class="btn-txt">Borrar selecciones</span>
+              <button class="btn-util btn-limpiar" onclick="limpiarSala()" title="Restablecer todos los filtros a valores por defecto">
+                <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"/></svg>
+                <span class="btn-txt">Restablecer filtros</span>
               </button>
               <button class="btn-util btn-keepalive" onclick="mantenerViva()">
                 <svg class="btn-flat-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -519,6 +548,7 @@
       <div class="esp-pill" id="esp-pill" style="display:none">👁 <span id="esp-count-draft">0</span></div>
       <div class="conn-pill conn-ok" id="conn-pill">🟢 Conectado</div>
       <button type="button" class="btn-super-ayuda" id="btn-super-ayuda" onclick="toggleSuperAyuda()" title="Fichas técnicas con estadísticas de Pokémon">🧠 Súper Ayuda: <span style="opacity:0.7">OFF</span></button>
+      <button class="btn-copiar-codigo-draft" onclick="copiarCodigoSala()" title="Copiar código de sala">📋</button>
       <button class="btn-copiar-sala-draft" onclick="copiarEnlace()" title="Copiar enlace de sala">🔗</button>
       <button class="btn-reiniciar" onclick="resetear()">↺ Reiniciar</button>
     </div>
@@ -603,7 +633,6 @@
       </div>
       <div class="fin-acciones-row" style="text-align:center; margin-top:20px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
         <button class="btn-revancha" id="btn-revancha" onclick="solicitarRevancha(this)">⚡ Revancha Inmediata (Mismas Reglas)</button>
-        <button class="btn-accion btn-resumen-duelo" onclick="copiarResumenDuelo(this)">📜 Copiar Resumen del Duelo (Discord / WhatsApp)</button>
       </div>
     </div>
 

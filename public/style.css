@@ -1521,11 +1521,11 @@ textarea:focus {
 
 /* ════ CHAT RETRO POKÉ-NAV ════ */
 #chat-panel-lobby {
-  flex: 1;
   display: flex;
   flex-direction: column;
   margin-top: 14px;
-  min-height: 280px;
+  height: 380px;
+  max-height: 400px;
 }
 
 .chat-panel {
@@ -1540,8 +1540,10 @@ textarea:focus {
 
 .chat-panel-draft {
   margin-top: 20px;
-  flex: 1;
-  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  height: 280px;
+  max-height: 300px;
 }
 
 .chat-titulo {
@@ -1575,8 +1577,8 @@ textarea:focus {
 
 .chat-mensajes {
   flex: 1;
-  height: auto;
-  min-height: 180px;
+  min-height: 0;
+  max-height: 100%;
   overflow-y: auto;
   padding: 10px;
   display: flex;
@@ -2628,4 +2630,192 @@ body.buzz-shake {
   cursor: not-allowed;
   transform: none;
   opacity: 0.85;
+}
+
+/* ════ NAVBAR RETRO GBA ════ */
+.poke-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: linear-gradient(180deg, #1b5e20 0%, #2e7d32 100%);
+  border-bottom: 3px solid #0f3311;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  padding: 8px 16px;
+  width: 100%;
+}
+.poke-nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.poke-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.poke-nav-logo {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.poke-nav-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.72rem;
+  color: #ffeb3b;
+  text-shadow: 1px 1px 0 #003300;
+  letter-spacing: 0.5px;
+}
+.poke-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-nav-action {
+  background: #388e3c;
+  color: #ffffff;
+  border: 2px solid #a5d6a7;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #1b5e20;
+  transition: transform 0.08s, filter 0.12s;
+  user-select: none;
+}
+.btn-nav-action:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+.btn-nav-action:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #1b5e20;
+}
+.btn-nav-salir {
+  background: #c62828 !important;
+  border-color: #ef9a9a !important;
+  box-shadow: 0 2px 0 #5f0909 !important;
+}
+
+/* ── BOTONES DE COPIAR CÓDIGO DE SALA ── */
+.sala-header-actions {
+  display: flex;
+  gap: 6px;
+}
+.btn-copiar-codigo-lobby {
+  background: linear-gradient(180deg, #fbc02d 0%, #f57f17 100%);
+  color: #2e2000;
+  border: 2px solid #ff6f00;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.52rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #b26a00;
+  transition: transform 0.08s, filter 0.12s;
+  user-select: none;
+}
+.btn-copiar-codigo-lobby:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.btn-copiar-codigo-lobby:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #b26a00;
+}
+.btn-copiar-codigo-draft {
+  background: #fbc02d;
+  color: #2e2000;
+  border: 2px solid #f57f17;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #b26a00;
+  transition: transform 0.08s;
+}
+.btn-copiar-codigo-draft:hover {
+  transform: translateY(-1px);
+}
+
+/* ── PERSONALIZACIÓN DE ESPECTADORES ── */
+.esp-section-wrap {
+  margin: 6px 0 10px;
+}
+.esp-custom-box {
+  background: #f3e5f5;
+  border: 1px solid #ce93d8;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.esp-custom-lbl {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: #6a1b9a;
+}
+.esp-avatar-picker {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.btn-avatar-esp {
+  background: #ffffff;
+  border: 2px solid #ba68c8;
+  border-radius: 4px;
+  font-size: 1.05rem;
+  padding: 3px 6px;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+  line-height: 1;
+}
+.btn-avatar-esp:hover {
+  transform: scale(1.18);
+  border-color: #7b1fa2;
+}
+.btn-avatar-esp.avatar-active {
+  background: #e1bee7;
+  border-color: #4a148c;
+  box-shadow: 0 0 6px rgba(106, 27, 154, 0.4);
+}
+
+/* ── MODO OCULTO: CARTAS SECRETAS DEL RIVAL ── */
+.poke-card-oculta-rival {
+  background: #102014;
+  border: 3px dashed #66bb6a;
+  border-radius: 10px;
+  padding: 36px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  animation: pulseSecret 2s infinite ease-in-out;
+}
+@keyframes pulseSecret {
+  0%, 100% { border-color: #66bb6a; box-shadow: 0 0 8px rgba(102, 187, 106, 0.3); }
+  50% { border-color: #2e7d32; box-shadow: 0 0 16px rgba(46, 125, 50, 0.6); }
+}
+.poke-card-oculta-rival .ico-oculto {
+  font-size: 3.5rem;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+}
+.poke-card-oculta-rival .txt-oculto-rival {
+  font-family: 'VT323', monospace;
+  font-size: 1.45rem;
+  color: #e8f5e9;
+  letter-spacing: 0.5px;
+}
+.poke-card-oculta-rival .txt-oculto-rival strong {
+  color: #ffeb3b;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.72rem;
 }

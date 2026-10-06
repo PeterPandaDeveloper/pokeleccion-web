@@ -141,42 +141,64 @@ function pool2pokemon(sala: Sala): void {
   }
 }
 
+function obtenerPoolJugador(sala: Sala, jugador: 'jugador1'|'jugador2'): number[] {
+  const pPropio = jugador === 'jugador1' ? (sala as any).poolJ1 : (sala as any).poolJ2
+  if (Array.isArray(pPropio) && pPropio.length >= 2) return pPropio
+
+  // Si se agotó el pool propio, rellenar a partir del pool base excluyendo Pokémon ya en equipos
+  const ya = new Set([...sala.estado.jugador1.equipo, ...sala.estado.jugador2.equipo])
+  const base = (sala.pool && sala.pool.length >= 2 ? [...sala.pool] : Array.from({length: 1025}, (_, i) => i + 1))
+    .filter(id => !ya.has(id))
+    .sort(() => Math.random() - 0.5)
+
+  if (jugador === 'jugador1') (sala as any).poolJ1 = base
+  else (sala as any).poolJ2 = base
+  return base
+}
+
 export function limpiarTimer(sala: Sala): void {
   if (sala.timer) { clearTimeout(sala.timer); sala.timer=null }
   sala.estado.timerExpira = null
 }
 
-export function generarRonda(salaId: string, sala: Sala): void {
+export function generarTurno(salaId: string, sala: Sala): void {
   limpiarTimer(sala)
   const { estado } = sala
   estado.ultimaEleccionRandom = false
-  if (estado.rondaActual >= estado.config!.numRondas) {
-    estado.turnoDe='FIN'; estado.fase='fin'
-    const j1 = estado.jugador1.nombre||'J1'
-    const j2 = estado.jugador2.nombre||'J2'
-    agregarMensajeSistema(sala,`🏁 ¡Draft terminado! ${j1} y ${j2} tienen sus equipos.`)
+
+  if (estado.rondaActual > estado.config!.numRondas) {
+    estado.turnoDe = 'FIN'
+    estado.fase = 'fin'
+    const j1 = estado.jugador1.nombre || 'J1'
+    const j2 = estado.jugador2.nombre || 'J2'
+    agregarMensajeSistema(sala, `🏁 ¡Draft terminado! ${j1} y ${j2} tienen sus equipos listos.`)
     return
   }
-  pool2pokemon(sala)
-  const i1=Math.floor(Math.random()*sala.pool.length); const id1=sala.pool.splice(i1,1)[0]
-  const i2=Math.floor(Math.random()*sala.pool.length); const id2=sala.pool.splice(i2,1)[0]
-  estado.opcionesActuales=[id1,id2]; estado.historial.push(id1,id2)
-  estado.rondaActual++
-  estado.turnoDe = estado.rondaActual%2===1 ? 'jugador1' : 'jugador2'
-  // Timer pasivo
-  estado.timerExpira = Date.now() + CONFIG.TIMER_SEG*1000
 
-  // Solo en standalone se usa un setTimeout de refuerzo
+  const jugador = estado.turnoDe as 'jugador1' | 'jugador2'
+  const poolActivo = obtenerPoolJugador(sala, jugador)
+
+  // Tomar 2 opciones únicas para el jugador de su respectivo pool
+  const id1 = poolActivo.shift() || (Math.floor(Math.random() * 1025) + 1)
+  const id2 = poolActivo.shift() || (Math.floor(Math.random() * 1025) + 1)
+
+  estado.opcionesActuales = [id1, id2]
+  estado.historial.push(id1, id2)
+  estado.timerExpira = Date.now() + CONFIG.TIMER_SEG * 1000
+
+  // Refuerzo en standalone
   if (process.env.VERCEL !== '1' && process.env.SERVERLESS !== '1') {
-    sala.timer = setTimeout(()=>{
-      if (estado.fase!=='draft'||estado.turnoDe==='FIN') return
-      const elegido = estado.opcionesActuales[Math.floor(Math.random()*estado.opcionesActuales.length)]
+    sala.timer = setTimeout(() => {
+      if (estado.fase !== 'draft' || estado.turnoDe === 'FIN') return
+      const elegido = estado.opcionesActuales[Math.floor(Math.random() * estado.opcionesActuales.length)]
       console.log(`⏰  [${salaId}] Timeout activo → #${elegido}`)
       estado.ultimaEleccionRandom = true
       aplicarEleccion(salaId, sala, estado.turnoDe as 'jugador1'|'jugador2', elegido)
-    }, CONFIG.TIMER_SEG*1000)
+    }, CONFIG.TIMER_SEG * 1000)
   }
 }
+
+export const generarRonda = generarTurno
 
 /**
  * Verificación pasiva del temporizador de 10s.
@@ -197,37 +219,66 @@ export function verificarTimeoutPasivo(salaId: string, sala: Sala): boolean {
 }
 
 export function aplicarEleccion(salaId: string, sala: Sala, jugador: 'jugador1'|'jugador2', elegido: number): void {
-  const rival    = jugador==='jugador1'?'jugador2':'jugador1'
-  const noElegido = sala.estado.opcionesActuales.find(id=>id!==elegido)!
-  if (!sala.estado[jugador].picksPropios) sala.estado[jugador].picksPropios = []
-  if (!sala.estado[rival].picksPropios) sala.estado[rival].picksPropios = []
-  sala.estado[jugador].equipo.push(elegido)
-  sala.estado[jugador].picksPropios.push(elegido)
-  sala.estado[rival].equipo.push(noElegido)
-  generarRonda(salaId, sala)
+  const { estado } = sala
+  if (!estado[jugador].picksPropios) estado[jugador].picksPropios = []
+  
+  // Agregar el Pokémon seleccionado al equipo del jugador
+  estado[jugador].equipo.push(elegido)
+  estado[jugador].picksPropios.push(elegido)
+  // El Pokémon no seleccionado simplemente se descarta (NO se le impone al rival)
+
+  // Si fue el turno de J1, en esta ronda ahora le toca elegir a J2
+  if (jugador === 'jugador1') {
+    estado.turnoDe = 'jugador2'
+    generarTurno(salaId, sala)
+  } else {
+    // Si fue el turno de J2, ambos completaron la ronda actual
+    if (estado.rondaActual >= estado.config!.numRondas) {
+      estado.turnoDe = 'FIN'
+      estado.fase = 'fin'
+      limpiarTimer(sala)
+      const j1 = estado.jugador1.nombre || 'J1'
+      const j2 = estado.jugador2.nombre || 'J2'
+      agregarMensajeSistema(sala, `🏁 ¡Draft terminado! ${j1} y ${j2} tienen sus equipos listos.`)
+    } else {
+      estado.rondaActual++
+      estado.turnoDe = 'jugador1'
+      generarTurno(salaId, sala)
+    }
+  }
 }
 
 export function iniciarDraft(salaId: string, sala: Sala, idsValidosCliente?: number[]): void {
   const { estado } = sala
-  estado.config  = resolverConfig(estado.lobby.jugador1.voto!, estado.lobby.jugador2.voto!)
+  estado.config = resolverConfig(estado.lobby.jugador1.voto!, estado.lobby.jugador2.voto!)
   
   // Cálculo autoritativo seguro en el backend:
   let poolServidor = construirPoolBackend(estado.config)
-  if (!poolServidor || poolServidor.length < (estado.config.numRondas * 2)) {
-    if (idsValidosCliente && idsValidosCliente.length >= (estado.config.numRondas * 2)) {
+  if (!poolServidor || poolServidor.length < (estado.config.numRondas * 4)) {
+    if (idsValidosCliente && idsValidosCliente.length >= (estado.config.numRondas * 4)) {
       poolServidor = idsValidosCliente.slice()
     } else {
       poolServidor = Array.from({length: 1025}, (_, i) => i + 1)
     }
   }
 
-  sala.pool      = poolServidor
+  sala.pool = poolServidor
+  // Dos pools independientes barajados para cada jugador
+  ;(sala as any).poolJ1 = [...poolServidor].sort(() => Math.random() - 0.5)
+  ;(sala as any).poolJ2 = [...poolServidor].sort(() => Math.random() - 0.5)
+
   estado.poolSize = sala.pool.length
   estado.jugador1.nombre = estado.lobby.jugador1.nombre
   estado.jugador2.nombre = estado.lobby.jugador2.nombre
+  estado.jugador1.equipo = []
+  estado.jugador1.picksPropios = []
+  estado.jugador2.equipo = []
+  estado.jugador2.picksPropios = []
+  estado.historial = []
   estado.fase = 'draft'
-  const etiqueta = etiquetaConfig(estado.config)
-  agregarMensajeSistema(sala, `🎮 ¡Draft iniciado! Reglas: ${etiqueta}`)
-  console.log(`🎮  [${salaId}] Draft iniciado — pool autoritativo calculado en servidor: ${sala.pool.length}`)
-  generarRonda(salaId, sala)
+  estado.rondaActual = 1
+  estado.turnoDe = 'jugador1'
+
+  console.log(`🎮  [${salaId}] Draft iniciado — pools independientes preparados para J1 y J2: ${sala.pool.length}`)
+  generarTurno(salaId, sala)
 }
