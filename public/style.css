@@ -17,25 +17,38 @@
   --pixel-border: 4px solid #d0d0d0;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+html {
+  box-sizing: border-box;
+  overflow-x: hidden;
+  width: 100%;
+}
 
-/* 🟢 FONDO PASTEL SUAVE (único cambio solicitado) */
+*, *::before, *::after {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
   background: #c8e6c9;                 /* verde menta pastel */
   background-image: linear-gradient(135deg, #dcedc8 0%, #b9dfc3 100%);
   font-family: 'VT323', 'Courier New', monospace;
   font-size: 18px;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 20px;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 14px;
   color: var(--text-dark);
 }
 
 .main-container {
   width: 100%;
   max-width: 960px;
+  min-width: 0;
+  box-sizing: border-box;
   background: #ffffff;
   border: 4px solid #a0c0a0;
   border-radius: 0;
@@ -51,6 +64,7 @@ body {
   margin-bottom: 25px;
   border-bottom: 3px dashed #a0c0a0;
   padding-bottom: 15px;
+  width: 100%;
 }
 
 .title {
@@ -59,6 +73,42 @@ body {
   color: #2e7d32;
   text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
   line-height: 1.6;
+  word-break: break-word;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 8px 6px;
+  }
+  .main-container {
+    padding: 16px 10px;
+    border-width: 3px;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.15);
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 100%;
+  }
+  .title {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+  .subtitle {
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+  .box-gba {
+    padding: 10px 8px;
+  }
+  .titulo-bloque {
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .title {
+    font-size: 0.82rem;
+  }
 }
 
 .subtitle {
@@ -488,14 +538,17 @@ button:active {
 
 .sala-grid {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 240px minmax(0, 1fr);
   gap: 16px;
   margin-top: 10px;
+  width: 100%;
+  min-width: 0;
 }
 
 @media (max-width: 720px) {
   .sala-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
   }
 }
 
@@ -506,12 +559,18 @@ button:active {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .config-panel {
   background: #f9fff9;
   border: 2px solid #a0c0a0;
   padding: 12px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .sala-title-row {
@@ -523,6 +582,16 @@ button:active {
   margin-bottom: 10px;
   padding-bottom: 6px;
   border-bottom: 2px solid #c0e0c0;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 440px) {
+  .sala-title-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
 }
 
 .panel-title {
@@ -691,17 +760,17 @@ button:active {
   max-width: 100%;
 }
 
-@media (max-width: 580px) {
+@media (max-width: 600px) and (min-width: 441px) {
   .tipo-grid {
     grid-template-columns: repeat(6, 1fr);
-    gap: 6px;
+    gap: 5px;
   }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 440px) {
   .tipo-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    gap: 5px;
   }
 }
 
@@ -2260,7 +2329,7 @@ body.buzz-shake {
   gap: 10px;
   margin-top: 8px;
 }
-@media (max-width: 620px) {
+@media (max-width: 620px) and (min-width: 541px) {
   .presets-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 6px;
@@ -2278,7 +2347,7 @@ body.buzz-shake {
     font-size: 0.8rem !important;
   }
 }
-@media (max-width: 440px) {
+@media (max-width: 540px) {
   .presets-grid {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -2381,9 +2450,14 @@ body.buzz-shake {
 }
 .bst-input-col {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+.bst-input-col .bst-input {
+  width: 100%;
+  box-sizing: border-box;
 }
 .bst-slider {
   width: 100%;
@@ -2512,6 +2586,52 @@ body.buzz-shake {
   border-radius: 12px;
   margin-top: 2px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+
+@media (max-width: 640px) {
+  .bst-preview-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px 8px;
+    width: 100%;
+    min-width: 0;
+  }
+  .bst-middle-indicator {
+    grid-column: 1 / -1;
+    order: -1;
+    padding: 2px 0 6px;
+  }
+  .bst-indicator-lbl {
+    font-size: 0.95rem;
+  }
+  .bst-indicator-val {
+    font-size: 0.58rem;
+  }
+  .bst-poke-card {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    padding: 8px 6px;
+    box-sizing: border-box;
+  }
+  .bst-card-sprite-wrap {
+    width: 68px;
+    height: 68px;
+  }
+  .bst-sprite-img {
+    width: 60px;
+    height: 60px;
+  }
+  .bst-card-tag {
+    font-size: 0.44rem;
+  }
+  .bst-poke-name {
+    font-size: 1.15rem;
+  }
+  .bst-poke-stat {
+    font-size: 0.52rem;
+  }
 }
 
 /* ── DEXCARD TACTICAL TOOLTIP (SÚPER AYUDA) ── */
@@ -2720,6 +2840,19 @@ body.buzz-shake {
 .sala-header-actions {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+@media (max-width: 440px) {
+  .sala-header-actions {
+    width: 100%;
+  }
+  .btn-copiar-codigo-lobby, .btn-copiar-sala-lobby {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    justify-content: center;
+  }
 }
 .btn-copiar-codigo-lobby {
   background: linear-gradient(180deg, #fbc02d 0%, #f57f17 100%);
