@@ -207,6 +207,8 @@ export const I18N = {
 
     // Nuevas traducciones de notificaciones flotantes y footer
     footer_created_by: 'Created with <span class="footer-heart">💚</span> by',
+    footer_coffee: 'Buy me a coffee',
+    footer_coffee_title: 'Support PeterPandaDev on Buy Me a Coffee',
     toast_no_active_room: "⚠️ No active room to copy",
     toast_code_fallback: "Code: {code}",
     toast_link_fallback: "Link: {url}",
@@ -431,6 +433,8 @@ export const I18N = {
 
     // Nuevas traducciones de notificaciones flotantes y footer
     footer_created_by: 'Creado con <span class="footer-heart">💚</span> por',
+    footer_coffee: 'Invítame un café',
+    footer_coffee_title: 'Apoya a PeterPandaDev en Buy Me a Coffee',
     toast_no_active_room: "⚠️ No hay sala activa para copiar",
     toast_code_fallback: "Código: {code}",
     toast_link_fallback: "Enlace: {url}",
