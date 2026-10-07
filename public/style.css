@@ -1934,31 +1934,34 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  background: linear-gradient(180deg, #fff9c4 0%, #fbc02d 100%);
-  border: 2px solid #f57f17;
-  color: #4e342e;
-  padding: 5px 10px;
+  gap: 4px;
+  background: linear-gradient(180deg, #9c27b0 0%, #6a1b9a 100%);
+  border: 2px solid #4a148c;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  padding: 4px 10px;
+  min-height: 36px;
   border-radius: 6px;
   font-family: 'Press Start 2P', monospace;
   font-size: 0.52rem;
   letter-spacing: 0.5px;
   cursor: pointer;
-  box-shadow: 0 3px 0 #b26a00;
+  box-shadow: 0 3px 0 #2a0845;
   transition: filter 0.15s, transform 0.08s;
   user-select: none;
+  overflow: visible;
 }
 .btn-buzz:hover {
-  filter: brightness(1.08);
+  filter: brightness(1.15);
   transform: translateY(-1px);
-  box-shadow: 0 4px 0 #b26a00;
+  box-shadow: 0 4px 0 #2a0845;
 }
 .btn-buzz:hover .chingling-sprite {
   animation: chingling-wobble 0.5s ease-in-out infinite alternate;
 }
 .btn-buzz:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 #b26a00;
+  box-shadow: 0 1px 0 #2a0845;
 }
 .btn-buzz:disabled {
   opacity: 0.55;
@@ -1969,14 +1972,16 @@ textarea:focus {
 }
 
 .chingling-sprite {
-  width: 26px;
-  height: 26px;
+  width: 78px;
+  height: 78px;
+  margin: -20px -14px -20px -12px;
   object-fit: contain;
   image-rendering: pixelated;
   flex-shrink: 0;
   display: block;
-  transform-origin: 50% 20%;
+  transform-origin: 50% 35%;
   transition: transform 0.15s ease;
+  pointer-events: none;
 }
 
 .btn-buzz.chingling-ringing .chingling-sprite {

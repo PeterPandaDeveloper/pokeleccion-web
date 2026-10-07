@@ -588,13 +588,13 @@ export async function enviarBuzz() {
     let s = 8
     const iv = setInterval(() => {
       s--
-      const cdHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/433.png" class="chingling-sprite" alt="Chingling" width="28" height="28"/><span class="btn-buzz-txt">${s}s</span>`
+      const cdHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/433.png" class="chingling-sprite" alt="Chingling" width="78" height="78"/><span class="btn-buzz-txt">${s}s</span>`
       if (btn)  btn.innerHTML = cdHTML
       if (btnL) btnL.innerHTML = cdHTML
       if (s <= 0) {
         clearInterval(iv)
         const buzzTxt = t('chat_buzz') || 'Avisar'
-        const normalHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/433.png" class="chingling-sprite" alt="Chingling" width="28" height="28"/><span class="btn-buzz-txt" data-i18n="chat_buzz">${buzzTxt}</span>`
+        const normalHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/433.png" class="chingling-sprite" alt="Chingling" width="78" height="78"/><span class="btn-buzz-txt" data-i18n="chat_buzz">${buzzTxt}</span>`
         if (btn)  { btn.disabled=false;  btn.innerHTML = normalHTML }
         if (btnL) { btnL.disabled=false; btnL.innerHTML = normalHTML }
       }
