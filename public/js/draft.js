@@ -571,24 +571,32 @@ export async function enviarBuzz() {
   try {
     await post('/buzz', {})
     mostrarToast(t('toast_buzz_sent') || '🔔 Rival alerted!','ok')
-    Sonido.click()
+    if (Sonido.chingling) Sonido.chingling()
+    else Sonido.click()
     if (typeof window.registrarBuzz === 'function') window.registrarBuzz()
     if (window.forzarActualizar) window.forzarActualizar()
-    // Deshabilitar todos los botones de buzz 8s
+    // Animación de cascabel Chingling en los botones
     const btn = document.getElementById('btn-buzz')
     const btnL = document.getElementById('btn-buzz-lobby')
-    if (btn)  btn.disabled = true
-    if (btnL) btnL.disabled = true
+    if (btn)  { btn.classList.add('chingling-ringing'); btn.disabled = true }
+    if (btnL) { btnL.classList.add('chingling-ringing'); btnL.disabled = true }
+    setTimeout(() => {
+      if (btn) btn.classList.remove('chingling-ringing')
+      if (btnL) btnL.classList.remove('chingling-ringing')
+    }, 1200)
+
     let s = 8
     const iv = setInterval(() => {
       s--
-      if (btn)  btn.textContent  = `🔔 ${s}s`
-      if (btnL) btnL.textContent = `🔔 ${s}s`
+      const cdHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/433.png" class="chingling-sprite" alt="Chingling" width="28" height="28"/><span class="btn-buzz-txt">${s}s</span>`
+      if (btn)  btn.innerHTML = cdHTML
+      if (btnL) btnL.innerHTML = cdHTML
       if (s <= 0) {
         clearInterval(iv)
-        const buzzTxt = t('chat_buzz') || 'Buzz'
-        if (btn)  { btn.disabled=false;  btn.innerHTML = `<span class="btn-buzz-icon">🔔</span><span class="btn-buzz-txt" data-i18n="chat_buzz">${buzzTxt}</span>` }
-        if (btnL) { btnL.disabled=false; btnL.innerHTML = `<span class="btn-buzz-icon">🔔</span><span class="btn-buzz-txt" data-i18n="chat_buzz">${buzzTxt}</span>` }
+        const buzzTxt = t('chat_buzz') || 'Avisar'
+        const normalHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/433.png" class="chingling-sprite" alt="Chingling" width="28" height="28"/><span class="btn-buzz-txt" data-i18n="chat_buzz">${buzzTxt}</span>`
+        if (btn)  { btn.disabled=false;  btn.innerHTML = normalHTML }
+        if (btnL) { btnL.disabled=false; btnL.innerHTML = normalHTML }
       }
     }, 1000)
   } catch(e) { mostrarToast('⚠️ '+(e.message||e),'err') }

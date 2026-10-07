@@ -1935,33 +1935,65 @@ textarea:focus {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: linear-gradient(180deg, #8e24aa 0%, #6a1b9a 100%);
-  border: 2px solid #4a148c;
-  color: #ffffff;
-  padding: 7px 10px;
+  background: linear-gradient(180deg, #fff9c4 0%, #fbc02d 100%);
+  border: 2px solid #f57f17;
+  color: #4e342e;
+  padding: 5px 10px;
   border-radius: 6px;
   font-family: 'Press Start 2P', monospace;
   font-size: 0.52rem;
   letter-spacing: 0.5px;
   cursor: pointer;
-  box-shadow: 0 3px 0 #38006b;
+  box-shadow: 0 3px 0 #b26a00;
   transition: filter 0.15s, transform 0.08s;
   user-select: none;
 }
 .btn-buzz:hover {
-  filter: brightness(1.15);
+  filter: brightness(1.08);
   transform: translateY(-1px);
-  box-shadow: 0 4px 0 #38006b;
+  box-shadow: 0 4px 0 #b26a00;
+}
+.btn-buzz:hover .chingling-sprite {
+  animation: chingling-wobble 0.5s ease-in-out infinite alternate;
 }
 .btn-buzz:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 #38006b;
+  box-shadow: 0 1px 0 #b26a00;
 }
 .btn-buzz:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  filter: grayscale(0.5);
+}
+
+.chingling-sprite {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+  display: block;
+  transform-origin: 50% 20%;
+  transition: transform 0.15s ease;
+}
+
+.btn-buzz.chingling-ringing .chingling-sprite {
+  animation: chingling-ring 0.3s ease-in-out 4;
+}
+
+@keyframes chingling-wobble {
+  0% { transform: rotate(-10deg) scale(1.08); }
+  100% { transform: rotate(10deg) scale(1.08); }
+}
+
+@keyframes chingling-ring {
+  0% { transform: rotate(0deg) scale(1.15); }
+  25% { transform: rotate(-22deg) scale(1.2); }
+  50% { transform: rotate(22deg) scale(1.2); }
+  75% { transform: rotate(-14deg) scale(1.15); }
+  100% { transform: rotate(0deg) scale(1); }
 }
 
 /* ════ TUTORIAL ════ */

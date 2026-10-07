@@ -78,6 +78,7 @@ export const I18N = {
     chat_ph: "Type a message...",
     chat_send: "Send",
     chat_buzz: "Buzz",
+    chat_buzz_title: "Ring Chingling to alert rival",
     chat_empty: "💬 Channel connected!<br>Send a message to coordinate rules with your rival.",
     chat_sys: "⚙️ System",
 
@@ -301,6 +302,7 @@ export const I18N = {
     chat_ph: "Escribe un mensaje...",
     chat_send: "Enviar",
     chat_buzz: "Avisar",
+    chat_buzz_title: "Hacer sonar a Chingling para avisar al rival",
     chat_empty: "💬 ¡Canal conectado!<br>Envía un mensaje para coordinar las reglas con tu rival.",
     chat_sys: "⚙️ Sistema",
 

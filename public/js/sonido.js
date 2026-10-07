@@ -41,7 +41,14 @@ export const Sonido = {
   error:       ()=>t(180,0.18,'sawtooth',0.08),
   limpiar:     ()=>sw(600,200,0.3,'triangle',0.07),
   chat:        ()=>t(440,0.08,'sine',0.05),
-  buzz:        ()=>{t(200,0.1,'sawtooth',0.12);t(150,0.1,'sawtooth',0.12,0.12);t(200,0.1,'sawtooth',0.12,0.24)},
+  chingling:   ()=>{
+    const notas = [1046.5, 1318.5, 1567.98, 2093.0]
+    notas.forEach((f, i) => {
+      t(f, 0.35, 'sine', 0.08, i * 0.06)
+      t(f * 1.5, 0.18, 'triangle', 0.04, i * 0.06 + 0.02)
+    })
+  },
+  buzz:        function(){ this.chingling ? this.chingling() : t(1046.5,0.3,'sine',0.08) },
   votoOtro:   ()=>{t(660,0.06,'square',0.07);t(660,0.06,'square',0.07,0.1)},
 }
 
